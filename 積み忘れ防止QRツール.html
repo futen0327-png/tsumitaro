@@ -1,0 +1,1783 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>積み忘れ防止QR確認ツール</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+<style>
+  :root {
+    --steel: #1a2332;
+    --steel-mid: #243447;
+    --steel-light: #2e4057;
+    --accent: #e8a000;
+    --accent-bright: #ffb800;
+    --ok: #00c853;
+    --warn: #ff6d00;
+    --danger: #d50000;
+    --text: #f0f4f8;
+    --text-dim: #8899aa;
+    --surface: #1e2d3d;
+    --border: #344a60;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+    background: var(--steel);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ========== LOGIN ========== */
+  #login-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0d1821 0%, #1a2332 50%, #0f2030 100%);
+  }
+
+  .login-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 48px 40px;
+    width: 340px;
+    text-align: center;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  }
+
+  .login-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+
+  .login-box h1 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent-bright);
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
+  }
+
+  .login-box p {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 32px;
+  }
+
+  .login-box input {
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--steel-mid);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 20px;
+    text-align: center;
+    letter-spacing: 0.3em;
+    margin-bottom: 16px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .login-box input:focus { border-color: var(--accent); }
+
+  .btn-primary {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: #000;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  .btn-primary:hover { background: var(--accent-bright); }
+  .btn-primary:active { transform: scale(0.98); }
+
+  .login-error {
+    color: var(--danger);
+    font-size: 13px;
+    margin-top: 12px;
+    display: none;
+  }
+
+  /* ========== MAIN APP ========== */
+  #app { display: none; }
+
+  .top-bar {
+    background: var(--steel-mid);
+    border-bottom: 2px solid var(--accent);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .top-bar h1 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent-bright);
+    letter-spacing: 0.05em;
+  }
+
+  .bin-status {
+    font-size: 12px;
+    color: var(--text-dim);
+    text-align: right;
+    line-height: 1.5;
+  }
+
+  .bin-status strong {
+    color: var(--text);
+    display: block;
+    font-size: 13px;
+  }
+
+  .bin-expired {
+    color: var(--danger) !important;
+    font-weight: 700;
+  }
+
+  /* ========== TABS ========== */
+  .tabs {
+    display: flex;
+    background: var(--steel-mid);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tab {
+    flex: 1;
+    padding: 14px 8px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .tab.active {
+    color: var(--accent-bright);
+    border-bottom-color: var(--accent-bright);
+    background: rgba(255,184,0,0.05);
+  }
+
+  .tab-content { display: none; padding: 20px; }
+  .tab-content.active { display: block; }
+
+  /* ========== FORMS ========== */
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .form-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    align-items: flex-end;
+  }
+
+  .form-group {
+    flex: 1;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+
+  .form-group input, .form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--steel-mid);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-group input:focus, .form-group select:focus {
+    border-color: var(--accent);
+  }
+
+  .btn-add {
+    padding: 10px 20px;
+    background: var(--steel-light);
+    border: 1px solid var(--accent);
+    color: var(--accent-bright);
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s;
+  }
+
+  .btn-add:hover { background: rgba(232,160,0,0.2); }
+
+  /* ========== PARTS LIST ========== */
+  .parts-list {
+    margin-bottom: 20px;
+  }
+
+  .part-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+
+  .part-item .part-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.05em;
+  }
+
+  .part-item .part-desc {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  .btn-remove {
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    font-size: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .btn-remove:hover { background: rgba(213,0,0,0.15); }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-dim);
+    font-size: 14px;
+  }
+
+  /* ========== BIN SETUP ========== */
+  .bin-setup {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+
+  .bin-setup .form-row { margin-bottom: 0; }
+
+  /* ========== ACTION BUTTONS ========== */
+  .action-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .btn-confirm {
+    flex: 1;
+    padding: 14px;
+    background: var(--ok);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .btn-confirm:hover { opacity: 0.9; }
+  .btn-confirm:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-print {
+    flex: 1;
+    padding: 14px;
+    background: var(--steel-light);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .btn-print:hover { background: var(--steel-mid); }
+  .btn-print:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ========== QR PRINT AREA ========== */
+  #qr-print-area {
+    display: none;
+  }
+
+  .qr-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 160px);
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .qr-card {
+    background: white;
+    color: black;
+    border: 2px solid #333;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    page-break-inside: avoid;
+  }
+
+  .qr-card .qr-goban {
+    font-size: 16px;
+    font-weight: 900;
+    margin-bottom: 4px;
+    letter-spacing: 0.05em;
+  }
+
+  .qr-card .qr-desc {
+    font-size: 10px;
+    color: #555;
+    margin-bottom: 8px;
+  }
+
+  .qr-card .qr-bin-label {
+    font-size: 9px;
+    color: #888;
+    margin-top: 6px;
+    border-top: 1px solid #ddd;
+    padding-top: 4px;
+  }
+
+  /* ========== SCAN SCREEN ========== */
+  .scan-header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  .progress-display {
+    font-size: 48px;
+    font-weight: 900;
+    color: var(--accent-bright);
+    line-height: 1;
+  }
+
+  .progress-display span {
+    font-size: 24px;
+    color: var(--text-dim);
+  }
+
+  .progress-label {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  .remaining-count {
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 8px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    display: inline-block;
+  }
+
+  .remaining-count.has-remaining {
+    color: var(--danger);
+    background: rgba(213,0,0,0.1);
+  }
+
+  .remaining-count.all-done {
+    color: var(--ok);
+    background: rgba(0,200,83,0.1);
+  }
+
+  /* ========== CAMERA ========== */
+  .camera-wrap {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+    margin-bottom: 16px;
+    aspect-ratio: 4/3;
+  }
+
+  #camera-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .scan-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .scan-frame {
+    width: 200px;
+    height: 200px;
+    border: 3px solid var(--accent-bright);
+    border-radius: 12px;
+    box-shadow: 0 0 0 9999px rgba(0,0,0,0.45);
+    animation: pulse-frame 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-frame {
+    0%, 100% { border-color: var(--accent-bright); }
+    50% { border-color: rgba(255,184,0,0.4); }
+  }
+
+  #scan-canvas { display: none; }
+
+  /* ========== SCAN RESULT ========== */
+  .scan-result {
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 16px;
+    transition: all 0.3s;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .scan-result.idle {
+    background: var(--surface);
+    border: 2px dashed var(--border);
+  }
+
+  .scan-result.ok {
+    background: rgba(0,200,83,0.15);
+    border: 2px solid var(--ok);
+  }
+
+  .scan-result.duplicate {
+    background: rgba(255,109,0,0.12);
+    border: 2px solid var(--warn);
+  }
+
+  .scan-result.outside {
+    background: rgba(255,109,0,0.12);
+    border: 2px solid var(--warn);
+  }
+
+  .scan-result.error {
+    background: rgba(213,0,0,0.12);
+    border: 2px solid var(--danger);
+  }
+
+  .scan-result-icon {
+    font-size: 28px;
+  }
+
+  .scan-result-goban {
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+  }
+
+  .scan-result-msg {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  /* ========== MANUAL INPUT ========== */
+  .manual-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+
+  .manual-input label {
+    font-size: 12px;
+    color: var(--text-dim);
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .manual-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .manual-row input {
+    flex: 1;
+    padding: 10px 12px;
+    background: var(--steel-mid);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    outline: none;
+  }
+
+  .manual-row input:focus { border-color: var(--accent); }
+
+  .btn-manual {
+    padding: 10px 16px;
+    background: var(--steel-light);
+    border: 1px solid var(--accent);
+    color: var(--accent-bright);
+    font-weight: 700;
+    font-size: 13px;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  /* ========== SCANNED LIST ========== */
+  .scanned-list {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 80px;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .scanned-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .scanned-item:last-child { border-bottom: none; }
+
+  .scanned-item .si-goban {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ok);
+  }
+
+  .scanned-item .si-time {
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  /* ========== COMPLETE BUTTON ========== */
+  .complete-btn-wrap {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 16px 20px;
+    background: linear-gradient(transparent, var(--steel) 40%);
+  }
+
+  .btn-complete {
+    width: 100%;
+    padding: 18px;
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-complete.ready {
+    background: var(--ok);
+    color: white;
+    box-shadow: 0 4px 20px rgba(0,200,83,0.4);
+  }
+
+  .btn-complete.not-ready {
+    background: var(--steel-light);
+    color: var(--text-dim);
+  }
+
+  .btn-complete.danger {
+    background: var(--danger);
+    color: white;
+    animation: shake 0.5s ease;
+  }
+
+  /* ========== ALARM SCREEN ========== */
+  #alarm-screen {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--danger);
+    z-index: 1000;
+    padding: 40px 24px;
+    overflow-y: auto;
+  }
+
+  .alarm-title {
+    font-size: 36px;
+    font-weight: 900;
+    text-align: center;
+    margin-bottom: 8px;
+    animation: alarm-blink 0.8s ease-in-out infinite;
+  }
+
+  @keyframes alarm-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  .alarm-subtitle {
+    font-size: 16px;
+    text-align: center;
+    margin-bottom: 32px;
+    opacity: 0.85;
+  }
+
+  .alarm-list {
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 32px;
+  }
+
+  .alarm-item {
+    font-size: 22px;
+    font-weight: 900;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    letter-spacing: 0.08em;
+  }
+
+  .alarm-item:last-child { border-bottom: none; }
+
+  .btn-back-to-scan {
+    width: 100%;
+    padding: 18px;
+    background: white;
+    color: var(--danger);
+    font-size: 18px;
+    font-weight: 900;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-bottom: 12px;
+  }
+
+  /* ========== COMPLETE SCREEN ========== */
+  #complete-screen {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #003a1a;
+    z-index: 1000;
+    padding: 40px 24px;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  .complete-icon { font-size: 80px; margin-bottom: 24px; }
+  .complete-title { font-size: 32px; font-weight: 900; color: var(--ok); margin-bottom: 12px; }
+  .complete-detail { font-size: 18px; color: var(--text-dim); margin-bottom: 40px; }
+
+  .btn-end-bin {
+    padding: 16px 32px;
+    background: transparent;
+    border: 2px solid var(--text-dim);
+    color: var(--text-dim);
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-bottom: 12px;
+    width: 100%;
+  }
+
+  .btn-end-bin:hover { border-color: var(--text); color: var(--text); }
+
+  .btn-new-scan {
+    padding: 16px 32px;
+    background: var(--ok);
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  /* ========== MODAL ========== */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .modal-overlay.show { display: flex; }
+
+  .modal-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 24px;
+    width: 100%;
+    max-width: 360px;
+    text-align: center;
+  }
+
+  .modal-icon { font-size: 36px; margin-bottom: 12px; }
+  .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .modal-msg { font-size: 13px; color: var(--text-dim); margin-bottom: 24px; line-height: 1.6; }
+  .modal-highlight { color: var(--accent-bright); font-weight: 700; font-size: 18px; }
+
+  .modal-btns {
+    display: flex;
+    gap: 10px;
+  }
+
+  .modal-btn-cancel {
+    flex: 1;
+    padding: 12px;
+    background: var(--steel-mid);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .modal-btn-ok {
+    flex: 1;
+    padding: 12px;
+    background: var(--danger);
+    border: none;
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .modal-btn-single {
+    width: 100%;
+    padding: 12px;
+    background: var(--accent);
+    border: none;
+    color: #000;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  /* ========== STATUS BADGE ========== */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .badge-locked { background: rgba(213,0,0,0.15); color: var(--danger); }
+  .badge-open { background: rgba(0,200,83,0.15); color: var(--ok); }
+  .badge-expired { background: rgba(213,0,0,0.2); color: var(--danger); }
+
+  /* ========== PRINT STYLES ========== */
+  @media print {
+    body * { visibility: hidden; }
+    #qr-print-area, #qr-print-area * { visibility: visible; }
+    #qr-print-area {
+      display: block !important;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      background: white;
+      color: black;
+      padding: 20px;
+    }
+    .qr-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+  }
+
+  .hint-text {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    text-align: center;
+  }
+
+  .prompt-complete {
+    background: rgba(0,200,83,0.1);
+    border: 1px solid var(--ok);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--ok);
+    text-align: center;
+    margin-bottom: 12px;
+    font-weight: 600;
+    animation: fade-in 0.4s ease;
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .no-bin-warning {
+    background: rgba(213,0,0,0.1);
+    border: 1px solid var(--danger);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    color: var(--danger);
+    font-size: 14px;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<!-- ========== LOGIN ========== -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-icon">🏗️</div>
+    <h1>積み忘れ防止QR確認ツール</h1>
+    <p>パスワードを入力してください</p>
+    <input type="password" id="pw-input" placeholder="●●●●" maxlength="10"
+           onkeydown="if(event.key==='Enter') doLogin()">
+    <button class="btn-primary" onclick="doLogin()">ログイン</button>
+    <div class="login-error" id="login-error">パスワードが違います</div>
+  </div>
+</div>
+
+<!-- ========== APP ========== -->
+<div id="app">
+  <div class="top-bar">
+    <h1>🏗️ 積み忘れ防止ツール</h1>
+    <div class="bin-status" id="top-bin-status">
+      <span style="color:var(--text-dim)">便未選択</span>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('office')" id="tab-office">📋 事務所</div>
+    <div class="tab" onclick="switchTab('scan')" id="tab-scan">📱 スキャン</div>
+  </div>
+
+  <!-- ===== 事務所タブ ===== -->
+  <div class="tab-content active" id="tab-office">
+
+    <!-- 便設定 -->
+    <div class="section-title">便設定</div>
+    <div class="bin-setup">
+      <div class="form-row">
+        <div class="form-group">
+          <label>出荷日</label>
+          <input type="date" id="bin-date">
+        </div>
+        <div class="form-group">
+          <label>便名</label>
+          <select id="bin-name">
+            <option value="午前便">午前便</option>
+            <option value="午後便">午後便</option>
+            <option value="臨時便">臨時便</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 部材追加 -->
+    <div class="section-title" style="margin-top:20px">部材登録</div>
+    <div id="lock-warning" style="display:none">
+      <div class="status-badge badge-locked" style="margin-bottom:12px">🔒 リスト確定済み（変更不可）</div>
+    </div>
+
+    <div id="add-part-area">
+      <div class="form-row">
+        <div class="form-group">
+          <label>合番 <span style="color:var(--danger)">*</span></label>
+          <input type="text" id="input-goban" placeholder="例: G2-B14"
+                 style="text-transform:uppercase"
+                 onkeydown="if(event.key==='Enter') addPart()">
+        </div>
+        <div class="form-group">
+          <label>品名（任意）</label>
+          <input type="text" id="input-desc" placeholder="例: 大梁"
+                 onkeydown="if(event.key==='Enter') addPart()">
+        </div>
+        <button class="btn-add" onclick="addPart()">追加</button>
+      </div>
+    </div>
+
+    <div class="parts-list" id="parts-list">
+      <div class="empty-state">部材を追加してください</div>
+    </div>
+
+    <div class="action-bar" id="action-bar">
+      <button class="btn-confirm" id="btn-confirm-list" onclick="confirmList()">✅ リスト確定・QR生成</button>
+      <button class="btn-print" id="btn-print" onclick="printQR()" disabled>🖨️ QR印刷</button>
+    </div>
+
+    <div class="hint-text" id="confirm-hint">確定後は部材の変更ができません。印刷後にシールを貼ってください。</div>
+
+    <!-- QRプレビュー -->
+    <div id="qr-preview-area" style="display:none; margin-top:20px">
+      <div class="section-title">QRコードプレビュー</div>
+      <div class="qr-grid" id="qr-grid"></div>
+    </div>
+  </div>
+
+  <!-- ===== スキャンタブ ===== -->
+  <div class="tab-content" id="tab-scan">
+
+    <div id="scan-no-bin" class="no-bin-warning" style="display:none">
+      ⚠️ 当日リストが確定されていません<br>
+      <span style="font-size:12px; font-weight:400; margin-top:4px; display:block">
+        「事務所」タブでリストを確定してください
+      </span>
+    </div>
+
+    <div id="scan-content" style="display:none">
+      <!-- 進捗 -->
+      <div class="scan-header">
+        <div class="progress-display">
+          <span id="scan-count">0</span>
+          <span> / </span>
+          <span id="scan-total">0</span>
+        </div>
+        <div class="progress-label">積込済 / 総数</div>
+        <div class="remaining-count has-remaining" id="remaining-badge">残り 0 点</div>
+      </div>
+
+      <!-- カメラ -->
+      <div class="camera-wrap">
+        <video id="camera-video" autoplay playsinline muted></video>
+        <canvas id="scan-canvas"></canvas>
+        <div class="scan-overlay">
+          <div class="scan-frame"></div>
+        </div>
+      </div>
+
+      <!-- スキャン結果 -->
+      <div class="scan-result idle" id="scan-result">
+        <div class="scan-result-icon">📷</div>
+        <div class="scan-result-msg">QRコードをカメラに向けてください</div>
+      </div>
+
+      <!-- 合番手入力 -->
+      <div class="manual-input">
+        <label>🔧 QRが読めない場合 — 合番を手入力</label>
+        <div class="manual-row">
+          <input type="text" id="manual-goban" placeholder="合番を入力"
+                 style="text-transform:uppercase"
+                 onkeydown="if(event.key==='Enter') manualScan()">
+          <button class="btn-manual" onclick="manualScan()">登録</button>
+        </div>
+      </div>
+
+      <!-- 全完了プロンプト -->
+      <div class="prompt-complete" id="prompt-complete" style="display:none">
+        ✅ 全部材スキャン完了！「積込完了」ボタンを押してください
+      </div>
+
+      <!-- スキャン済み一覧 -->
+      <div class="scanned-list" id="scanned-list">
+        <div style="color:var(--text-dim); font-size:13px; text-align:center">スキャン済み部材がここに表示されます</div>
+      </div>
+    </div>
+
+    <!-- 積込完了ボタン（固定） -->
+    <div class="complete-btn-wrap" id="complete-btn-wrap" style="display:none">
+      <button class="btn-complete not-ready" id="btn-complete" onclick="checkComplete()">
+        積込完了
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== QR印刷エリア（非表示） ========== -->
+<div id="qr-print-area">
+  <h2 style="color:#000; margin-bottom:16px; font-size:16px" id="print-title"></h2>
+  <div class="qr-grid" id="print-qr-grid"></div>
+</div>
+
+<!-- ========== アラーム画面 ========== -->
+<div id="alarm-screen">
+  <div class="alarm-title">⚠️ 積み忘れあり！</div>
+  <div class="alarm-subtitle">以下の部材が未積込です</div>
+  <div class="alarm-list" id="alarm-list"></div>
+  <button class="btn-back-to-scan" onclick="backToScan()">確認した → スキャン画面に戻る</button>
+</div>
+
+<!-- ========== 完了画面 ========== -->
+<div id="complete-screen" style="display:flex">
+  <div>
+    <div class="complete-icon">✅</div>
+    <div class="complete-title" id="complete-title">出荷OK</div>
+    <div class="complete-detail" id="complete-detail"></div>
+    <button class="btn-end-bin" onclick="endBin()">この便を終了する（データ削除）</button>
+    <button class="btn-new-scan" onclick="backToScan()">スキャン画面に戻る</button>
+  </div>
+</div>
+
+<!-- ========== モーダル ========== -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <div class="modal-icon" id="modal-icon"></div>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-msg" id="modal-msg"></div>
+    <div class="modal-btns" id="modal-btns"></div>
+  </div>
+</div>
+
+<script>
+// ========================================
+// 設定
+// ========================================
+const PASSWORD = '1234'; // ← ここを変更
+
+// ========================================
+// 状態管理
+// ========================================
+const LS_KEY = 'tetsukotsu_bin_v2';
+
+function getState() {
+  try {
+    return JSON.parse(localStorage.getItem(LS_KEY)) || defaultState();
+  } catch { return defaultState(); }
+}
+
+function defaultState() {
+  return {
+    binId: '',
+    binDate: '',
+    binName: '',
+    parts: [],      // [{goban, desc}]
+    locked: false,
+    scanned: [],    // [{goban, time}]
+    completed: false
+  };
+}
+
+function saveState(state) {
+  localStorage.setItem(LS_KEY, JSON.stringify(state));
+}
+
+// ========================================
+// ログイン
+// ========================================
+function doLogin() {
+  const pw = document.getElementById('pw-input').value;
+  if (pw === PASSWORD) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    initApp();
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-input').focus();
+  }
+}
+
+// ========================================
+// アプリ初期化
+// ========================================
+function initApp() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('bin-date').value = today;
+
+  const state = getState();
+  checkExpiry(state);
+  renderAll(state);
+}
+
+// 日付チェック（翌日以降は期限切れ）
+function checkExpiry(state) {
+  if (!state.binDate) return;
+  const today = new Date().toISOString().split('T')[0];
+  if (state.binDate < today) {
+    state.expired = true;
+  } else {
+    state.expired = false;
+  }
+  saveState(state);
+}
+
+// ========================================
+// 描画
+// ========================================
+function renderAll(state) {
+  renderTopBar(state);
+  renderOfficeTab(state);
+  renderScanTab(state);
+}
+
+function renderTopBar(state) {
+  const el = document.getElementById('top-bin-status');
+  if (!state.binId) {
+    el.innerHTML = '<span style="color:var(--text-dim)">便未設定</span>';
+    return;
+  }
+  const expiredClass = state.expired ? 'bin-expired' : '';
+  el.innerHTML = `
+    <strong>${state.binDate} ${state.binName}</strong>
+    <span class="${expiredClass}">${state.expired ? '⚠️ 期限切れ' : '有効'}</span>
+  `;
+}
+
+function renderOfficeTab(state) {
+  // 便設定
+  if (state.binDate) document.getElementById('bin-date').value = state.binDate;
+  if (state.binName) document.getElementById('bin-name').value = state.binName;
+
+  // ロック表示
+  const lockWarn = document.getElementById('lock-warning');
+  const addArea = document.getElementById('add-part-area');
+  const btnConfirm = document.getElementById('btn-confirm-list');
+  const btnPrint = document.getElementById('btn-print');
+
+  if (state.locked) {
+    lockWarn.style.display = 'block';
+    addArea.style.display = 'none';
+    btnConfirm.disabled = true;
+    btnConfirm.textContent = '✅ リスト確定済み';
+    btnPrint.disabled = false;
+  } else {
+    lockWarn.style.display = 'none';
+    addArea.style.display = 'block';
+    btnConfirm.disabled = state.parts.length === 0;
+    btnPrint.disabled = true;
+  }
+
+  // 部材一覧
+  const list = document.getElementById('parts-list');
+  if (state.parts.length === 0) {
+    list.innerHTML = '<div class="empty-state">部材を追加してください</div>';
+  } else {
+    list.innerHTML = state.parts.map((p, i) => `
+      <div class="part-item">
+        <div>
+          <div class="part-name">${p.goban}</div>
+          <div class="part-desc">${p.desc || '品名未入力'}</div>
+        </div>
+        ${state.locked ? '' : `<button class="btn-remove" onclick="removePart(${i})">削除</button>`}
+      </div>
+    `).join('');
+  }
+
+  // QRプレビュー
+  if (state.locked && state.parts.length > 0) {
+    document.getElementById('qr-preview-area').style.display = 'block';
+    renderQRGrid('qr-grid', state);
+  } else {
+    document.getElementById('qr-preview-area').style.display = 'none';
+  }
+}
+
+function renderScanTab(state) {
+  const noBin = document.getElementById('scan-no-bin');
+  const content = document.getElementById('scan-content');
+  const completeBtnWrap = document.getElementById('complete-btn-wrap');
+
+  if (!state.locked || state.expired) {
+    noBin.style.display = 'block';
+    noBin.innerHTML = state.expired
+      ? `<div class="no-bin-warning">⚠️ この便データは期限切れです<br><span style="font-size:12px;font-weight:400">「事務所」タブで新しい便を設定してください</span></div>`
+      : `<div class="no-bin-warning">⚠️ 当日リストが確定されていません<br><span style="font-size:12px;font-weight:400">「事務所」タブでリストを確定してください</span></div>`;
+    content.style.display = 'none';
+    completeBtnWrap.style.display = 'none';
+    return;
+  }
+
+  noBin.style.display = 'none';
+  content.style.display = 'block';
+  completeBtnWrap.style.display = 'block';
+
+  const total = state.parts.length;
+  const done = state.scanned.length;
+  const remaining = total - done;
+
+  document.getElementById('scan-count').textContent = done;
+  document.getElementById('scan-total').textContent = total;
+
+  const badge = document.getElementById('remaining-badge');
+  if (remaining <= 0) {
+    badge.textContent = '✅ 全部材スキャン済み';
+    badge.className = 'remaining-count all-done';
+    document.getElementById('prompt-complete').style.display = 'block';
+  } else {
+    badge.textContent = `残り ${remaining} 点`;
+    badge.className = 'remaining-count has-remaining';
+    document.getElementById('prompt-complete').style.display = 'none';
+  }
+
+  // 完了ボタン
+  const btn = document.getElementById('btn-complete');
+  btn.className = 'btn-complete ' + (remaining <= 0 ? 'ready' : 'not-ready');
+
+  // スキャン済み一覧
+  const scanList = document.getElementById('scanned-list');
+  if (state.scanned.length === 0) {
+    scanList.innerHTML = '<div style="color:var(--text-dim);font-size:13px;text-align:center">スキャン済み部材がここに表示されます</div>';
+  } else {
+    scanList.innerHTML = [...state.scanned].reverse().map(s => `
+      <div class="scanned-item">
+        <div class="si-goban">✓ ${s.goban}</div>
+        <div class="si-time">${s.time}</div>
+      </div>
+    `).join('');
+  }
+}
+
+// ========================================
+// QR描画
+// ========================================
+function renderQRGrid(containerId, state) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+
+  state.parts.forEach(p => {
+    const qrData = `${state.binId}|${p.goban}`;
+    const card = document.createElement('div');
+    card.className = 'qr-card';
+    card.innerHTML = `
+      <div class="qr-goban">${p.goban}</div>
+      <div class="qr-desc">${p.desc || ''}</div>
+      <div id="qr-${containerId}-${p.goban.replace(/[^a-zA-Z0-9]/g, '_')}"></div>
+      <div class="qr-bin-label">${state.binDate} ${state.binName}</div>
+    `;
+    container.appendChild(card);
+
+    try {
+      new QRCode(document.getElementById(`qr-${containerId}-${p.goban.replace(/[^a-zA-Z0-9]/g, '_')}`), {
+        text: qrData,
+        width: 128,
+        height: 128,
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    } catch(e) { console.error('QR生成エラー', e); }
+  });
+}
+
+// ========================================
+// 部材操作
+// ========================================
+function addPart() {
+  const goban = document.getElementById('input-goban').value.trim().toUpperCase();
+  const desc = document.getElementById('input-desc').value.trim();
+
+  if (!goban) {
+    showModal('⚠️', '入力エラー', '合番を入力してください', [{label:'OK', cls:'modal-btn-single', fn: closeModal}]);
+    return;
+  }
+
+  const state = getState();
+  if (state.locked) return;
+
+  // 重複チェック（安全仕様1）
+  if (state.parts.some(p => p.goban === goban)) {
+    showModal('🚫', '重複エラー', `同一合番が重複しています。\n\n${goban}`, [{label:'OK', cls:'modal-btn-single', fn: closeModal}]);
+    return;
+  }
+
+  state.parts.push({ goban, desc });
+  saveState(state);
+  renderAll(state);
+
+  document.getElementById('input-goban').value = '';
+  document.getElementById('input-desc').value = '';
+  document.getElementById('input-goban').focus();
+}
+
+function removePart(idx) {
+  const state = getState();
+  if (state.locked) return;
+  state.parts.splice(idx, 1);
+  saveState(state);
+  renderAll(state);
+}
+
+// ========================================
+// リスト確定
+// ========================================
+function confirmList() {
+  const state = getState();
+  if (state.parts.length === 0) return;
+
+  const binDate = document.getElementById('bin-date').value;
+  const binName = document.getElementById('bin-name').value;
+
+  if (!binDate) {
+    showModal('⚠️', '入力エラー', '出荷日を選択してください', [{label:'OK', cls:'modal-btn-single', fn: closeModal}]);
+    return;
+  }
+
+  // 既存便データがある場合の警告（安全仕様3）
+  if (state.locked && state.binId) {
+    showModal('⚠️', '便データの置き換え', `現在の便データを削除しますか？\n\n${state.binDate} ${state.binName}`, [
+      {label:'キャンセル', cls:'modal-btn-cancel', fn: closeModal},
+      {label:'削除して続行', cls:'modal-btn-ok', fn: () => { closeModal(); doConfirm(state, binDate, binName); }}
+    ]);
+    return;
+  }
+
+  doConfirm(state, binDate, binName);
+}
+
+function doConfirm(state, binDate, binName) {
+  const today = new Date().toISOString().split('T')[0];
+  const dateStr = binDate.replace(/-/g, '');
+  const existing = getState();
+
+  // 同日同名の便番号をインクリメント
+  const binCount = (existing.binDate === binDate && existing.binName === binName)
+    ? (parseInt(existing.binId?.split('-')[2] || 0) + 1) : 1;
+
+  const binId = `${dateStr}-${String(binCount).padStart(2,'0')}`;
+
+  const newState = {
+    binId,
+    binDate,
+    binName,
+    parts: existing.parts,
+    locked: true,
+    scanned: [],
+    completed: false,
+    expired: binDate < today
+  };
+
+  saveState(newState);
+  renderAll(newState);
+
+  // QRは確定後に生成
+  setTimeout(() => {
+    renderQRGrid('qr-grid', newState);
+  }, 100);
+}
+
+// ========================================
+// QR印刷
+// ========================================
+function printQR() {
+  const state = getState();
+  if (!state.locked) return;
+
+  document.getElementById('print-title').textContent =
+    `${state.binDate} ${state.binName} — 積込部材QRシール (便ID: ${state.binId})`;
+
+  const printGrid = document.getElementById('print-qr-grid');
+  printGrid.innerHTML = '';
+
+  state.parts.forEach(p => {
+    const qrData = `${state.binId}|${p.goban}`;
+    const card = document.createElement('div');
+    card.className = 'qr-card';
+    card.innerHTML = `
+      <div class="qr-goban">${p.goban}</div>
+      <div class="qr-desc">${p.desc || ''}</div>
+      <div id="print-qr-${p.goban.replace(/[^a-zA-Z0-9]/g,'_')}"></div>
+      <div class="qr-bin-label">${state.binDate} ${state.binName}<br>便ID: ${state.binId}</div>
+    `;
+    printGrid.appendChild(card);
+
+    setTimeout(() => {
+      new QRCode(document.getElementById(`print-qr-${p.goban.replace(/[^a-zA-Z0-9]/g,'_')}`), {
+        text: qrData, width: 128, height: 128,
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    }, 50);
+  });
+
+  setTimeout(() => window.print(), 300);
+}
+
+// ========================================
+// スキャン処理
+// ========================================
+let cameraStream = null;
+let scanTimer = null;
+let lastScannedCode = '';
+let lastScannedTime = 0;
+
+function startCamera() {
+  if (cameraStream) return;
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+  }).then(stream => {
+    cameraStream = stream;
+    const video = document.getElementById('camera-video');
+    video.srcObject = stream;
+    video.play();
+    scanTimer = setInterval(scanFrame, 200);
+  }).catch(err => {
+    console.error('カメラエラー', err);
+    showResult('error', '❌', 'カメラ起動エラー', 'カメラへのアクセスを許可してください');
+  });
+}
+
+function stopCamera() {
+  if (scanTimer) { clearInterval(scanTimer); scanTimer = null; }
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(t => t.stop());
+    cameraStream = null;
+  }
+}
+
+function scanFrame() {
+  const video = document.getElementById('camera-video');
+  const canvas = document.getElementById('scan-canvas');
+  if (!video.videoWidth) return;
+
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0);
+  const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const code = jsQR(imgData.data, imgData.width, imgData.height, { inversionAttempts: 'dontInvert' });
+
+  if (code) {
+    const now = Date.now();
+    if (code.data === lastScannedCode && now - lastScannedTime < 2000) return;
+    lastScannedCode = code.data;
+    lastScannedTime = now;
+    processQR(code.data);
+  }
+}
+
+function processQR(data) {
+  const state = getState();
+  if (!state.locked) return;
+
+  // QRデータ解析：binId|goban
+  const parts = data.split('|');
+  if (parts.length !== 2) {
+    showResult('error', '❌', 'QR読込エラー', '対応していないQRコードです');
+    playBeep('error');
+    return;
+  }
+
+  const [scannedBinId, goban] = parts;
+
+  // 便IDチェック（安全仕様1・3）
+  if (scannedBinId !== state.binId) {
+    showResult('error', '⚠️', '別便のQRです', `このQRは別の便のものです\n読込不可`);
+    playBeep('error');
+    return;
+  }
+
+  // 期限チェック（安全仕様3）
+  if (state.expired) {
+    showResult('error', '⏰', '期限切れ', 'この便データは期限切れです');
+    playBeep('error');
+    return;
+  }
+
+  registerGoban(goban, state);
+}
+
+function manualScan() {
+  const goban = document.getElementById('manual-goban').value.trim().toUpperCase();
+  if (!goban) return;
+
+  const state = getState();
+  if (!state.locked) return;
+  if (state.expired) {
+    showResult('error', '⏰', '期限切れ', 'この便データは期限切れです');
+    return;
+  }
+
+  registerGoban(goban, state);
+  document.getElementById('manual-goban').value = '';
+}
+
+function registerGoban(goban, state) {
+  // リストにない部材
+  const inList = state.parts.some(p => p.goban === goban);
+  if (!inList) {
+    showResult('outside', '⚠️', goban, '本日対象外の部材');
+    playBeep('warn');
+    vibrate([200, 100, 200]);
+    return;
+  }
+
+  // 重複スキャン（安全仕様2）
+  const alreadyScanned = state.scanned.some(s => s.goban === goban);
+  if (alreadyScanned) {
+    showResult('duplicate', '🔁', goban, '既に読込済みです');
+    playBeep('warn');
+    return;
+  }
+
+  // OK
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  state.scanned.push({ goban, time: timeStr });
+  saveState(state);
+
+  showResult('ok', '✓', goban, '読込OK');
+  playBeep('ok');
+  vibrate([100]);
+  renderScanTab(state);
+}
+
+function showResult(type, icon, goban, msg) {
+  const el = document.getElementById('scan-result');
+  el.className = `scan-result ${type}`;
+  el.innerHTML = `
+    <div class="scan-result-icon">${icon}</div>
+    <div class="scan-result-goban">${goban}</div>
+    <div class="scan-result-msg">${msg}</div>
+  `;
+}
+
+// ========================================
+// 積込完了チェック
+// ========================================
+function checkComplete() {
+  const state = getState();
+  const remaining = state.parts.filter(p => !state.scanned.some(s => s.goban === p.goban));
+
+  if (remaining.length > 0) {
+    // 積み忘れあり
+    showAlarm(remaining);
+  } else {
+    // 全完了
+    state.completed = true;
+    saveState(state);
+    showCompleteScreen(state);
+  }
+}
+
+function showAlarm(missing) {
+  playBeep('alarm');
+  vibrate([500, 200, 500, 200, 500]);
+
+  const screen = document.getElementById('alarm-screen');
+  const list = document.getElementById('alarm-list');
+  list.innerHTML = missing.map(p =>
+    `<div class="alarm-item">▶ ${p.goban}${p.desc ? '　' + p.desc : ''}</div>`
+  ).join('');
+  screen.style.display = 'block';
+}
+
+function backToScan() {
+  document.getElementById('alarm-screen').style.display = 'none';
+  document.getElementById('complete-screen').style.display = 'none';
+}
+
+function showCompleteScreen(state) {
+  stopCamera();
+  const screen = document.getElementById('complete-screen');
+  document.getElementById('complete-title').textContent = `出荷OK　全 ${state.parts.length} 点 積込完了`;
+  document.getElementById('complete-detail').textContent = `${state.binDate} ${state.binName}`;
+  screen.style.display = 'flex';
+  playBeep('complete');
+  vibrate([200, 100, 200, 100, 500]);
+}
+
+function endBin() {
+  showModal('🗑️', 'この便を終了する', 'データを削除します。よろしいですか？', [
+    {label:'キャンセル', cls:'modal-btn-cancel', fn: closeModal},
+    {label:'削除して終了', cls:'modal-btn-ok', fn: () => {
+      localStorage.removeItem(LS_KEY);
+      closeModal();
+      document.getElementById('complete-screen').style.display = 'none';
+      initApp();
+    }}
+  ]);
+}
+
+// ========================================
+// タブ切替
+// ========================================
+function switchTab(tab) {
+  // タブボタン
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+
+  // タブコンテンツ
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).nextElementSibling
+    || document.querySelector(`.tab-content`); // fallback
+
+  if (tab === 'scan') {
+    document.querySelectorAll('.tab-content')[1].classList.add('active');
+    const state = getState();
+    if (state.locked && !state.expired) startCamera();
+    renderScanTab(state);
+  } else {
+    document.querySelectorAll('.tab-content')[0].classList.add('active');
+    stopCamera();
+    renderAll(getState());
+  }
+}
+
+// ========================================
+// 音・バイブ
+// ========================================
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playBeep(type) {
+  try {
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    switch(type) {
+      case 'ok':
+        oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+        oscillator.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + 0.15);
+        break;
+      case 'warn':
+        oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
+        oscillator.frequency.setValueAtTime(330, audioCtx.currentTime + 0.1);
+        gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+        oscillator.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + 0.25);
+        break;
+      case 'error':
+        oscillator.type = 'sawtooth';
+        oscillator.frequency.setValueAtTime(200, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+        oscillator.start(audioCtx.currentTime);
+        oscillator.stop(audioCtx.currentTime + 0.3);
+        break;
+      case 'alarm':
+        // 繰り返し警報音
+        for(let i = 0; i < 5; i++) {
+          const osc = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          osc.connect(g); g.connect(audioCtx.destination);
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(880, audioCtx.currentTime + i * 0.3);
+          g.gain.setValueAtTime(0.2, audioCtx.currentTime + i * 0.3);
+          g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * 0.3 + 0.25);
+          osc.start(audioCtx.currentTime + i * 0.3);
+          osc.stop(audioCtx.currentTime + i * 0.3 + 0.25);
+        }
+        return;
+      case 'complete':
+        const freqs = [523, 659, 784, 1047];
+        freqs.forEach((f, i) => {
+          const osc = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          osc.connect(g); g.connect(audioCtx.destination);
+          osc.frequency.setValueAtTime(f, audioCtx.currentTime + i * 0.12);
+          g.gain.setValueAtTime(0.25, audioCtx.currentTime + i * 0.12);
+          g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * 0.12 + 0.2);
+          osc.start(audioCtx.currentTime + i * 0.12);
+          osc.stop(audioCtx.currentTime + i * 0.12 + 0.2);
+        });
+        return;
+    }
+  } catch(e) {}
+}
+
+function vibrate(pattern) {
+  try { navigator.vibrate(pattern); } catch(e) {}
+}
+
+// ========================================
+// モーダル
+// ========================================
+function showModal(icon, title, msg, buttons) {
+  document.getElementById('modal-icon').textContent = icon;
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-msg').innerHTML = msg.replace(/\n/g, '<br>');
+
+  const btns = document.getElementById('modal-btns');
+  btns.innerHTML = '';
+  buttons.forEach(b => {
+    const btn = document.createElement('button');
+    btn.className = b.cls;
+    btn.textContent = b.label;
+    btn.onclick = b.fn;
+    btns.appendChild(btn);
+  });
+
+  document.getElementById('modal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+}
+
+// ========================================
+// 起動
+// ========================================
+document.getElementById('pw-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+// 今日の日付をデフォルト設定
+document.getElementById('bin-date').value = new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>
