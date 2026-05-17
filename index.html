@@ -197,8 +197,7 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 .mbtn-single{width:100%;padding:11px;background:var(--accent);border:none;color:#000;font-size:13px;font-weight:700;border-radius:8px;cursor:pointer;}
 #qr-print-area{display:none;}
 @media print{body *{visibility:hidden;}#qr-print-area,#qr-print-area *{visibility:visible;}#qr-print-area{display:block !important;position:fixed;top:0;left:0;width:100%;background:white;padding:20px;}.qr-grid{grid-template-columns:repeat(4,1fr);}}
-.camera-wrap{margin-bottom:14px;overflow:hidden;border-radius:12px;}
-
+.camera-wrap{margin-bottom:14px;overflow:hidden;border-radius:12px;display:flex;justify-content:center;background:#000;}
 
 #cam-video{width:100%;height:100%;object-fit:cover;display:block;}
 .cam-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
@@ -518,7 +517,7 @@ function processQR(data){try{const mgmt=JSON.parse(data);if(mgmt.shipmentId&&mgm
 function handleMgmtQR(mgmt){if(!appState.locked||mgmt.shipmentId!==appState.binId){showModal('📋','管理QR読込',`${mgmt.date} ${mgmt.label}<br>部材数：<span class="highlight">${mgmt.ids.length}件</span><br><br>このリストを読み込みますか？`,[{label:'キャンセル',cls:'mbtn-cancel',fn:closeModal},{label:'読み込む',cls:'mbtn-ok',fn:()=>{closeModal();appState.binId=mgmt.shipmentId;appState.binDate=mgmt.date;appState.binLabel=mgmt.label;appState.binName=mgmt.label;appState.companyName=mgmt.company||appState.companyName;appState.parts=mgmt.ids.map(([id4,goban])=>({id4,goban,desc:'',bin:'',bundle:''}));appState.locked=true;appState.scanned=[];appState.managementQrLoaded=true;saveAppState();renderAll();showScanResult('ok','✅','管理QR読込完了',`${mgmt.ids.length}件のリストをセットしました`);playBeep('ok');flash('ok');}}]);return;}appState.managementQrLoaded=true;saveAppState();renderScanTab();showScanResult('ok','✅','管理QR読込済',`${appState.parts.length}件のリスト確認OK`);playBeep('ok');flash('ok');}
 
 function registerById(id4,source){const norm=normalize4(id4);const part=appState.parts.find(p=>p.id4===norm);if(!part){showScanResult('err','⚠️',norm,'このIDは本日対象外です');playBeep('warn');flash('warn');vibrate([200,100,200]);return;}const alreadyDone=appState.scanned.some(s=>s.id4===norm);if(alreadyDone){showScanResult('dup','🔁',norm,`${part.goban} — 読込済み`);playBeep('dup');flash('dup');return;}const now=new Date(),timeStr=now.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit',second:'2-digit'});appState.scanned.push({id4:norm,goban:part.goban,time:timeStr});saveAppState();showScanResult('ok','✓',norm,`${part.goban} 読込OK`);playBeep('ok');flash('ok');vibrate([80]);renderScanTab();if(appState.scanned.length===appState.parts.length)setTimeout(()=>playBeep('complete'),200);}
-function tapRegister(id4){registerById(id4,'tap');}
+function tapRegister(id4){const part=appState.parts.find(p=>p.id4===normalize4(id4));if(!part)return;showModal('📋','登録確認',`<span style="font-size:20px;font-weight:900;color:var(--accent-bright)">${part.id4}</span><br><span style="font-size:16px;font-weight:700">${part.goban}</span><br><br>この部材を登録しますか？`,[{label:'いいえ',cls:'mbtn-cancel',fn:closeModal},{label:'はい',cls:'mbtn-ok',fn:()=>{closeModal();registerById(id4,'tap');}}]);}
 function showScanResult(type,icon,id,msg){const el=document.getElementById('scan-result');el.className='scan-result '+type;el.innerHTML=`<div class="sr-icon">${icon}</div>${id?`<div class="sr-id">${id}</div>`:''}<div class="sr-msg">${msg}</div>`;}
 
 // 4桁ID検索
