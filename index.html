@@ -276,24 +276,28 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
     </div>
   </div>
   <div class="tab-pane" id="tab-scan">
-    <div id="scan-no-bin" style="display:none"><div class="no-bin-warn">⚠️ 管理QRが未読込です<span>管理QRを読み込むか、事務所タブでリストを確定してください</span></div></div>
+    <div id="scan-no-bin" style="display:none;margin-bottom:8px">
+      <div class="no-bin-warn">⚠️ 管理QRが未読込です<span>下のカメラで管理QRを読み込んでください</span></div>
+    </div>
     <div class="emergency-start-wrap" id="emergency-start-wrap"><button class="btn-emergency" id="btn-emergency-start">⚡ 緊急開始</button></div>
-    <div id="scan-content" style="display:none">
+    <div id="scan-progress" style="display:none">
       <div class="scan-header">
         <div class="progress-big"><span id="scan-count">0</span><span> / </span><span id="scan-total">0</span></div>
         <div class="progress-label">積込済 / 総数</div>
         <div class="remaining-badge has" id="remaining-badge">残り 0 点</div>
       </div>
-      <div class="camera-wrap">
-        <video id="cam-video" autoplay playsinline muted></video>
-        <canvas id="cam-canvas"></canvas>
-        <div class="cam-overlay"><div class="cam-frame"></div></div>
-        <div class="cam-stopped-banner" id="cam-stopped-banner">
-          <span>カメラ停止中</span>
-          <button class="btn-restart-cam" id="btn-restart-cam">カメラを再開</button>
-        </div>
+    </div>
+    <div class="camera-wrap">
+      <video id="cam-video" autoplay playsinline muted></video>
+      <canvas id="cam-canvas"></canvas>
+      <div class="cam-overlay"><div class="cam-frame"></div></div>
+      <div class="cam-stopped-banner" id="cam-stopped-banner">
+        <span>カメラ停止中</span>
+        <button class="btn-restart-cam" id="btn-restart-cam">カメラを再開</button>
       </div>
-      <div class="scan-result idle" id="scan-result"><div class="sr-icon">📷</div><div class="sr-msg">QRコードをカメラに向けてください</div></div>
+    </div>
+    <div class="scan-result idle" id="scan-result"><div class="sr-icon">📷</div><div class="sr-msg">QRコードをカメラに向けてください</div></div>
+    <div id="scan-content" style="display:none">
       <div class="id-input-wrap">
         <label>🔧 QRが読めない場合 — 4桁IDを入力</label>
         <div class="id-input-row">
@@ -410,7 +414,7 @@ function renderTopBar(){const el=document.getElementById('top-bin-pill');if(!app
 function renderOfficeTab(){const locked=appState.locked;document.getElementById('locked-warn').style.display=locked?'block':'none';document.getElementById('upload-section').style.display=locked?'none':'block';document.getElementById('action-bar').style.display=appState.parts.length>0?'flex':'none';const btn=document.getElementById('btn-confirm-list');if(locked){btn.textContent='✅ リスト確定済み';btn.disabled=true;}else{btn.textContent='✅ リスト確定・QR生成';btn.disabled=false;}renderPartsList();}
 function renderPartsList(){const el=document.getElementById('parts-list');if(appState.parts.length===0){el.innerHTML='<div class="empty-state">Excelをアップロードすると部材が表示されます</div>';return;}el.innerHTML=appState.parts.map(p=>`<div class="part-item"><div class="pi-id">${p.id4}</div><div class="pi-info"><div class="pi-goban">${p.goban}</div><div class="pi-desc">${p.desc||'品名なし'}</div></div><div class="pi-bin">${p.bin||''}</div></div>`).join('');}
 
-function renderScanTab(){const noBin=document.getElementById('scan-no-bin'),content=document.getElementById('scan-content'),fixedBtn=document.getElementById('complete-btn-fixed'),emgWrap=document.getElementById('emergency-start-wrap');if(!appState.locked||appState.expired){noBin.style.display='block';content.style.display='none';fixedBtn.style.display='none';emgWrap.classList.remove('show');startCamera();return;}noBin.style.display='none';if(!appState.managementQrLoaded)emgWrap.classList.add('show');else emgWrap.classList.remove('show');content.style.display='block';fixedBtn.style.display='block';const total=appState.parts.length,done=appState.scanned.length,remaining=total-done;document.getElementById('scan-count').textContent=done;document.getElementById('scan-total').textContent=total;const badge=document.getElementById('remaining-badge');if(remaining<=0){badge.textContent='✅ 全部材スキャン済み';badge.className='remaining-badge done';document.getElementById('prompt-all-done').style.display='block';}else{badge.textContent=`残り ${remaining} 点`;badge.className='remaining-badge has';document.getElementById('prompt-all-done').style.display='none';}const btn=document.getElementById('btn-complete');btn.className='btn-complete '+(remaining<=0?'ready':'not-ready');renderUnscannedList();}
+function renderScanTab(){const noBin=document.getElementById('scan-no-bin'),scanContent=document.getElementById('scan-content'),fixedBtn=document.getElementById('complete-btn-fixed'),emgWrap=document.getElementById('emergency-start-wrap'),progress=document.getElementById('scan-progress');if(!appState.locked||appState.expired){noBin.style.display='block';scanContent.style.display='none';fixedBtn.style.display='none';progress&&(progress.style.display='none');emgWrap.classList.remove('show');return;}noBin.style.display='none';if(!appState.managementQrLoaded)emgWrap.classList.add('show');else emgWrap.classList.remove('show');scanContent.style.display='block';fixedBtn.style.display='block';progress&&(progress.style.display='block');const total=appState.parts.length,done=appState.scanned.length,remaining=total-done;document.getElementById('scan-count').textContent=done;document.getElementById('scan-total').textContent=total;const badge=document.getElementById('remaining-badge');if(remaining<=0){badge.textContent='✅ 全部材スキャン済み';badge.className='remaining-badge done';document.getElementById('prompt-all-done').style.display='block';}else{badge.textContent=`残り ${remaining} 点`;badge.className='remaining-badge has';document.getElementById('prompt-all-done').style.display='none';}const btn=document.getElementById('btn-complete');btn.className='btn-complete '+(remaining<=0?'ready':'not-ready');renderUnscannedList();}
 function renderUnscannedList(){const el=document.getElementById('unscanned-list');const scannedIds=new Set(appState.scanned.map(s=>s.id4));const unscanned=appState.parts.filter(p=>!scannedIds.has(p.id4));if(unscanned.length===0){el.innerHTML='<div style="color:var(--ok);font-size:13px;text-align:center;padding:12px">✅ 全部材積込済み</div>';return;}el.innerHTML=unscanned.map(p=>`<div class="unscanned-item" onclick="tapRegister('${p.id4}')"><div class="ui-id">${p.id4}</div><div class="ui-goban">${p.goban}</div><div class="ui-desc">${p.desc||''}</div></div>`).join('');}
 
 function renderQRTab(){const noList=document.getElementById('qr-no-list'),content=document.getElementById('qr-content');if(!appState.locked){noList.style.display='block';content.style.display='none';return;}noList.style.display='none';content.style.display='block';renderMgmtQR();renderQRGrid();}
