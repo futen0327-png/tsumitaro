@@ -173,6 +173,23 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 .no-bin-warn{background:rgba(229,57,53,0.08);border:1px solid var(--danger);border-radius:var(--radius);padding:20px;text-align:center;color:var(--danger);font-size:14px;font-weight:600;margin-bottom:14px;}
 .no-bin-warn span{display:block;font-size:12px;font-weight:400;color:var(--text-dim);margin-top:6px;}
 .prompt-all-done{background:rgba(0,200,83,0.1);border:1px solid var(--ok);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--ok);text-align:center;margin-bottom:12px;font-weight:600;display:none;}
+.id-search-result{background:var(--surface);border:2px solid var(--accent);border-radius:var(--radius);padding:14px;margin-top:10px;display:none;}
+.id-search-result.show{display:block;}
+.isr-id{font-size:28px;font-weight:900;color:var(--accent-bright);letter-spacing:0.1em;}
+.isr-goban{font-size:18px;font-weight:700;margin:4px 0;}
+.isr-desc{font-size:12px;color:var(--text-dim);margin-bottom:12px;}
+.btn-do-register{width:100%;padding:13px;background:var(--ok);color:white;font-size:15px;font-weight:800;border:none;border-radius:8px;cursor:pointer;letter-spacing:0.06em;}
+.btn-do-register:active{opacity:0.85;}
+.recent-list{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px;}
+.recent-list-title{font-size:13px;font-weight:700;color:var(--text-dim);margin-bottom:10px;letter-spacing:0.04em;}
+.recent-item{display:flex;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.2s;}
+.recent-item:last-child{border-bottom:none;}
+.recent-item:hover{background:rgba(255,255,255,0.03);}
+.ri-icon{font-size:16px;margin-right:8px;color:var(--ok);}
+.ri-id{font-size:16px;font-weight:900;color:var(--accent-bright);width:52px;}
+.ri-goban{font-size:14px;font-weight:700;flex:1;}
+.ri-time{font-size:11px;color:var(--text-dim);margin-left:8px;}
+.ri-undo{font-size:11px;color:var(--danger);margin-left:6px;opacity:0.7;}
 .locked-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(229,57,53,0.12);color:var(--danger);margin-bottom:12px;}
 #screen-alarm{display:none;position:fixed;inset:0;background:#b71c1c;z-index:1000;padding:40px 20px;overflow-y:auto;}
 .alarm-title{font-size:34px;font-weight:900;text-align:center;margin-bottom:6px;animation:alarm-blink 0.7s ease-in-out infinite;}
@@ -327,7 +344,17 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
           <input type="number" id="id-input" placeholder="0023" maxlength="4" inputmode="numeric">
           <button class="btn-id-search" id="btn-id-search">検索</button>
         </div>
+        <div class="id-search-result" id="id-search-result">
+          <div class="isr-id" id="isr-id"></div>
+          <div class="isr-goban" id="isr-goban"></div>
+          <div class="isr-desc" id="isr-desc"></div>
+          <button class="btn-do-register" id="btn-do-register">✅ 積込登録</button>
+        </div>
         <div class="candidates" id="candidates"></div>
+      </div>
+      <div class="recent-list" id="recent-list" style="display:none">
+        <div class="recent-list-title">📦 直近積込（タップで取消）</div>
+        <div id="recent-items"></div>
       </div>
       <div class="prompt-all-done" id="prompt-all-done">✅ 全部材スキャン完了！「積込完了」ボタンを押してください</div>
       <div class="sec-title">未積込一覧（タップで登録）</div>
@@ -444,7 +471,7 @@ function renderTopBar(){const el=document.getElementById('top-bin-pill');if(!app
 function renderOfficeTab(){const locked=appState.locked;document.getElementById('locked-warn').style.display=locked?'block':'none';document.getElementById('upload-section').style.display=locked?'none':'block';document.getElementById('action-bar').style.display=appState.parts.length>0?'flex':'none';const btn=document.getElementById('btn-confirm-list');if(locked){btn.textContent='✅ リスト確定済み';btn.disabled=true;}else{btn.textContent='✅ リスト確定・QR生成';btn.disabled=false;}renderPartsList();}
 function renderPartsList(){const el=document.getElementById('parts-list');if(appState.parts.length===0){el.innerHTML='<div class="empty-state">Excelをアップロードすると部材が表示されます</div>';return;}el.innerHTML=appState.parts.map(p=>`<div class="part-item"><div class="pi-id">${p.id4}</div><div class="pi-info"><div class="pi-goban">${p.goban}</div><div class="pi-desc">${p.desc||'品名なし'}</div></div><div class="pi-bin">${p.bin||''}</div></div>`).join('');}
 
-function renderScanTab(){const noBin=document.getElementById('scan-no-bin'),scanContent=document.getElementById('scan-content'),fixedBtn=document.getElementById('complete-btn-fixed'),emgWrap=document.getElementById('emergency-start-wrap'),progress=document.getElementById('scan-progress');if(!appState.locked||appState.expired){noBin.style.display='block';scanContent.style.display='none';fixedBtn.style.display='none';progress&&(progress.style.display='none');emgWrap.classList.remove('show');return;}noBin.style.display='none';if(!appState.managementQrLoaded)emgWrap.classList.add('show');else emgWrap.classList.remove('show');scanContent.style.display='block';fixedBtn.style.display='block';progress&&(progress.style.display='block');const total=appState.parts.length,done=appState.scanned.length,remaining=total-done;document.getElementById('scan-count').textContent=done;document.getElementById('scan-total').textContent=total;const badge=document.getElementById('remaining-badge');if(remaining<=0){badge.textContent='✅ 全部材スキャン済み';badge.className='remaining-badge done';document.getElementById('prompt-all-done').style.display='block';}else{badge.textContent=`残り ${remaining} 点`;badge.className='remaining-badge has';document.getElementById('prompt-all-done').style.display='none';}const btn=document.getElementById('btn-complete');btn.className='btn-complete '+(remaining<=0?'ready':'not-ready');renderUnscannedList();}
+function renderScanTab(){const noBin=document.getElementById('scan-no-bin'),scanContent=document.getElementById('scan-content'),fixedBtn=document.getElementById('complete-btn-fixed'),emgWrap=document.getElementById('emergency-start-wrap'),progress=document.getElementById('scan-progress');if(!appState.locked||appState.expired){noBin.style.display='block';scanContent.style.display='none';fixedBtn.style.display='none';progress&&(progress.style.display='none');emgWrap.classList.remove('show');return;}noBin.style.display='none';if(!appState.managementQrLoaded)emgWrap.classList.add('show');else emgWrap.classList.remove('show');scanContent.style.display='block';fixedBtn.style.display='block';progress&&(progress.style.display='block');const total=appState.parts.length,done=appState.scanned.length,remaining=total-done;document.getElementById('scan-count').textContent=done;document.getElementById('scan-total').textContent=total;const badge=document.getElementById('remaining-badge');if(remaining<=0){badge.textContent='✅ 全部材スキャン済み';badge.className='remaining-badge done';document.getElementById('prompt-all-done').style.display='block';}else{badge.textContent=`残り ${remaining} 点`;badge.className='remaining-badge has';document.getElementById('prompt-all-done').style.display='none';}const btn=document.getElementById('btn-complete');btn.className='btn-complete '+(remaining<=0?'ready':'not-ready');renderUnscannedList();renderRecentList();}
 function renderUnscannedList(){const el=document.getElementById('unscanned-list');const scannedIds=new Set(appState.scanned.map(s=>s.id4));const unscanned=appState.parts.filter(p=>!scannedIds.has(p.id4));if(unscanned.length===0){el.innerHTML='<div style="color:var(--ok);font-size:13px;text-align:center;padding:12px">✅ 全部材積込済み</div>';return;}el.innerHTML=unscanned.map(p=>`<div class="unscanned-item" onclick="tapRegister('${p.id4}')"><div class="ui-id">${p.id4}</div><div class="ui-goban">${p.goban}</div><div class="ui-desc">${p.desc||''}</div></div>`).join('');}
 
 function renderQRTab(){const noList=document.getElementById('qr-no-list'),content=document.getElementById('qr-content');if(!appState.locked){noList.style.display='block';content.style.display='none';return;}noList.style.display='none';content.style.display='block';renderMgmtQR();renderQRGrid();}
@@ -511,7 +538,7 @@ function pauseCamera(){stopCamera();document.getElementById('cam-stopped-banner'
 function resetIdleTimer(){if(camIdleTimer)clearTimeout(camIdleTimer);camIdleTimer=setTimeout(()=>pauseCamera(),60000);}
 function scanFrame(){}
 
-function processQR(data){try{const mgmt=JSON.parse(data);if(mgmt.shipmentId&&mgmt.ids){handleMgmtQR(mgmt);return;}}catch(e){}const parts=data.split(':');if(parts.length===3&&parts[0]==='P'){const[,qrBinId,qrId4]=parts;if(!appState.locked){showScanResult('err','⚠️','','リストが確定されていません');return;}if(qrBinId!==appState.binId){showScanResult('err','⚠️','別便',`この部材は別便のものです`);playBeep('err');vibrate([200,100,200]);flash('err');return;}registerById(qrId4,'qr');return;}showScanResult('err','❌','','対応していないQRコードです');playBeep('err');flash('err');}
+function processQR(data){try{const mgmt=JSON.parse(data);if(mgmt.shipmentId&&mgmt.ids){handleMgmtQR(mgmt);return;}}catch(e){}const parts=data.split(':');if(parts.length===3&&parts[0]==='P'){const[,qrBinId,qrId4]=parts;if(!appState.locked){showScanResult('err','⚠️','','リストが確定されていません');return;}if(qrBinId!==appState.binId){showScanResult('err','⚠️','別便',`この部材は別便のものです`);playBeep('err');vibrate([200,100,200]);flash('err');return;}const norm=normalize4(qrId4);const part=appState.parts.find(p=>p.id4===norm);if(!part){showScanResult('err','⚠️',norm,'このIDは本日対象外です');playBeep('warn');flash('warn');vibrate([200,100,200]);return;}const alreadyDone=appState.scanned.some(s=>s.id4===norm);if(alreadyDone){showScanResult('dup','🔁',norm,`${part.goban} — 読込済み`);playBeep('dup');flash('dup');return;}showModal('📋','登録確認',`<span style="font-size:20px;font-weight:900;color:var(--accent-bright)">${part.id4}</span><br><span style="font-size:16px;font-weight:700">${part.goban}</span><br><br>この部材を登録しますか？`,[{label:'いいえ',cls:'mbtn-cancel',fn:closeModal},{label:'はい',cls:'mbtn-ok',fn:()=>{closeModal();registerById(qrId4,'qr');}}]);return;}showScanResult('err','❌','','対応していないQRコードです');playBeep('err');flash('err');}
 
 function handleMgmtQR(mgmt){if(!appState.locked||mgmt.shipmentId!==appState.binId){showModal('📋','管理QR読込',`${mgmt.date} ${mgmt.label}<br>部材数：<span class="highlight">${mgmt.ids.length}件</span><br><br>このリストを読み込みますか？`,[{label:'キャンセル',cls:'mbtn-cancel',fn:closeModal},{label:'読み込む',cls:'mbtn-ok',fn:()=>{closeModal();appState.binId=mgmt.shipmentId;appState.binDate=mgmt.date;appState.binLabel=mgmt.label;appState.binName=mgmt.label;appState.companyName=mgmt.company||appState.companyName;appState.parts=mgmt.ids.map(([id4,goban])=>({id4,goban,desc:'',bin:'',bundle:''}));appState.locked=true;appState.scanned=[];appState.managementQrLoaded=true;saveAppState();renderAll();showScanResult('ok','✅','管理QR読込完了',`${mgmt.ids.length}件のリストをセットしました`);playBeep('ok');flash('ok');}}]);return;}appState.managementQrLoaded=true;saveAppState();renderScanTab();showScanResult('ok','✅','管理QR読込済',`${appState.parts.length}件のリスト確認OK`);playBeep('ok');flash('ok');}
 
@@ -522,8 +549,72 @@ function showScanResult(type,icon,id,msg){const el=document.getElementById('scan
 // 4桁ID検索
 document.getElementById('btn-id-search').addEventListener('click',searchById);
 document.getElementById('id-input').addEventListener('keydown',e=>{if(e.key==='Enter')searchById();});
-function searchById(){const raw=document.getElementById('id-input').value.trim();if(!raw)return;const norm=normalize4(raw);const matches=appState.parts.filter(p=>p.id4===norm);const cands=document.getElementById('candidates');if(matches.length===0){cands.classList.remove('show');showScanResult('err','⚠️',norm,'このIDは見つかりません');playBeep('err');flash('err');return;}if(matches.length===1){cands.classList.remove('show');registerById(norm,'manual');document.getElementById('id-input').value='';return;}cands.classList.add('show');cands.innerHTML=matches.map(p=>`<div class="candidate-item" onclick="selectCandidate('${p.id4}')"><div class="cand-id">${p.id4}</div><div class="cand-info"><div class="cand-goban">${p.goban}</div><div class="cand-desc">${p.desc||''}</div></div><div class="cand-bin">${p.bin||''}</div></div>`).join('');}
-function selectCandidate(id4){document.getElementById('candidates').classList.remove('show');document.getElementById('id-input').value='';registerById(id4,'candidate');}
+function searchById(){
+  const raw=document.getElementById('id-input').value.trim();
+  if(!raw)return;
+  const norm=normalize4(raw);
+  const result=document.getElementById('id-search-result');
+  const cands=document.getElementById('candidates');
+  result.classList.remove('show');
+  cands.classList.remove('show');
+  const matches=appState.parts.filter(p=>p.id4===norm);
+  if(matches.length===0){showScanResult('err','⚠️',norm,'このIDは見つかりません');playBeep('err');flash('err');return;}
+  if(matches.length===1){
+    const p=matches[0];
+    const alreadyDone=appState.scanned.some(s=>s.id4===norm);
+    if(alreadyDone){showScanResult('dup','🔁',norm,`${p.goban} — 読込済み`);playBeep('dup');flash('dup');return;}
+    document.getElementById('isr-id').textContent=p.id4;
+    document.getElementById('isr-goban').textContent=p.goban;
+    document.getElementById('isr-desc').textContent=p.desc||'';
+    document.getElementById('btn-do-register').onclick=()=>{
+      result.classList.remove('show');
+      document.getElementById('id-input').value='';
+      registerById(norm,'manual');
+    };
+    result.classList.add('show');
+    return;
+  }
+  cands.classList.add('show');
+  cands.innerHTML=matches.map(p=>`<div class="candidate-item" onclick="selectCandidate('${p.id4}')"><div class="cand-id">${p.id4}</div><div class="cand-info"><div class="cand-goban">${p.goban}</div><div class="cand-desc">${p.desc||''}</div></div><div class="cand-bin">${p.bin||''}</div></div>`).join('');
+}
+function selectCandidate(id4){
+  document.getElementById('candidates').classList.remove('show');
+  document.getElementById('id-input').value='';
+  const p=appState.parts.find(x=>x.id4===id4);
+  if(!p)return;
+  const result=document.getElementById('id-search-result');
+  document.getElementById('isr-id').textContent=p.id4;
+  document.getElementById('isr-goban').textContent=p.goban;
+  document.getElementById('isr-desc').textContent=p.desc||'';
+  document.getElementById('btn-do-register').onclick=()=>{
+    result.classList.remove('show');
+    registerById(id4,'candidate');
+  };
+  result.classList.add('show');
+}
+
+function renderRecentList(){
+  const wrap=document.getElementById('recent-list');
+  const container=document.getElementById('recent-items');
+  if(!appState.scanned||appState.scanned.length===0){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  const recent=[...appState.scanned].reverse().slice(0,5);
+  container.innerHTML=recent.map(s=>`<div class="recent-item" onclick="confirmUnregister('${s.id4}')"><span class="ri-icon">✅</span><span class="ri-id">${s.id4}</span><span class="ri-goban">${s.goban}</span><span class="ri-time">${s.time}</span><span class="ri-undo">取消</span></div>`).join('');
+}
+
+function confirmUnregister(id4){
+  const s=appState.scanned.find(x=>x.id4===id4);
+  if(!s)return;
+  showModal('↩️','積込取消',`<span style="font-size:20px;font-weight:900;color:var(--accent-bright)">${s.id4}</span><br><span style="font-size:16px;font-weight:700">${s.goban}</span><br><br>未積込へ戻しますか？`,[{label:'いいえ',cls:'mbtn-cancel',fn:closeModal},{label:'はい',cls:'mbtn-ok',fn:()=>{closeModal();unregisterById(id4);}}]);
+}
+
+function unregisterById(id4){
+  appState.scanned=appState.scanned.filter(s=>s.id4!==id4);
+  saveAppState();
+  showScanResult('other','↩️',id4,'未積込へ戻しました');
+  playBeep('warn');
+  renderScanTab();
+}
 
 // 積込完了
 document.getElementById('btn-complete').addEventListener('click',checkComplete);
