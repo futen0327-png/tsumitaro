@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>ツミタロウ</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
@@ -198,8 +198,11 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 #qr-print-area{display:none;}
 @media print{body *{visibility:hidden;}#qr-print-area,#qr-print-area *{visibility:visible;}#qr-print-area{display:block !important;position:fixed;top:0;left:0;width:100%;background:white;padding:20px;}.qr-grid{grid-template-columns:repeat(4,1fr);}}
 .camera-wrap{margin-bottom:14px;overflow:hidden;border-radius:12px;}
-#cam-qr-region video{object-position:top!important;vertical-align:top!important;}
-#cam-qr-region>div{top:0!important;}
+
+
+#cam-video{width:100%;height:100%;object-fit:cover;display:block;}
+.cam-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.cam-frame{width:200px;height:200px;border:3px solid var(--accent-bright);border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,0.4);}
 </style>
 </head>
 <body>
@@ -292,8 +295,7 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
       </div>
     </div>
     <div class="camera-wrap" style="position:relative;background:#000;border-radius:12px;overflow:hidden;margin-bottom:14px;max-height:220px;">
-      <div id="cam-qr-region" style="width:100%;"></div>
-      <video id="cam-video" style="display:none"></video>
+      <video id="cam-video" autoplay playsinline muted style="width:100%;display:block;"></video>
       <canvas id="cam-canvas" style="display:none"></canvas>
       <div class="cam-stopped-banner" id="cam-stopped-banner">
         <span>カメラ停止中</span>
@@ -445,13 +447,12 @@ document.getElementById('btn-reset-list').addEventListener('click',()=>{showModa
 document.getElementById('btn-print-qr').addEventListener('click',()=>{const pg=document.getElementById('print-qr-grid');pg.innerHTML='';document.getElementById('print-title').textContent=`${appState.binDate} ${appState.binLabel} — 積込QR札 (便ID: ${appState.binId})`;appState.parts.forEach(p=>{const qd=`P:${appState.binId}:${p.id4}`;const card=document.createElement('div');card.className='qr-card';const qrId='print_'+p.id4;card.innerHTML=`<div class="qc-id">ID:${p.id4}</div><div class="qc-goban">${p.goban}</div><div id="${qrId}"></div><div class="qc-bottom">${appState.binDate} ${appState.binLabel}<br>${appState.companyName}</div>`;pg.appendChild(card);setTimeout(()=>{new QRCode(document.getElementById(qrId),{text:qd,width:128,height:128,correctLevel:QRCode.CorrectLevel.H});},50);});setTimeout(()=>window.print(),400);});
 
 // カメラ・スキャン
-let html5QrCode=null,camIdleTimer=null,lastCode='',lastCodeTime=0;
-function startCamera(){if(html5QrCode)return;const el=document.getElementById('cam-video');el.style.display='none';const wrap=document.getElementById('cam-qr-region');html5QrCode=new Html5Qrcode('cam-qr-region');const qbSize=Math.min(Math.floor(window.innerWidth*0.6),250);const config={fps:10,qrbox:{width:qbSize,height:qbSize}};html5QrCode.start({facingMode:'environment'},config,qrCodeMessage=>{const now=Date.now();if(qrCodeMessage===lastCode&&now-lastCodeTime<2000)return;lastCode=qrCodeMessage;lastCodeTime=now;resetIdleTimer();processQR(qrCodeMessage);},()=>{}).then(()=>{document.getElementById('cam-stopped-banner').classList.remove('show');resetIdleTimer();}).catch(err=>{showScanResult('err','❌','カメラ起動失敗','カメラへのアクセスを許可してください');html5QrCode=null;});}
-function stopCamera(){if(camIdleTimer){clearTimeout(camIdleTimer);camIdleTimer=null;}if(html5QrCode){html5QrCode.stop().then(()=>{html5QrCode.clear();html5QrCode=null;}).catch(()=>{html5QrCode=null;});}}
+let camStream=null,scanTimer=null,camIdleTimer=null,lastCode='',lastCodeTime=0;
+function startCamera(){if(camStream)return;navigator.mediaDevices.getUserMedia({video:{facingMode:{exact:'environment'},width:{ideal:1280},height:{ideal:720}}}).then(stream=>{camStream=stream;const v=document.getElementById('cam-video');v.srcObject=stream;v.play();document.getElementById('cam-stopped-banner').classList.remove('show');scanTimer=setInterval(scanFrame,200);resetIdleTimer();}).catch(()=>{navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}).then(stream=>{camStream=stream;const v=document.getElementById('cam-video');v.srcObject=stream;v.play();document.getElementById('cam-stopped-banner').classList.remove('show');scanTimer=setInterval(scanFrame,200);resetIdleTimer();}).catch(()=>{showScanResult('err','❌','カメラ起動失敗','カメラへのアクセスを許可してください');});});}
+function stopCamera(){if(scanTimer){clearInterval(scanTimer);scanTimer=null;}if(camIdleTimer){clearTimeout(camIdleTimer);camIdleTimer=null;}if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}}
 function pauseCamera(){stopCamera();document.getElementById('cam-stopped-banner').classList.add('show');}
-function resetIdleTimer(){if(camIdleTimer)clearTimeout(camIdleTimer);camIdleTimer=setTimeout(()=>pauseCamera(),30000);}
-document.getElementById('btn-restart-cam').addEventListener('click',()=>{document.getElementById('cam-stopped-banner').classList.remove('show');startCamera();});
-function scanFrame(){}
+function resetIdleTimer(){if(camIdleTimer)clearTimeout(camIdleTimer);camIdleTimer=setTimeout(()=>pauseCamera(),60000);}
+function scanFrame(){const v=document.getElementById('cam-video'),c=document.getElementById('cam-canvas');if(!v.videoWidth||v.readyState<2)return;c.width=v.videoWidth;c.height=v.videoHeight;const ctx=c.getContext('2d');ctx.drawImage(v,0,0);const img=ctx.getImageData(0,0,c.width,c.height);const code=jsQR(img.data,img.width,img.height,{inversionAttempts:'attemptBoth'});if(code){const now=Date.now();if(code.data===lastCode&&now-lastCodeTime<2500)return;lastCode=code.data;lastCodeTime=now;resetIdleTimer();processQR(code.data);}}
 
 function processQR(data){try{const mgmt=JSON.parse(data);if(mgmt.shipmentId&&mgmt.ids){handleMgmtQR(mgmt);return;}}catch(e){}const parts=data.split(':');if(parts.length===3&&parts[0]==='P'){const[,qrBinId,qrId4]=parts;if(!appState.locked){showScanResult('err','⚠️','','リストが確定されていません');return;}if(qrBinId!==appState.binId){showScanResult('err','⚠️','別便',`この部材は別便のものです`);playBeep('err');vibrate([200,100,200]);flash('err');return;}registerById(qrId4,'qr');return;}showScanResult('err','❌','','対応していないQRコードです');playBeep('err');flash('err');}
 
