@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>ツミタロウ</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.19.1/umd/index.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
@@ -447,24 +447,45 @@ document.getElementById('btn-reset-list').addEventListener('click',()=>{showModa
 document.getElementById('btn-print-qr').addEventListener('click',()=>{const pg=document.getElementById('print-qr-grid');pg.innerHTML='';document.getElementById('print-title').textContent=`${appState.binDate} ${appState.binLabel} — 積込QR札 (便ID: ${appState.binId})`;appState.parts.forEach(p=>{const qd=`P:${appState.binId}:${p.id4}`;const card=document.createElement('div');card.className='qr-card';const qrId='print_'+p.id4;card.innerHTML=`<div class="qc-id">ID:${p.id4}</div><div class="qc-goban">${p.goban}</div><div id="${qrId}"></div><div class="qc-bottom">${appState.binDate} ${appState.binLabel}<br>${appState.companyName}</div>`;pg.appendChild(card);setTimeout(()=>{new QRCode(document.getElementById(qrId),{text:qd,width:128,height:128,correctLevel:QRCode.CorrectLevel.H});},50);});setTimeout(()=>window.print(),400);});
 
 // カメラ・スキャン
-let camStream=null,scanTimer=null,camIdleTimer=null,lastCode='',lastCodeTime=0;
-function startCamera(){if(camStream)return;navigator.mediaDevices.getUserMedia({video:{facingMode:{exact:'environment'},width:{ideal:1280},height:{ideal:720}}}).then(stream=>{camStream=stream;const v=document.getElementById('cam-video');v.srcObject=stream;v.play();document.getElementById('cam-stopped-banner').classList.remove('show');scanTimer=setInterval(scanFrame,200);resetIdleTimer();}).catch(()=>{navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}).then(stream=>{camStream=stream;const v=document.getElementById('cam-video');v.srcObject=stream;v.play();document.getElementById('cam-stopped-banner').classList.remove('show');scanTimer=setInterval(scanFrame,200);resetIdleTimer();}).catch(()=>{showScanResult('err','❌','カメラ起動失敗','カメラへのアクセスを許可してください');});});}
-function stopCamera(){if(scanTimer){clearInterval(scanTimer);scanTimer=null;}if(camIdleTimer){clearTimeout(camIdleTimer);camIdleTimer=null;}if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}}
+let camStream=null,zxingReader=null,scanTimer=null,camIdleTimer=null,lastCode='',lastCodeTime=0;
+function startCamera(){
+  if(camStream)return;
+  try{
+    zxingReader=new ZXing.BrowserMultiFormatReader();
+    const v=document.getElementById('cam-video');
+    zxingReader.decodeFromConstraints(
+      {video:{facingMode:'environment'}},
+      v,
+      (result,err)=>{
+        if(result){
+          const now=Date.now();
+          if(result.text===lastCode&&now-lastCodeTime<2500)return;
+          lastCode=result.text;lastCodeTime=now;
+          camStream=v.srcObject;
+          document.getElementById('cam-stopped-banner').classList.remove('show');
+          resetIdleTimer();
+          processQR(result.text);
+        }
+      }
+    ).then(()=>{
+      camStream=v.srcObject;
+      document.getElementById('cam-stopped-banner').classList.remove('show');
+      resetIdleTimer();
+    }).catch(e=>{
+      showScanResult('err','❌','カメラ起動失敗','カメラへのアクセスを許可してください');
+    });
+  }catch(e){
+    showScanResult('err','❌','カメラ起動失敗',e.message);
+  }
+}
+function stopCamera(){
+  if(camIdleTimer){clearTimeout(camIdleTimer);camIdleTimer=null;}
+  if(zxingReader){try{zxingReader.reset();}catch(e){}zxingReader=null;}
+  if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
+}
 function pauseCamera(){stopCamera();document.getElementById('cam-stopped-banner').classList.add('show');}
 function resetIdleTimer(){if(camIdleTimer)clearTimeout(camIdleTimer);camIdleTimer=setTimeout(()=>pauseCamera(),60000);}
-function scanFrame(){
-  const v=document.getElementById('cam-video'),c=document.getElementById('cam-canvas');
-  if(!v.videoWidth||!v.videoHeight)return;
-  // 高解像度でキャプチャ
-  const scale=2;
-  c.width=v.videoWidth;c.height=v.videoHeight;
-  const ctx=c.getContext('2d');
-  ctx.drawImage(v,0,0,c.width,c.height);
-  const img=ctx.getImageData(0,0,c.width,c.height);
-  // 通常試行
-  let code=jsQR(img.data,img.width,img.height,{inversionAttempts:'attemptBoth'});
-  if(code){const now=Date.now();if(code.data===lastCode&&now-lastCodeTime<2500)return;lastCode=code.data;lastCodeTime=now;resetIdleTimer();processQR(code.data);}
-}
+function scanFrame(){}
 
 function processQR(data){try{const mgmt=JSON.parse(data);if(mgmt.shipmentId&&mgmt.ids){handleMgmtQR(mgmt);return;}}catch(e){}const parts=data.split(':');if(parts.length===3&&parts[0]==='P'){const[,qrBinId,qrId4]=parts;if(!appState.locked){showScanResult('err','⚠️','','リストが確定されていません');return;}if(qrBinId!==appState.binId){showScanResult('err','⚠️','別便',`この部材は別便のものです`);playBeep('err');vibrate([200,100,200]);flash('err');return;}registerById(qrId4,'qr');return;}showScanResult('err','❌','','対応していないQRコードです');playBeep('err');flash('err');}
 
