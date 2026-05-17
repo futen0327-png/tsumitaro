@@ -452,7 +452,19 @@ function startCamera(){if(camStream)return;navigator.mediaDevices.getUserMedia({
 function stopCamera(){if(scanTimer){clearInterval(scanTimer);scanTimer=null;}if(camIdleTimer){clearTimeout(camIdleTimer);camIdleTimer=null;}if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}}
 function pauseCamera(){stopCamera();document.getElementById('cam-stopped-banner').classList.add('show');}
 function resetIdleTimer(){if(camIdleTimer)clearTimeout(camIdleTimer);camIdleTimer=setTimeout(()=>pauseCamera(),60000);}
-function scanFrame(){const v=document.getElementById('cam-video'),c=document.getElementById('cam-canvas');if(!v.videoWidth||v.readyState<2)return;c.width=v.videoWidth;c.height=v.videoHeight;const ctx=c.getContext('2d');ctx.drawImage(v,0,0);const img=ctx.getImageData(0,0,c.width,c.height);const code=jsQR(img.data,img.width,img.height,{inversionAttempts:'attemptBoth'});if(code){const now=Date.now();if(code.data===lastCode&&now-lastCodeTime<2500)return;lastCode=code.data;lastCodeTime=now;resetIdleTimer();processQR(code.data);}}
+function scanFrame(){
+  const v=document.getElementById('cam-video'),c=document.getElementById('cam-canvas');
+  if(!v.videoWidth||!v.videoHeight)return;
+  // 高解像度でキャプチャ
+  const scale=2;
+  c.width=v.videoWidth;c.height=v.videoHeight;
+  const ctx=c.getContext('2d');
+  ctx.drawImage(v,0,0,c.width,c.height);
+  const img=ctx.getImageData(0,0,c.width,c.height);
+  // 通常試行
+  let code=jsQR(img.data,img.width,img.height,{inversionAttempts:'attemptBoth'});
+  if(code){const now=Date.now();if(code.data===lastCode&&now-lastCodeTime<2500)return;lastCode=code.data;lastCodeTime=now;resetIdleTimer();processQR(code.data);}
+}
 
 function processQR(data){try{const mgmt=JSON.parse(data);if(mgmt.shipmentId&&mgmt.ids){handleMgmtQR(mgmt);return;}}catch(e){}const parts=data.split(':');if(parts.length===3&&parts[0]==='P'){const[,qrBinId,qrId4]=parts;if(!appState.locked){showScanResult('err','⚠️','','リストが確定されていません');return;}if(qrBinId!==appState.binId){showScanResult('err','⚠️','別便',`この部材は別便のものです`);playBeep('err');vibrate([200,100,200]);flash('err');return;}registerById(qrId4,'qr');return;}showScanResult('err','❌','','対応していないQRコードです');playBeep('err');flash('err');}
 
