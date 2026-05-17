@@ -197,6 +197,9 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 .mbtn-single{width:100%;padding:11px;background:var(--accent);border:none;color:#000;font-size:13px;font-weight:700;border-radius:8px;cursor:pointer;}
 #qr-print-area{display:none;}
 @media print{body *{visibility:hidden;}#qr-print-area,#qr-print-area *{visibility:visible;}#qr-print-area{display:block !important;position:fixed;top:0;left:0;width:100%;background:white;padding:20px;}.qr-grid{grid-template-columns:repeat(4,1fr);}}
+.camera-wrap{margin-bottom:14px;overflow:hidden;border-radius:12px;}
+#cam-qr-region video{object-position:top!important;vertical-align:top!important;}
+#cam-qr-region>div{top:0!important;}
 </style>
 </head>
 <body>
@@ -443,7 +446,7 @@ document.getElementById('btn-print-qr').addEventListener('click',()=>{const pg=d
 
 // カメラ・スキャン
 let html5QrCode=null,camIdleTimer=null,lastCode='',lastCodeTime=0;
-function startCamera(){if(html5QrCode)return;const el=document.getElementById('cam-video');el.style.display='none';const wrap=document.getElementById('cam-qr-region');html5QrCode=new Html5Qrcode('cam-qr-region');const config={fps:10,qrbox:{width:160,height:160},aspectRatio:1.5};html5QrCode.start({facingMode:'environment'},config,qrCodeMessage=>{const now=Date.now();if(qrCodeMessage===lastCode&&now-lastCodeTime<2000)return;lastCode=qrCodeMessage;lastCodeTime=now;resetIdleTimer();processQR(qrCodeMessage);},()=>{}).then(()=>{document.getElementById('cam-stopped-banner').classList.remove('show');resetIdleTimer();}).catch(err=>{showScanResult('err','❌','カメラ起動失敗','カメラへのアクセスを許可してください');html5QrCode=null;});}
+function startCamera(){if(html5QrCode)return;const el=document.getElementById('cam-video');el.style.display='none';const wrap=document.getElementById('cam-qr-region');html5QrCode=new Html5Qrcode('cam-qr-region');const qbSize=Math.min(Math.floor(window.innerWidth*0.6),250);const config={fps:10,qrbox:{width:qbSize,height:qbSize}};html5QrCode.start({facingMode:'environment'},config,qrCodeMessage=>{const now=Date.now();if(qrCodeMessage===lastCode&&now-lastCodeTime<2000)return;lastCode=qrCodeMessage;lastCodeTime=now;resetIdleTimer();processQR(qrCodeMessage);},()=>{}).then(()=>{document.getElementById('cam-stopped-banner').classList.remove('show');resetIdleTimer();}).catch(err=>{showScanResult('err','❌','カメラ起動失敗','カメラへのアクセスを許可してください');html5QrCode=null;});}
 function stopCamera(){if(camIdleTimer){clearTimeout(camIdleTimer);camIdleTimer=null;}if(html5QrCode){html5QrCode.stop().then(()=>{html5QrCode.clear();html5QrCode=null;}).catch(()=>{html5QrCode=null;});}}
 function pauseCamera(){stopCamera();document.getElementById('cam-stopped-banner').classList.add('show');}
 function resetIdleTimer(){if(camIdleTimer)clearTimeout(camIdleTimer);camIdleTimer=setTimeout(()=>pauseCamera(),30000);}
