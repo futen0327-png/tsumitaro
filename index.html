@@ -128,8 +128,8 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 .remaining-badge{display:inline-block;margin-top:8px;padding:5px 16px;border-radius:20px;font-size:14px;font-weight:700;}
 .remaining-badge.has{color:var(--danger);background:rgba(229,57,53,0.1);}
 .remaining-badge.done{color:var(--ok);background:rgba(0,200,83,0.1);}
-.camera-wrap{position:relative;border-radius:12px;overflow:hidden;background:#000;margin-bottom:14px;aspect-ratio:4/3;}
-#cam-video{width:100%;height:100%;object-fit:cover;display:block;}
+.camera-wrap{position:relative;border-radius:12px;overflow:hidden;background:#000;margin-bottom:14px;width:100%;height:220px;}
+#cam-video{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;}
 .cam-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
 .cam-frame{width:190px;height:190px;border:3px solid var(--accent-bright);border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,0.45);animation:pulse-frame 2s ease-in-out infinite;}
 @keyframes pulse-frame{0%,100%{border-color:var(--accent-bright);}50%{border-color:rgba(255,184,0,0.3);}}
@@ -197,9 +197,8 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 .mbtn-single{width:100%;padding:11px;background:var(--accent);border:none;color:#000;font-size:13px;font-weight:700;border-radius:8px;cursor:pointer;}
 #qr-print-area{display:none;}
 @media print{body *{visibility:hidden;}#qr-print-area,#qr-print-area *{visibility:visible;}#qr-print-area{display:block !important;position:fixed;top:0;left:0;width:100%;background:white;padding:20px;}.qr-grid{grid-template-columns:repeat(4,1fr);}}
-.camera-wrap{margin-bottom:14px;overflow:hidden;border-radius:12px;display:flex;justify-content:center;background:#000;}
 
-#cam-video{width:100%;height:100%;object-fit:cover;display:block;}
+
 .cam-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
 .cam-frame{width:200px;height:200px;border:3px solid var(--accent-bright);border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,0.4);}
 
@@ -312,8 +311,8 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
         <div class="remaining-badge has" id="remaining-badge">残り 0 点</div>
       </div>
     </div>
-    <div class="camera-wrap" style="position:relative;background:#000;border-radius:12px;overflow:hidden;margin-bottom:14px;max-height:220px;display:flex;justify-content:center;">
-      <video id="cam-video" autoplay playsinline muted style="width:100%;display:block;"></video>
+    <div class="camera-wrap">
+      <video id="cam-video" autoplay playsinline muted></video>
       <canvas id="cam-canvas" style="display:none"></canvas>
       <div class="cam-stopped-banner" id="cam-stopped-banner">
         <span>カメラ停止中</span>
