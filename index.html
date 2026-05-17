@@ -287,7 +287,7 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
         <div class="remaining-badge has" id="remaining-badge">残り 0 点</div>
       </div>
     </div>
-    <div class="camera-wrap" style="position:relative;background:#000;border-radius:12px;overflow:hidden;margin-bottom:14px;">
+    <div class="camera-wrap" style="position:relative;background:#000;border-radius:12px;overflow:hidden;margin-bottom:14px;max-height:280px;">
       <div id="cam-qr-region" style="width:100%;"></div>
       <video id="cam-video" style="display:none"></video>
       <canvas id="cam-canvas" style="display:none"></canvas>
@@ -442,7 +442,7 @@ document.getElementById('btn-print-qr').addEventListener('click',()=>{const pg=d
 
 // カメラ・スキャン
 let html5QrCode=null,camIdleTimer=null,lastCode='',lastCodeTime=0;
-function startCamera(){if(html5QrCode)return;const el=document.getElementById('cam-video');el.style.display='none';const wrap=document.getElementById('cam-qr-region');html5QrCode=new Html5Qrcode('cam-qr-region');const config={fps:10,qrbox:{width:250,height:250},aspectRatio:1.0};html5QrCode.start({facingMode:'environment'},config,qrCodeMessage=>{const now=Date.now();if(qrCodeMessage===lastCode&&now-lastCodeTime<2000)return;lastCode=qrCodeMessage;lastCodeTime=now;resetIdleTimer();processQR(qrCodeMessage);},()=>{}).then(()=>{document.getElementById('cam-stopped-banner').classList.remove('show');resetIdleTimer();}).catch(err=>{showScanResult('err','❌','カメラ起動失敗','カメラへのアクセスを許可してください');html5QrCode=null;});}
+function startCamera(){if(html5QrCode)return;const el=document.getElementById('cam-video');el.style.display='none';const wrap=document.getElementById('cam-qr-region');html5QrCode=new Html5Qrcode('cam-qr-region');const config={fps:10,qrbox:{width:200,height:200},aspectRatio:1.333};html5QrCode.start({facingMode:'environment'},config,qrCodeMessage=>{const now=Date.now();if(qrCodeMessage===lastCode&&now-lastCodeTime<2000)return;lastCode=qrCodeMessage;lastCodeTime=now;resetIdleTimer();processQR(qrCodeMessage);},()=>{}).then(()=>{document.getElementById('cam-stopped-banner').classList.remove('show');resetIdleTimer();}).catch(err=>{showScanResult('err','❌','カメラ起動失敗','カメラへのアクセスを許可してください');html5QrCode=null;});}
 function stopCamera(){if(camIdleTimer){clearTimeout(camIdleTimer);camIdleTimer=null;}if(html5QrCode){html5QrCode.stop().then(()=>{html5QrCode.clear();html5QrCode=null;}).catch(()=>{html5QrCode=null;});}}
 function pauseCamera(){stopCamera();document.getElementById('cam-stopped-banner').classList.add('show');}
 function resetIdleTimer(){if(camIdleTimer)clearTimeout(camIdleTimer);camIdleTimer=setTimeout(()=>pauseCamera(),30000);}
