@@ -69,14 +69,14 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 .emergency-section.show{display:block;}
 .emergency-section label{font-size:11px;color:var(--warn);display:block;margin-bottom:6px;}
 #screen-app{display:none;}
-.top-bar{background:var(--steel-mid);border-bottom:2px solid var(--accent);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.top-bar{background:var(--steel-mid);border-bottom:2px solid var(--accent);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;height:52px;}
 .top-bar-left{display:flex;align-items:center;gap:10px;}
 .top-logo{height:32px;}
 .company-name{font-size:12px;color:var(--text-dim);font-weight:600;}
 .bin-pill{font-size:11px;text-align:right;line-height:1.5;}
 .bin-pill strong{display:block;font-size:13px;color:var(--text);}
 .status-ok{color:var(--ok);} .status-exp{color:var(--danger);font-weight:700;}
-.tabs{display:flex;background:var(--steel-mid);border-bottom:1px solid var(--border);}
+.tabs{display:flex;background:var(--steel-mid);border-bottom:1px solid var(--border);position:sticky;top:52px;z-index:99;}
 .tab-btn{flex:1;padding:13px 6px;text-align:center;font-size:15px;font-weight:700;color:#ffffff;cursor:pointer;border-bottom:3px solid transparent;transition:all 0.2s;letter-spacing:0.04em;background:none;border-top:none;border-left:none;border-right:none;}
 .tab-btn.active{color:var(--accent-bright);border-bottom-color:var(--accent-bright);background:rgba(255,184,0,0.05);}
 .tab-pane{display:none;padding:16px;}
@@ -339,7 +339,6 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 </div>
 <div id="screen-complete" style="display:flex">
   <div><div class="comp-icon">✅</div><div class="comp-title" id="comp-title">出荷OK</div><div class="comp-detail" id="comp-detail"></div>
-  <button class="btn-end-bin" onclick="endBin()">この便を終了する（データ削除）</button>
   <button class="btn-new-scan" onclick="backToScan()">スキャン画面に戻る</button></div>
 </div>
 <div class="modal-overlay" id="modal">
