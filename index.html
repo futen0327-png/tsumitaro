@@ -237,6 +237,7 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 .alarm-item{font-size:20px;font-weight:900;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.2);letter-spacing:0.05em;}
 .alarm-item:last-child{border-bottom:none;}
 .btn-back-scan{width:100%;padding:17px;background:white;color:#b71c1c;font-size:16px;font-weight:900;border:none;border-radius:12px;cursor:pointer;margin-bottom:10px;}
+.btn-force-complete{width:100%;padding:14px;background:transparent;border:2px solid rgba(255,255,255,0.6);color:white;font-size:14px;font-weight:700;border-radius:12px;cursor:pointer;}
 #screen-complete{display:none;position:fixed;inset:0;background:#002810;z-index:1000;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:40px 24px;}
 .comp-icon{font-size:72px;margin-bottom:20px;} .comp-title{font-size:28px;font-weight:900;color:var(--ok);margin-bottom:10px;} .comp-detail{font-size:16px;color:var(--text-dim);margin-bottom:36px;}
 .btn-end-bin{width:100%;padding:14px;background:transparent;border:2px solid var(--text-dim);color:var(--text-dim);font-size:14px;font-weight:700;border-radius:10px;cursor:pointer;margin-bottom:10px;}
@@ -418,6 +419,7 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
   <div class="alarm-sub">以下の部材が未積込です</div>
   <div class="alarm-list" id="alarm-list"></div>
   <button class="btn-back-scan" onclick="backToScan()">確認した → スキャン画面に戻る</button>
+  <button class="btn-force-complete" onclick="forceComplete()">⚠️ 積み残しとして完了する</button>
 </div>
 <div id="screen-complete" style="display:none">
   <div class="comp-inner">
@@ -701,6 +703,10 @@ document.getElementById('btn-complete').addEventListener('click',checkComplete);
 function checkComplete(){const scannedIds=new Set(appState.scanned.map(s=>s.id4));const missing=appState.parts.filter(p=>!scannedIds.has(p.id4));if(missing.length>0)showAlarm(missing);else{appState.completed=true;saveAppState();showCompleteScreen();}}
 function showAlarm(missing){playBeep('alarm');vibrate([500,200,500,200,500]);const list=document.getElementById('alarm-list');list.innerHTML=missing.map(p=>`<div class="alarm-item">▶ ${p.id4} — ${p.goban}${p.desc?' '+p.desc:''}</div>`).join('');document.getElementById('screen-alarm').style.display='block';}
 function backToScan(){document.getElementById('screen-alarm').style.display='none';document.getElementById('screen-complete').style.display='none';}
+function forceComplete(){
+  document.getElementById('screen-alarm').style.display='none';
+  showCompleteScreen();
+}
 
 function buildCompletionData(){
   const scannedIds=new Set(appState.scanned.map(s=>s.id4));
