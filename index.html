@@ -49,7 +49,7 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 
 /* ===== PCレイアウト: アプリ全体を中央に最大幅で表示 ===== */
 #screen-app{display:none;max-width:860px;margin:0 auto;}
-.top-bar{background:var(--steel-mid);border-bottom:2px solid var(--accent);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;height:52px;}
+.top-bar{background:var(--steel-mid);border-bottom:2px solid var(--accent);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;height:52px;gap:8px;}
 .top-bar-left{display:flex;align-items:center;gap:10px;}
 .top-logo{height:32px;}
 .company-name{font-size:13px;color:var(--text-dim);font-weight:600;}
@@ -330,6 +330,24 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 .welcome-btns{width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px;}
 .btn-welcome-main{width:100%;padding:18px;background:var(--accent);color:#000;font-size:17px;font-weight:900;border:none;border-radius:12px;cursor:pointer;letter-spacing:0.06em;box-shadow:0 4px 20px rgba(232,160,0,0.35);}
 .btn-welcome-sub{width:100%;padding:16px;background:transparent;border:2px solid var(--border);color:var(--text);font-size:15px;font-weight:700;border-radius:12px;cursor:pointer;}
+.mode-btn{flex:1;padding:12px 8px;background:var(--surface);border:2px solid var(--border);color:var(--text);font-size:13px;font-weight:700;border-radius:10px;cursor:pointer;line-height:1.5;transition:all 0.2s;}
+.mode-btn span{font-size:10px;font-weight:400;color:var(--text-dim);display:block;margin-top:3px;}
+.mode-btn.selected{border-color:var(--accent);background:rgba(232,160,0,0.1);color:var(--accent-bright);}
+.mode-btn.selected span{color:var(--accent);}
+
+/* モード切替ボタン（右上） */
+.mode-switch-btn{padding:5px 10px;background:var(--steel-light);border:1px solid var(--border);color:var(--text-dim);font-size:11px;font-weight:700;border-radius:6px;cursor:pointer;white-space:nowrap;}
+.mode-switch-btn:hover{border-color:var(--accent);color:var(--accent-bright);}
+
+/* 管理者モード: PCでより広いレイアウト */
+body.mode-admin{--admin-font-scale:1.05;}
+@media(min-width:640px){
+  body.mode-admin .tab-btn{font-size:16px;padding:16px 10px;}
+  body.mode-admin .tab-pane{padding:28px 36px;}
+  body.mode-admin .sec-title{font-size:18px;}
+  body.mode-admin .pi-goban{font-size:17px;}
+  body.mode-admin .pi-id{font-size:20px;}
+}
 .welcome-version{margin-top:40px;font-size:11px;color:var(--text-dim);letter-spacing:0.06em;}
 
 </style>
@@ -347,6 +365,13 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
   <div class="welcome-btns">
     <button class="btn-welcome-main" id="btn-welcome-new">🚛 今日の積込を始める</button>
     <button class="btn-welcome-sub" id="btn-welcome-continue" style="display:none">📋 前回の続きから</button>
+  </div>
+  <div style="margin-top:28px;width:100%;max-width:360px">
+    <div style="font-size:12px;color:var(--text-dim);text-align:center;margin-bottom:10px;letter-spacing:0.06em">起動モードを選択</div>
+    <div style="display:flex;gap:10px">
+      <button class="mode-btn" id="btn-mode-admin" onclick="selectMode('admin')">🖥️ 管理者モード<br><span>事務所・QR印刷・結果確認</span></button>
+      <button class="mode-btn" id="btn-mode-field" onclick="selectMode('field')">📱 現場モード<br><span>スキャン・結果確認</span></button>
+    </div>
   </div>
   <div class="welcome-version">ツミタロウ MVP v1.0</div>
 </div>
@@ -382,6 +407,7 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
       <div class="company-name" id="top-company">読み込み中...</div>
     </div>
     <div class="bin-pill" id="top-bin-pill"><span style="color:var(--text-dim);font-size:11px">便未設定</span></div>
+    <button class="mode-switch-btn" id="mode-switch-btn" onclick="toggleModeSwitch()">モード切替</button>
   </div>
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('office')" id="tabBtn-office">📋 事務所</button>
@@ -560,7 +586,7 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 </div>
 <div id="qr-print-area"><h2 style="color:#000;margin-bottom:14px;font-size:14px" id="print-title"></h2><div class="qr-grid" id="print-qr-grid"></div></div>
 <script>
-const LS_DEVICE='deviceId',LS_LICENSE='licenseCache',LS_COMPANY='currentCompanyId',LS_STATE='tsumitaro_state_v1';
+const LS_DEVICE='deviceId',LS_LICENSE='licenseCache',LS_COMPANY='currentCompanyId',LS_STATE='tsumitaro_state_v1',LS_MODE='tsumitaro_mode';
 const DB_NAME='qr-loading-system',DB_VERSION=1;
 let idb=null;
 
@@ -594,6 +620,10 @@ window.onFirebaseReady=async function(user){
   const today=new Date().toISOString().split('T')[0];
   const hasPrev=appState.locked&&appState.binDate===today&&!appState.completed;
   document.getElementById('btn-welcome-continue').style.display=hasPrev?'block':'none';
+  // モード選択ボタンを前回の選択状態に
+  const savedMode=getCurrentMode();
+  document.getElementById('btn-mode-admin').classList.toggle('selected',savedMode==='admin');
+  document.getElementById('btn-mode-field').classList.toggle('selected',savedMode==='field');
 };
 window.onFirebaseSignedOut=function(){showScreen('screen-login');};
 document.addEventListener('firebaseLoaded',()=>{setTimeout(()=>{if(!window._currentUser)showScreen('screen-login');},1500);});
@@ -631,7 +661,58 @@ async function loadLicense(companyId){
 }
 function useLicenseCache(companyId){try{const c=JSON.parse(localStorage.getItem(LS_LICENSE));if(c){appState.companyId=c.companyId;appState.companyName=c.companyName||'（オフライン）';}}catch(e){appState.companyName='（オフライン）';}}
 
-function initApp(){loadAppState();document.getElementById('top-company').textContent=appState.companyName;document.getElementById('bin-date').value=todayStr();checkExpiry();renderAll();setTimeout(retrySendUnsent,3000);}
+function initApp(){loadAppState();document.getElementById('top-company').textContent=appState.companyName;document.getElementById('bin-date').value=todayStr();checkExpiry();renderAll();setTimeout(retrySendUnsent,3000);applyMode(getCurrentMode());}
+
+// ===== モード管理 =====
+function getCurrentMode(){return localStorage.getItem(LS_MODE)||'admin';}
+
+function selectMode(mode){
+  localStorage.setItem(LS_MODE,mode);
+  // ウェルカム画面のボタン状態更新
+  document.getElementById('btn-mode-admin').classList.toggle('selected',mode==='admin');
+  document.getElementById('btn-mode-field').classList.toggle('selected',mode==='field');
+}
+
+function applyMode(mode){
+  const body=document.body;
+  body.classList.toggle('mode-admin',mode==='admin');
+  body.classList.toggle('mode-field',mode==='field');
+
+  // タブ表示制御
+  const officeBtn=document.getElementById('tabBtn-office');
+  const scanBtn=document.getElementById('tabBtn-scan');
+  const qrBtn=document.getElementById('tabBtn-qr');
+  const resultsBtn=document.getElementById('tabBtn-results');
+
+  if(mode==='admin'){
+    // 管理者：事務所・QR印刷・結果確認のみ（スキャン非表示）
+    officeBtn.style.display='';
+    scanBtn.style.display='none';
+    qrBtn.style.display='';
+    resultsBtn.style.display='';
+    // スキャンタブが選択中なら事務所に切替
+    if(document.getElementById('tab-scan').classList.contains('active')){switchTab('office');}
+  }else{
+    // 現場：スキャン・結果確認のみ（事務所・QR非表示）
+    officeBtn.style.display='none';
+    scanBtn.style.display='';
+    qrBtn.style.display='none';
+    resultsBtn.style.display='';
+    // 事務所やQRタブが選択中ならスキャンに切替
+    const activeTab=document.querySelector('.tab-pane.active');
+    if(activeTab&&(activeTab.id==='tab-office'||activeTab.id==='tab-qr')){switchTab('scan');}
+  }
+  // モード切替ボタン表示更新
+  const btn=document.getElementById('mode-switch-btn');
+  if(btn)btn.textContent=mode==='admin'?'📱 現場モードへ':'🖥️ 管理者モードへ';
+}
+
+function toggleModeSwitch(){
+  const current=getCurrentMode();
+  const next=current==='admin'?'field':'admin';
+  localStorage.setItem(LS_MODE,next);
+  applyMode(next);
+}
 function checkExpiry(){if(!appState.binDate)return;appState.expired=appState.binDate<todayStr();saveAppState();}
 
 function switchTab(name){
@@ -1265,12 +1346,14 @@ document.getElementById('btn-welcome-new').addEventListener('click',()=>{
   saveAppState();
   showScreen('screen-app');
   initApp();
-  switchTab('office');
+  const mode=getCurrentMode();
+  switchTab(mode==='field'?'scan':'office');
 });
 document.getElementById('btn-welcome-continue').addEventListener('click',()=>{
   showScreen('screen-app');
   initApp();
-  switchTab('scan');
+  const mode=getCurrentMode();
+  switchTab(mode==='field'?'scan':'office');
 });
 </script>
 </body>
