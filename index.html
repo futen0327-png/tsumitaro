@@ -754,24 +754,46 @@ document.getElementById('btn-reset-list').addEventListener('click',()=>{showModa
 document.getElementById('btn-print-qr').addEventListener('click',()=>{const pg=document.getElementById('print-qr-grid');pg.innerHTML='';document.getElementById('print-title').textContent=`${appState.binDate} ${appState.binLabel} — 積込QR札 (便ID: ${appState.binId})`;appState.parts.forEach(p=>{const qd=`P:${appState.binId}:${p.id4}`;const card=document.createElement('div');card.className='qr-card';const qrId='print_'+p.id4;card.innerHTML=`<div class="qc-id">ID:${p.id4}</div><div class="qc-goban">${p.goban}</div><div id="${qrId}"></div><div class="qc-bottom">${appState.binDate} ${appState.binLabel}<br>${appState.companyName}</div>`;pg.appendChild(card);setTimeout(()=>{new QRCode(document.getElementById(qrId),{text:qd,width:128,height:128,correctLevel:QRCode.CorrectLevel.H});},50);});setTimeout(()=>window.print(),400);});
 
 // カメラ・スキャン
-let camStream=null,zxingReader=null,scanTimer=null,camIdleTimer=null,lastCode='',lastCodeTime=0;
+let camStream=null,zxingReader=null,camIdleTimer=null;
+// 同一QRの連続誤読み防止：直近N件を記録
+const RECENT_QR_MAX=5;
+let recentQRs=[];
+
+function isRecentDuplicate(text){
+  const now=Date.now();
+  // 3秒以内に同じコードがあればスキップ
+  recentQRs=recentQRs.filter(r=>now-r.t<3000);
+  if(recentQRs.some(r=>r.code===text))return true;
+  recentQRs.push({code:text,t:now});
+  if(recentQRs.length>RECENT_QR_MAX)recentQRs.shift();
+  return false;
+}
+
 function startCamera(){
   if(camStream)return;
+  _startCameraInner();
+}
+
+function _startCameraInner(){
   try{
+    // 毎回新しいインスタンスを生成して誤読取りを防ぐ
+    if(zxingReader){try{zxingReader.reset();}catch(e){}zxingReader=null;}
     zxingReader=new ZXing.BrowserMultiFormatReader();
     const v=document.getElementById('cam-video');
     zxingReader.decodeFromConstraints(
-      {video:{facingMode:'environment'}},
+      {video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}},
       v,
       (result,err)=>{
-        if(result){
-          const now=Date.now();
-          if(result.text===lastCode&&now-lastCodeTime<2500)return;
-          lastCode=result.text;lastCodeTime=now;
+        if(result&&result.text){
+          const text=result.text.trim();
+          if(!text)return;
+          // 重複・短すぎるデータは無視
+          if(text.length<3)return;
+          if(isRecentDuplicate(text))return;
           camStream=v.srcObject;
           document.getElementById('cam-stopped-banner').classList.remove('show');
           resetIdleTimer();
-          processQR(result.text);
+          processQR(text);
         }
       }
     ).then(()=>{
@@ -785,10 +807,12 @@ function startCamera(){
     showScanResult('err','❌','カメラ起動失敗',e.message);
   }
 }
+
 function stopCamera(){
   if(camIdleTimer){clearTimeout(camIdleTimer);camIdleTimer=null;}
   if(zxingReader){try{zxingReader.reset();}catch(e){}zxingReader=null;}
   if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
+  recentQRs=[];
 }
 function pauseCamera(){stopCamera();document.getElementById('cam-stopped-banner').classList.add('show');}
 function resetIdleTimer(){if(camIdleTimer)clearTimeout(camIdleTimer);camIdleTimer=setTimeout(()=>pauseCamera(),60000);}
@@ -799,15 +823,31 @@ function processQR(data){
   const parts=data.split(':');
   if(parts.length===3&&parts[0]==='P'){
     const[,qrBinId,qrId4]=parts;
-    // デバッグ表示（一時的）
-    console.log('QR読取:', data);
-    console.log('QR便ID:', qrBinId, '/ 現在の便ID:', appState.binId);
     if(!appState.locked){showScanResult('err','⚠️','','リストが確定されていません');return;}
     if(qrBinId!==appState.binId){
-      // 詳細なエラーメッセージ
-      showScanResult('err','⚠️','便ID不一致',`QR:${qrBinId} / 現在:${appState.binId}`);
+      showScanResult('err','⚠️','別便',`この部材は別便のものです`);
       playBeep('err');vibrate([200,100,200]);flash('err');return;
-    }const norm=normalize4(qrId4);const part=appState.parts.find(p=>p.id4===norm);if(!part){showScanResult('err','⚠️',norm,'このIDは本日対象外です');playBeep('warn');flash('warn');vibrate([200,100,200]);return;}const alreadyDone=appState.scanned.some(s=>s.id4===norm);if(alreadyDone){showScanResult('dup','🔁',norm,`${part.goban} — 読込済み`);playBeep('dup');flash('dup');return;}showModal('📋','登録確認',`<span style="font-size:20px;font-weight:900;color:var(--accent-bright)">${part.id4}</span><br><span style="font-size:16px;font-weight:700">${part.goban}</span><br><br>この部材を登録しますか？`,[{label:'いいえ',cls:'mbtn-cancel',fn:closeModal},{label:'はい',cls:'mbtn-ok',fn:()=>{closeModal();registerById(qrId4,'qr');}}]);return;}showScanResult('err','❌','','対応していないQRコードです');playBeep('err');flash('err');}
+    }
+    const norm=normalize4(qrId4);
+    const part=appState.parts.find(p=>p.id4===norm);
+    if(!part){showScanResult('err','⚠️',norm,'このIDは本日対象外です');playBeep('warn');flash('warn');vibrate([200,100,200]);return;}
+    const alreadyDone=appState.scanned.some(s=>s.id4===norm);
+    if(alreadyDone){showScanResult('dup','🔁',norm,`${part.goban} — 読込済み`);playBeep('dup');flash('dup');return;}
+    showModal('📋','登録確認',`<span style="font-size:20px;font-weight:900;color:var(--accent-bright)">${part.id4}</span><br><span style="font-size:16px;font-weight:700">${part.goban}</span><br><br>この部材を登録しますか？`,[{label:'いいえ',cls:'mbtn-cancel',fn:closeModal},{label:'はい',cls:'mbtn-ok',fn:()=>{closeModal();registerById(qrId4,'qr');}}]);
+    return;
+  }
+  // ツミタロウ対象外のデータ → 無視（エラー表示しない）
+  // ただし「P:」で始まるが形式が崩れている場合は誤読取りとして無視
+  if(data.startsWith('P:')){
+    // 誤読取りの可能性が高い。リカバリーのためカメラを再起動
+    setTimeout(()=>{
+      stopCamera();
+      setTimeout(()=>_startCameraInner(),300);
+    },500);
+    return;
+  }
+  // 全く関係ないQR（URLなど）は静かに無視
+}
 
 function handleMgmtQR(mgmt){if(!appState.locked||mgmt.shipmentId!==appState.binId){showModal('📋','管理QR読込',`${mgmt.date} ${mgmt.label}<br>部材数：<span class="highlight">${mgmt.ids.length}件</span><br><br>このリストを読み込みますか？`,[{label:'キャンセル',cls:'mbtn-cancel',fn:closeModal},{label:'読み込む',cls:'mbtn-ok',fn:()=>{closeModal();appState.binId=mgmt.shipmentId;appState.binDate=mgmt.date;appState.binLabel=mgmt.label;appState.binName=mgmt.label;appState.companyName=mgmt.company||appState.companyName;appState.parts=mgmt.ids.map(([id4,goban])=>({id4,goban,desc:'',bin:'',bundle:''}));appState.locked=true;appState.scanned=[];appState.managementQrLoaded=true;saveAppState();renderAll();showScanResult('ok','✅','管理QR読込完了',`${mgmt.ids.length}件のリストをセットしました`);playBeep('ok');flash('ok');}}]);return;}appState.managementQrLoaded=true;saveAppState();renderScanTab();showScanResult('ok','✅','管理QR読込済',`${appState.parts.length}件のリスト確認OK`);playBeep('ok');flash('ok');}
 
