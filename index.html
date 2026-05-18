@@ -794,7 +794,20 @@ function pauseCamera(){stopCamera();document.getElementById('cam-stopped-banner'
 function resetIdleTimer(){if(camIdleTimer)clearTimeout(camIdleTimer);camIdleTimer=setTimeout(()=>pauseCamera(),60000);}
 function scanFrame(){}
 
-function processQR(data){try{const mgmt=JSON.parse(data);if(mgmt.shipmentId&&mgmt.ids){handleMgmtQR(mgmt);return;}}catch(e){}const parts=data.split(':');if(parts.length===3&&parts[0]==='P'){const[,qrBinId,qrId4]=parts;if(!appState.locked){showScanResult('err','⚠️','','リストが確定されていません');return;}if(qrBinId!==appState.binId){showScanResult('err','⚠️','別便',`この部材は別便のものです`);playBeep('err');vibrate([200,100,200]);flash('err');return;}const norm=normalize4(qrId4);const part=appState.parts.find(p=>p.id4===norm);if(!part){showScanResult('err','⚠️',norm,'このIDは本日対象外です');playBeep('warn');flash('warn');vibrate([200,100,200]);return;}const alreadyDone=appState.scanned.some(s=>s.id4===norm);if(alreadyDone){showScanResult('dup','🔁',norm,`${part.goban} — 読込済み`);playBeep('dup');flash('dup');return;}showModal('📋','登録確認',`<span style="font-size:20px;font-weight:900;color:var(--accent-bright)">${part.id4}</span><br><span style="font-size:16px;font-weight:700">${part.goban}</span><br><br>この部材を登録しますか？`,[{label:'いいえ',cls:'mbtn-cancel',fn:closeModal},{label:'はい',cls:'mbtn-ok',fn:()=>{closeModal();registerById(qrId4,'qr');}}]);return;}showScanResult('err','❌','','対応していないQRコードです');playBeep('err');flash('err');}
+function processQR(data){
+  try{const mgmt=JSON.parse(data);if(mgmt.shipmentId&&mgmt.ids){handleMgmtQR(mgmt);return;}}catch(e){}
+  const parts=data.split(':');
+  if(parts.length===3&&parts[0]==='P'){
+    const[,qrBinId,qrId4]=parts;
+    // デバッグ表示（一時的）
+    console.log('QR読取:', data);
+    console.log('QR便ID:', qrBinId, '/ 現在の便ID:', appState.binId);
+    if(!appState.locked){showScanResult('err','⚠️','','リストが確定されていません');return;}
+    if(qrBinId!==appState.binId){
+      // 詳細なエラーメッセージ
+      showScanResult('err','⚠️','便ID不一致',`QR:${qrBinId} / 現在:${appState.binId}`);
+      playBeep('err');vibrate([200,100,200]);flash('err');return;
+    }const norm=normalize4(qrId4);const part=appState.parts.find(p=>p.id4===norm);if(!part){showScanResult('err','⚠️',norm,'このIDは本日対象外です');playBeep('warn');flash('warn');vibrate([200,100,200]);return;}const alreadyDone=appState.scanned.some(s=>s.id4===norm);if(alreadyDone){showScanResult('dup','🔁',norm,`${part.goban} — 読込済み`);playBeep('dup');flash('dup');return;}showModal('📋','登録確認',`<span style="font-size:20px;font-weight:900;color:var(--accent-bright)">${part.id4}</span><br><span style="font-size:16px;font-weight:700">${part.goban}</span><br><br>この部材を登録しますか？`,[{label:'いいえ',cls:'mbtn-cancel',fn:closeModal},{label:'はい',cls:'mbtn-ok',fn:()=>{closeModal();registerById(qrId4,'qr');}}]);return;}showScanResult('err','❌','','対応していないQRコードです');playBeep('err');flash('err');}
 
 function handleMgmtQR(mgmt){if(!appState.locked||mgmt.shipmentId!==appState.binId){showModal('📋','管理QR読込',`${mgmt.date} ${mgmt.label}<br>部材数：<span class="highlight">${mgmt.ids.length}件</span><br><br>このリストを読み込みますか？`,[{label:'キャンセル',cls:'mbtn-cancel',fn:closeModal},{label:'読み込む',cls:'mbtn-ok',fn:()=>{closeModal();appState.binId=mgmt.shipmentId;appState.binDate=mgmt.date;appState.binLabel=mgmt.label;appState.binName=mgmt.label;appState.companyName=mgmt.company||appState.companyName;appState.parts=mgmt.ids.map(([id4,goban])=>({id4,goban,desc:'',bin:'',bundle:''}));appState.locked=true;appState.scanned=[];appState.managementQrLoaded=true;saveAppState();renderAll();showScanResult('ok','✅','管理QR読込完了',`${mgmt.ids.length}件のリストをセットしました`);playBeep('ok');flash('ok');}}]);return;}appState.managementQrLoaded=true;saveAppState();renderScanTab();showScanResult('ok','✅','管理QR読込済',`${appState.parts.length}件のリスト確認OK`);playBeep('ok');flash('ok');}
 
