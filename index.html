@@ -10,7 +10,7 @@
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
   import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-  import { getFirestore, doc, getDoc, updateDoc, arrayUnion, arrayRemove } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+  import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
   const firebaseConfig = {
     apiKey: "AIzaSyByNUEa1xavVdF2UE4KmzcywIY-VSy8LZY",
@@ -27,7 +27,7 @@
 
   window._firebaseAuth = auth;
   window._firebaseDb = db;
-  window._firebaseFns = { signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut, doc, getDoc, updateDoc, arrayUnion, arrayRemove };
+  window._firebaseFns = { signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut, doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove };
 
   onAuthStateChanged(auth, user => {
     if (user) { window._currentUser = user; window.onFirebaseReady && window.onFirebaseReady(user); }
@@ -107,6 +107,44 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 .pi-bin{font-size:11px;color:var(--text-dim);}
 .empty-state{text-align:center;padding:32px 16px;color:var(--text-dim);font-size:13px;}
 .btn-row{display:flex;gap:10px;margin-bottom:14px;}
+/* ===== 完了画面拡張 ===== */
+#screen-complete{display:none;position:fixed;inset:0;z-index:200;background:linear-gradient(160deg,#0a1a0f 0%,#0d2010 60%,#0a1a0f 100%);overflow-y:auto;padding:24px 16px 48px;}
+.comp-inner{max-width:420px;margin:0 auto;display:flex;flex-direction:column;align-items:center;}
+.comp-icon{font-size:64px;margin-bottom:8px;}
+.comp-title{font-size:26px;font-weight:900;color:var(--ok);letter-spacing:0.06em;text-align:center;margin-bottom:4px;}
+.comp-detail{font-size:13px;color:var(--text-dim);margin-bottom:16px;text-align:center;}
+.comp-summary{width:100%;background:rgba(0,200,83,0.07);border:1px solid rgba(0,200,83,0.25);border-radius:12px;padding:16px;margin-bottom:16px;}
+.cs-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:14px;}
+.cs-row:last-child{border-bottom:none;}
+.cs-label{color:var(--text-dim);}
+.cs-val{font-weight:700;color:var(--text);}
+.cs-val.ok{color:var(--ok);}
+.cs-val.warn{color:var(--warn);}
+.cs-val.danger{color:var(--danger);}
+.cs-missing{margin-top:8px;padding:8px 10px;background:rgba(229,57,53,0.1);border:1px solid rgba(229,57,53,0.3);border-radius:8px;font-size:12px;color:var(--danger);}
+.cs-extra{margin-top:6px;padding:8px 10px;background:rgba(255,143,0,0.1);border:1px solid rgba(255,143,0,0.3);border-radius:8px;font-size:12px;color:var(--warn);}
+/* Firebase送信ステータス */
+.fb-status-wrap{width:100%;margin-bottom:16px;}
+.fb-status{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:600;background:rgba(255,255,255,0.05);border:1px solid var(--border);}
+.fb-status.sending{border-color:var(--accent);background:rgba(232,160,0,0.07);}
+.fb-status.success{border-color:var(--ok);background:rgba(0,200,83,0.08);color:var(--ok);}
+.fb-status.failed{border-color:var(--danger);background:rgba(229,57,53,0.08);color:var(--danger);}
+.fb-status.unsent{border-color:var(--warn);background:rgba(255,143,0,0.08);color:var(--warn);}
+.fb-status-icon{font-size:18px;}
+/* 共有 */
+.share-section{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:8px;}
+.share-title{font-size:13px;font-weight:700;color:var(--accent);margin-bottom:12px;letter-spacing:0.06em;}
+.share-btns{display:flex;flex-direction:column;gap:8px;}
+.share-btn{display:flex;align-items:center;gap:10px;width:100%;padding:12px 16px;background:var(--steel-light);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;font-weight:700;cursor:pointer;transition:background 0.2s;}
+.share-btn:hover,.share-btn:active{background:var(--steel-mid);}
+.share-btn-icon{font-size:18px;}
+.result-qr-wrap{margin-top:14px;text-align:center;}
+.result-qr-label{font-size:12px;color:var(--text-dim);margin-bottom:10px;}
+.result-qr-note{font-size:11px;color:var(--text-dim);margin-top:8px;}
+#result-qr-box{display:flex;justify-content:center;}
+#result-qr-box img{border-radius:8px;}
+.btn-end-bin{width:100%;padding:12px;background:transparent;border:1px solid var(--danger);color:var(--danger);font-size:13px;font-weight:700;border-radius:8px;cursor:pointer;}
+.btn-new-scan{width:100%;padding:14px;background:var(--ok);color:#000;font-size:15px;font-weight:800;border:none;border-radius:8px;cursor:pointer;}
 .btn-secondary{flex:1;padding:12px;background:var(--steel-light);border:1px solid var(--border);color:var(--text);font-size:13px;font-weight:700;border-radius:8px;cursor:pointer;transition:background 0.2s;}
 .btn-secondary:hover{background:var(--steel-mid);} .btn-secondary:disabled{opacity:0.4;cursor:not-allowed;}
 .btn-ok{flex:1;padding:12px;background:var(--ok);color:white;font-size:13px;font-weight:700;border:none;border-radius:8px;cursor:pointer;transition:opacity 0.2s;}
@@ -382,8 +420,50 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
   <button class="btn-back-scan" onclick="backToScan()">確認した → スキャン画面に戻る</button>
 </div>
 <div id="screen-complete" style="display:none">
-  <div><div class="comp-icon">✅</div><div class="comp-title" id="comp-title">出荷OK</div><div class="comp-detail" id="comp-detail"></div>
-  <button class="btn-new-scan" onclick="backToScan()">スキャン画面に戻る</button></div>
+  <div class="comp-inner">
+    <div class="comp-icon">✅</div>
+    <div class="comp-title" id="comp-title">出荷OK</div>
+    <div class="comp-detail" id="comp-detail"></div>
+
+    <!-- 積込サマリー -->
+    <div class="comp-summary" id="comp-summary"></div>
+
+    <!-- Firebase送信ステータス -->
+    <div class="fb-status-wrap" id="fb-status-wrap">
+      <div class="fb-status" id="fb-status">
+        <span class="fb-status-icon" id="fb-status-icon">⏳</span>
+        <span class="fb-status-text" id="fb-status-text">Firebaseへ送信中...</span>
+      </div>
+    </div>
+
+    <!-- 共有エリア -->
+    <div class="share-section">
+      <div class="share-title">📤 結果を共有</div>
+      <div class="share-btns">
+        <button class="share-btn" id="btn-share-line" onclick="shareToLine()">
+          <span class="share-btn-icon">💬</span>LINEで共有
+        </button>
+        <button class="share-btn" id="btn-share-copy" onclick="copyShareText()">
+          <span class="share-btn-icon">📋</span>テキストコピー
+        </button>
+        <button class="share-btn" id="btn-show-result-qr" onclick="toggleResultQR()">
+          <span class="share-btn-icon">📷</span>完了QR表示
+        </button>
+      </div>
+
+      <!-- 完了QR -->
+      <div class="result-qr-wrap" id="result-qr-wrap" style="display:none">
+        <div class="result-qr-label">事務所でこのQRを読み取ると内容確認できます</div>
+        <div id="result-qr-box"></div>
+        <div class="result-qr-note" id="result-qr-note"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px">
+      <button class="btn-new-scan" onclick="backToScan()">スキャン画面に戻る</button>
+      <button class="btn-end-bin" onclick="endBin()">🗑️ この便を終了する</button>
+    </div>
+  </div>
 </div>
 <div class="modal-overlay" id="modal">
   <div class="modal-box"><div class="modal-icon" id="modal-icon"></div><div class="modal-title" id="modal-title"></div><div class="modal-msg" id="modal-msg"></div><div class="modal-btns" id="modal-btns"></div></div>
@@ -461,7 +541,7 @@ async function loadLicense(companyId){
 }
 function useLicenseCache(companyId){try{const c=JSON.parse(localStorage.getItem(LS_LICENSE));if(c){appState.companyId=c.companyId;appState.companyName=c.companyName||'（オフライン）';}}catch(e){appState.companyName='（オフライン）';}}
 
-function initApp(){loadAppState();document.getElementById('top-company').textContent=appState.companyName;document.getElementById('bin-date').value=todayStr();checkExpiry();renderAll();}
+function initApp(){loadAppState();document.getElementById('top-company').textContent=appState.companyName;document.getElementById('bin-date').value=todayStr();checkExpiry();renderAll();setTimeout(retrySendUnsent,3000);}
 function checkExpiry(){if(!appState.binDate)return;appState.expired=appState.binDate<todayStr();saveAppState();}
 
 function switchTab(name){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));document.getElementById('tabBtn-'+name).classList.add('active');document.getElementById('tab-'+name).classList.add('active');if(name==='scan'){renderScanTab();startCamera();}else{stopCamera();if(name==='office')renderOfficeTab();if(name==='qr')renderQRTab();}}
@@ -621,7 +701,206 @@ document.getElementById('btn-complete').addEventListener('click',checkComplete);
 function checkComplete(){const scannedIds=new Set(appState.scanned.map(s=>s.id4));const missing=appState.parts.filter(p=>!scannedIds.has(p.id4));if(missing.length>0)showAlarm(missing);else{appState.completed=true;saveAppState();showCompleteScreen();}}
 function showAlarm(missing){playBeep('alarm');vibrate([500,200,500,200,500]);const list=document.getElementById('alarm-list');list.innerHTML=missing.map(p=>`<div class="alarm-item">▶ ${p.id4} — ${p.goban}${p.desc?' '+p.desc:''}</div>`).join('');document.getElementById('screen-alarm').style.display='block';}
 function backToScan(){document.getElementById('screen-alarm').style.display='none';document.getElementById('screen-complete').style.display='none';}
-function showCompleteScreen(){stopCamera();document.getElementById('comp-title').textContent=`出荷OK　全${appState.parts.length}点 積込完了`;document.getElementById('comp-detail').textContent=`${appState.binDate} ${appState.binLabel}`;document.getElementById('screen-complete').style.display='flex';playBeep('complete');vibrate([200,100,200,100,500]);}
+
+function buildCompletionData(){
+  const scannedIds=new Set(appState.scanned.map(s=>s.id4));
+  const missing=appState.parts.filter(p=>!scannedIds.has(p.id4));
+  // extraは管理QR外の部材（今回は想定外スキャンはないので空）
+  return {
+    binId:appState.binId,
+    binDate:appState.binDate,
+    binLabel:appState.binLabel,
+    companyName:appState.companyName,
+    total:appState.parts.length,
+    scannedCount:appState.scanned.length,
+    missingCount:missing.length,
+    missingItems:missing.map(p=>({id4:p.id4,goban:p.goban,desc:p.desc||''})),
+    scannedAt:new Date().toISOString(),
+    deviceId:getDeviceId()
+  };
+}
+
+function renderCompleteSummary(data){
+  const el=document.getElementById('comp-summary');
+  const allOk=data.missingCount===0;
+  let html=`
+    <div class="cs-row"><span class="cs-label">出荷日・便名</span><span class="cs-val">${data.binDate} ${data.binLabel}</span></div>
+    <div class="cs-row"><span class="cs-label">予定点数</span><span class="cs-val">${data.total} 点</span></div>
+    <div class="cs-row"><span class="cs-label">積込済み</span><span class="cs-val ok">${data.scannedCount} 点</span></div>
+    <div class="cs-row"><span class="cs-label">積み残し</span><span class="cs-val ${data.missingCount>0?'danger':'ok'}">${data.missingCount} 点</span></div>
+  `;
+  if(data.missingCount>0){
+    html+=`<div class="cs-missing">⚠️ 積み残し：${data.missingItems.map(m=>m.id4+' '+m.goban).join('、')}</div>`;
+  }
+  el.innerHTML=html;
+}
+
+async function sendToFirebase(data){
+  setFbStatus('sending','⏳','Firebaseへ送信中...');
+  try{
+    const db=window._firebaseDb,fns=window._firebaseFns;
+    if(!db||!fns){setFbStatus('unsent','📵','オフライン — 未送信として保存');saveUnsent(data);return;}
+    const docId=data.binId+'_'+data.deviceId;
+    await fns.setDoc(fns.doc(db,'completions',docId),data);
+    setFbStatus('success','✅','送信完了 — 事務所で確認できます');
+    // 未送信リストから削除
+    removeUnsent(data.binId);
+  }catch(e){
+    setFbStatus('failed','❌','送信失敗 — 未送信として保存');
+    saveUnsent(data);
+  }
+}
+
+function setFbStatus(type,icon,text){
+  const wrap=document.getElementById('fb-status');
+  wrap.className='fb-status '+type;
+  document.getElementById('fb-status-icon').textContent=icon;
+  document.getElementById('fb-status-text').textContent=text;
+}
+
+const LS_UNSENT='tsumitaro_unsent_v1';
+function saveUnsent(data){
+  try{
+    const list=JSON.parse(localStorage.getItem(LS_UNSENT)||'[]');
+    const idx=list.findIndex(d=>d.binId===data.binId);
+    if(idx>=0)list[idx]=data; else list.push(data);
+    localStorage.setItem(LS_UNSENT,JSON.stringify(list));
+  }catch(e){}
+}
+function removeUnsent(binId){
+  try{
+    const list=JSON.parse(localStorage.getItem(LS_UNSENT)||'[]').filter(d=>d.binId!==binId);
+    localStorage.setItem(LS_UNSENT,JSON.stringify(list));
+  }catch(e){}
+}
+
+// 未送信データを再送（アプリ起動時などに呼ぶ）
+async function retrySendUnsent(){
+  try{
+    const list=JSON.parse(localStorage.getItem(LS_UNSENT)||'[]');
+    if(list.length===0)return;
+    const db=window._firebaseDb,fns=window._firebaseFns;
+    if(!db||!fns)return;
+    for(const data of list){
+      try{
+        const docId=data.binId+'_'+data.deviceId;
+        await fns.setDoc(fns.doc(db,'completions',docId),data);
+        removeUnsent(data.binId);
+        console.log('未送信データ再送成功:',data.binId);
+      }catch(e){}
+    }
+  }catch(e){}
+}
+
+function buildShareText(data){
+  const ok=data.missingCount===0;
+  let txt=`【積込完了報告】${data.companyName}\n`;
+  txt+=`${data.binDate} ${data.binLabel}\n`;
+  txt+=`━━━━━━━━━━━\n`;
+  txt+=`予定点数：${data.total}点\n`;
+  txt+=`積込済み：${data.scannedCount}点\n`;
+  txt+=`積み残し：${data.missingCount}点\n`;
+  if(data.missingCount>0){
+    txt+=`\n⚠️ 積み残し部材\n`;
+    data.missingItems.forEach(m=>{txt+=`  ${m.id4} ${m.goban}\n`;});
+  }else{
+    txt+=`\n✅ 全点積込完了\n`;
+  }
+  txt+=`━━━━━━━━━━━\n`;
+  txt+=`完了時刻：${new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})}`;
+  return txt;
+}
+
+let _currentCompletionData=null;
+
+function shareToLine(){
+  if(!_currentCompletionData)return;
+  const text=buildShareText(_currentCompletionData);
+  const url='https://line.me/R/msg/text/?'+encodeURIComponent(text);
+  window.open(url,'_blank');
+}
+
+function copyShareText(){
+  if(!_currentCompletionData)return;
+  const text=buildShareText(_currentCompletionData);
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(()=>{
+      const btn=document.getElementById('btn-share-copy');
+      const orig=btn.innerHTML;
+      btn.innerHTML='<span class="share-btn-icon">✅</span>コピー完了！';
+      setTimeout(()=>{btn.innerHTML=orig;},2000);
+    });
+  }else{
+    const ta=document.createElement('textarea');
+    ta.value=text;document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);
+  }
+}
+
+let resultQrShown=false;
+function toggleResultQR(){
+  const wrap=document.getElementById('result-qr-wrap');
+  resultQrShown=!resultQrShown;
+  wrap.style.display=resultQrShown?'block':'none';
+  const btn=document.getElementById('btn-show-result-qr');
+  btn.innerHTML=resultQrShown
+    ?'<span class="share-btn-icon">🔼</span>完了QRを閉じる'
+    :'<span class="share-btn-icon">📷</span>完了QR表示';
+  if(resultQrShown&&_currentCompletionData)renderResultQR(_currentCompletionData);
+}
+
+function renderResultQR(data){
+  const box=document.getElementById('result-qr-box');
+  box.innerHTML='';
+  // QRに含めるデータを軽量化
+  const qrPayload={
+    t:'COMP',
+    bid:data.binId,
+    dt:data.binDate,
+    lb:data.binLabel,
+    ok:data.scannedCount,
+    ng:data.missingCount,
+    miss:data.missingItems.map(m=>m.id4)
+  };
+  const jsonStr=JSON.stringify(qrPayload);
+  const byteLen=new TextEncoder().encode(jsonStr).length;
+  const img=document.createElement('img');
+  img.style.cssText='width:200px;height:200px;border-radius:8px;background:white;';
+  img.alt='完了QR';
+  img.src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&ecc=M&data='+encodeURIComponent(jsonStr);
+  img.onerror=()=>{box.innerHTML='<div style="color:var(--danger);font-size:12px">QR生成失敗（データが多すぎます）</div>';};
+  box.appendChild(img);
+  document.getElementById('result-qr-note').textContent=`データサイズ：${byteLen}バイト`;
+}
+
+function showCompleteScreen(){
+  stopCamera();
+  const data=buildCompletionData();
+  _currentCompletionData=data;
+  appState.completed=true;
+  saveAppState();
+
+  const allOk=data.missingCount===0;
+  document.getElementById('comp-title').textContent=allOk
+    ?`出荷OK　全${data.total}点 積込完了`
+    :`積込完了（積み残し ${data.missingCount}点）`;
+  document.getElementById('comp-detail').textContent=`${data.binDate} ${data.binLabel}`;
+
+  renderCompleteSummary(data);
+
+  // QRリセット
+  resultQrShown=false;
+  document.getElementById('result-qr-wrap').style.display='none';
+  document.getElementById('btn-show-result-qr').innerHTML='<span class="share-btn-icon">📷</span>完了QR表示';
+
+  document.getElementById('screen-complete').style.display='block';
+  playBeep('complete');
+  vibrate([200,100,200,100,500]);
+
+  // Firebase送信（非同期・失敗しても画面は出る）
+  sendToFirebase(data);
+}
+
 function endBin(){showModal('🗑️','この便を終了する','スキャンデータを削除します。よろしいですか？',[{label:'キャンセル',cls:'mbtn-cancel',fn:closeModal},{label:'削除して終了',cls:'mbtn-ok',fn:()=>{closeModal();Object.assign(appState,{scanned:[],completed:false,managementQrLoaded:false});saveAppState();document.getElementById('screen-complete').style.display='none';renderAll();}}]);}
 
 // 緊急開始
