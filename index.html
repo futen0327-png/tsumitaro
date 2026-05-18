@@ -568,7 +568,7 @@ function openIDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME
 
 function getDeviceId(){let id=localStorage.getItem(LS_DEVICE);if(!id){id='dev_'+Math.random().toString(36).slice(2,9);localStorage.setItem(LS_DEVICE,id);}return id;}
 
-let appState={companyId:'',companyName:'',binId:'',binDate:'',binName:'',binLabel:'',parts:[],locked:false,scanned:[],completed:false,expired:false,managementQrLoaded:false};
+let appState={companyId:'',companyName:'',binId:'',binDate:'',binName:'',binLabel:'',parts:[],locked:false,scanned:[],completed:false,expired:false,managementQrLoaded:false,firebaseSent:false,shared:false};
 
 function saveAppState(){localStorage.setItem(LS_STATE,JSON.stringify(appState));}
 function loadAppState(){try{const s=JSON.parse(localStorage.getItem(LS_STATE));if(s)Object.assign(appState,s);}catch(e){}}
@@ -790,7 +790,25 @@ document.getElementById('btn-import').addEventListener('click',()=>{const gc=doc
 
 // リスト確定・リセット
 document.getElementById('btn-confirm-list').addEventListener('click',()=>{if(appState.parts.length===0||appState.locked)return;const date=document.getElementById('bin-date').value,sel=document.getElementById('bin-name'),name=sel.value,label=sel.options[sel.selectedIndex].text;if(!date){showModal('⚠️','入力エラー','出荷日を選択してください。',[{label:'OK',cls:'mbtn-single',fn:closeModal}]);return;}showModal('✅','リストを確定しますか？',`${date} ${label}<br>部材数：<span class="highlight">${appState.parts.length}件</span><br><br>確定後は変更できません。`,[{label:'キャンセル',cls:'mbtn-cancel',fn:closeModal},{label:'確定する',cls:'mbtn-ok',fn:()=>{closeModal();appState.binId=makeBinId(date,name);appState.binDate=date;appState.binName=name;appState.binLabel=label;appState.locked=true;appState.scanned=[];appState.completed=false;appState.expired=date<todayStr();appState.managementQrLoaded=false;saveAppState();renderAll();switchTab('qr');}}]);});
-document.getElementById('btn-reset-list').addEventListener('click',()=>{showModal('🗑️','リストをリセット','全データを削除します。よろしいですか？',[{label:'キャンセル',cls:'mbtn-cancel',fn:closeModal},{label:'リセット',cls:'mbtn-ok',fn:()=>{closeModal();Object.assign(appState,{parts:[],locked:false,scanned:[],binId:'',binDate:'',binName:'',binLabel:'',completed:false,managementQrLoaded:false});saveAppState();renderAll();}}]);});
+document.getElementById('btn-reset-list').addEventListener('click',()=>{
+  const doReset=()=>{
+    closeModal();
+    Object.assign(appState,{parts:[],locked:false,scanned:[],binId:'',binDate:'',binName:'',binLabel:'',completed:false,managementQrLoaded:false,firebaseSent:false,shared:false});
+    saveAppState();renderAll();
+  };
+  // 完了済みで未共有の場合は警告
+  if(appState.completed&&!appState.shared){
+    showModal('⚠️','未共有のデータがあります',
+      `この便の結果がまだ共有されていません。<br><br>リセットすると結果確認できなくなります。`,
+      [{label:'キャンセル',cls:'mbtn-cancel',fn:closeModal},
+       {label:'完了QRを表示',cls:'mbtn-ok',fn:()=>{closeModal();switchTab('scan');setTimeout(()=>{document.getElementById('screen-complete').style.display='block';toggleResultQR();},100);}},
+       {label:'それでもリセット',cls:'mbtn-ok',fn:doReset}]);
+  }else{
+    showModal('🗑️','リストをリセット','全データを削除します。よろしいですか？',
+      [{label:'キャンセル',cls:'mbtn-cancel',fn:closeModal},
+       {label:'リセット',cls:'mbtn-ok',fn:doReset}]);
+  }
+});
 
 // 印刷
 document.getElementById('btn-print-qr').addEventListener('click',()=>{const pg=document.getElementById('print-qr-grid');pg.innerHTML='';document.getElementById('print-title').textContent=`${appState.binDate} ${appState.binLabel} — 積込QR札 (便ID: ${appState.binId})`;appState.parts.forEach(p=>{const qd=`P:${appState.binId}:${p.id4}`;const card=document.createElement('div');card.className='qr-card';const qrId='print_'+p.id4;card.innerHTML=`<div class="qc-id">ID:${p.id4}</div><div class="qc-goban">${p.goban}</div><div id="${qrId}"></div><div class="qc-bottom">${appState.binDate} ${appState.binLabel}<br>${appState.companyName}</div>`;pg.appendChild(card);setTimeout(()=>{new QRCode(document.getElementById(qrId),{text:qd,width:128,height:128,correctLevel:QRCode.CorrectLevel.H});},50);});setTimeout(()=>window.print(),400);});
@@ -891,7 +909,49 @@ function processQR(data){
   // 全く関係ないQR（URLなど）は静かに無視
 }
 
-function handleMgmtQR(mgmt){if(!appState.locked||mgmt.shipmentId!==appState.binId){showModal('📋','管理QR読込',`${mgmt.date} ${mgmt.label}<br>部材数：<span class="highlight">${mgmt.ids.length}件</span><br><br>このリストを読み込みますか？`,[{label:'キャンセル',cls:'mbtn-cancel',fn:closeModal},{label:'読み込む',cls:'mbtn-ok',fn:()=>{closeModal();appState.binId=mgmt.shipmentId;appState.binDate=mgmt.date;appState.binLabel=mgmt.label;appState.binName=mgmt.label;appState.companyName=mgmt.company||appState.companyName;appState.parts=mgmt.ids.map(([id4,goban])=>({id4,goban,desc:'',bin:'',bundle:''}));appState.locked=true;appState.scanned=[];appState.managementQrLoaded=true;saveAppState();renderAll();showScanResult('ok','✅','管理QR読込完了',`${mgmt.ids.length}件のリストをセットしました`);playBeep('ok');flash('ok');}}]);return;}appState.managementQrLoaded=true;saveAppState();renderScanTab();showScanResult('ok','✅','管理QR読込済',`${appState.parts.length}件のリスト確認OK`);playBeep('ok');flash('ok');}
+function handleMgmtQR(mgmt){
+  // 同じ便の管理QR再読込
+  if(appState.locked&&mgmt.shipmentId===appState.binId){
+    appState.managementQrLoaded=true;saveAppState();renderScanTab();
+    showScanResult('ok','✅','管理QR読込済',`${appState.parts.length}件のリスト確認OK`);
+    playBeep('ok');flash('ok');return;
+  }
+
+  // 新しい便の管理QR → 便切替処理
+  const doLoadNewBin=()=>{
+    appState.binId=mgmt.shipmentId;appState.binDate=mgmt.date;appState.binLabel=mgmt.label;
+    appState.binName=mgmt.label;appState.companyName=mgmt.company||appState.companyName;
+    appState.parts=mgmt.ids.map(([id4,goban])=>({id4,goban,desc:'',bin:'',bundle:''}));
+    appState.locked=true;appState.scanned=[];appState.completed=false;
+    appState.managementQrLoaded=true;appState.firebaseSent=false;appState.shared=false;
+    saveAppState();renderAll();
+    showScanResult('ok','✅','管理QR読込完了',`${mgmt.ids.length}件のリストをセットしました`);
+    playBeep('ok');flash('ok');
+  };
+
+  // 既存データがある場合は共有チェック
+  if(appState.locked&&appState.parts.length>0){
+    if(appState.shared){
+      // 共有済み → 自動リセットして新便へ
+      showModal('✅','前便データをリセット',
+        `共有済みのため、前便データをリセットして次便を開始します。<br><br>${mgmt.date} ${mgmt.label}（${mgmt.ids.length}件）を読み込みます。`,
+        [{label:'OK',cls:'mbtn-single',fn:()=>{closeModal();doLoadNewBin();}}]);
+    }else{
+      // 未共有 → 確認を求める
+      showModal('⚠️','前便が未共有です',
+        `前便（${appState.binDate} ${appState.binLabel}）の結果がまだ共有されていません。<br><br>データを消去して次便を開始しますか？`,
+        [{label:'いいえ',cls:'mbtn-cancel',fn:closeModal},
+         {label:'はい・消去して開始',cls:'mbtn-ok',fn:()=>{closeModal();doLoadNewBin();}}]);
+    }
+    return;
+  }
+
+  // 既存データなし → そのまま読込確認
+  showModal('📋','管理QR読込',
+    `${mgmt.date} ${mgmt.label}<br>部材数：<span class="highlight">${mgmt.ids.length}件</span><br><br>このリストを読み込みますか？`,
+    [{label:'キャンセル',cls:'mbtn-cancel',fn:closeModal},
+     {label:'読み込む',cls:'mbtn-ok',fn:()=>{closeModal();doLoadNewBin();}}]);
+}
 
 function registerById(id4,source){const norm=normalize4(id4);const part=appState.parts.find(p=>p.id4===norm);if(!part){showScanResult('err','⚠️',norm,'このIDは本日対象外です');playBeep('warn');flash('warn');vibrate([200,100,200]);return;}const alreadyDone=appState.scanned.some(s=>s.id4===norm);if(alreadyDone){showScanResult('dup','🔁',norm,`${part.goban} — 読込済み`);playBeep('dup');flash('dup');return;}const now=new Date(),timeStr=now.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit',second:'2-digit'});appState.scanned.push({id4:norm,goban:part.goban,time:timeStr});saveAppState();showScanResult('ok','✓',norm,`${part.goban} 読込OK`);playBeep('ok');flash('ok');vibrate([80]);renderScanTab();if(appState.scanned.length===appState.parts.length)setTimeout(()=>playBeep('complete'),200);}
 function tapRegister(id4){const part=appState.parts.find(p=>p.id4===normalize4(id4));if(!part)return;showModal('📋','登録確認',`<span style="font-size:20px;font-weight:900;color:var(--accent-bright)">${part.id4}</span><br><span style="font-size:16px;font-weight:700">${part.goban}</span><br><br>この部材を登録しますか？`,[{label:'いいえ',cls:'mbtn-cancel',fn:closeModal},{label:'はい',cls:'mbtn-ok',fn:()=>{closeModal();registerById(id4,'tap');}}]);}
@@ -1019,7 +1079,9 @@ async function sendToFirebase(data){
     const docId=data.binId+'_'+data.deviceId;
     await fns.setDoc(fns.doc(db,'completions',docId),data);
     setFbStatus('success','✅','送信完了 — 事務所で確認できます');
-    // 未送信リストから削除
+    appState.firebaseSent=true;
+    appState.shared=true;
+    saveAppState();
     removeUnsent(data.binId);
   }catch(e){
     setFbStatus('failed','❌','送信失敗 — 未送信として保存');
@@ -1094,6 +1156,7 @@ function shareToLine(){
   const text=buildShareText(_currentCompletionData);
   const url='https://line.me/R/msg/text/?'+encodeURIComponent(text);
   window.open(url,'_blank');
+  appState.shared=true;saveAppState();
 }
 
 function copyShareText(){
@@ -1105,11 +1168,13 @@ function copyShareText(){
       const orig=btn.innerHTML;
       btn.innerHTML='<span class="share-btn-icon">✅</span>コピー完了！';
       setTimeout(()=>{btn.innerHTML=orig;},2000);
+      appState.shared=true;saveAppState();
     });
   }else{
     const ta=document.createElement('textarea');
     ta.value=text;document.body.appendChild(ta);ta.select();
     document.execCommand('copy');document.body.removeChild(ta);
+    appState.shared=true;saveAppState();
   }
 }
 
@@ -1122,7 +1187,10 @@ function toggleResultQR(){
   btn.innerHTML=resultQrShown
     ?'<span class="share-btn-icon">🔼</span>完了QRを閉じる'
     :'<span class="share-btn-icon">📷</span>完了QR表示';
-  if(resultQrShown&&_currentCompletionData)renderResultQR(_currentCompletionData);
+  if(resultQrShown&&_currentCompletionData){
+    renderResultQR(_currentCompletionData);
+    appState.shared=true;saveAppState();
+  }
 }
 
 function renderResultQR(data){
