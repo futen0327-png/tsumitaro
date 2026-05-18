@@ -107,6 +107,30 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 .pi-bin{font-size:11px;color:var(--text-dim);}
 .empty-state{text-align:center;padding:32px 16px;color:var(--text-dim);font-size:13px;}
 .btn-row{display:flex;gap:10px;margin-bottom:14px;}
+/* ===== 結果確認タブ ===== */
+.result-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;}
+.result-card.all-ok{border-color:rgba(0,200,83,0.4);}
+.result-card.has-missing{border-color:rgba(229,57,53,0.4);}
+.rc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.rc-title{font-size:15px;font-weight:800;color:var(--text);}
+.rc-time{font-size:11px;color:var(--text-dim);margin-top:2px;}
+.rc-badge{padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700;}
+.rc-badge.ok{background:rgba(0,200,83,0.15);color:var(--ok);}
+.rc-badge.ng{background:rgba(229,57,53,0.15);color:var(--danger);}
+.rc-stats{display:flex;gap:12px;margin-bottom:8px;}
+.rc-stat{flex:1;text-align:center;background:var(--steel-light);border-radius:8px;padding:8px 4px;}
+.rc-stat-val{font-size:20px;font-weight:900;}
+.rc-stat-val.ok{color:var(--ok);}
+.rc-stat-val.danger{color:var(--danger);}
+.rc-stat-label{font-size:10px;color:var(--text-dim);margin-top:2px;}
+.rc-missing{background:rgba(229,57,53,0.08);border:1px solid rgba(229,57,53,0.25);border-radius:8px;padding:10px;font-size:12px;color:var(--danger);line-height:1.7;}
+.rc-device{font-size:10px;color:var(--text-dim);margin-top:8px;text-align:right;}
+.unsent-card{background:rgba(255,143,0,0.08);border:1px solid rgba(255,143,0,0.3);border-radius:10px;padding:12px;margin-bottom:8px;font-size:13px;}
+.unsent-card-title{font-weight:700;color:var(--warn);margin-bottom:4px;}
+.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface);}
+.tab-btn{flex:1;padding:10px 2px;background:none;border:none;color:var(--text-dim);font-size:11px;font-weight:700;cursor:pointer;border-bottom:2px solid transparent;transition:color 0.2s;white-space:nowrap;}
+.tab-btn.active{color:var(--accent-bright);border-bottom-color:var(--accent-bright);}
+
 /* ===== 完了画面拡張 ===== */
 #screen-complete{display:none;position:fixed;inset:0;z-index:200;background:linear-gradient(160deg,#0a1a0f 0%,#0d2010 60%,#0a1a0f 100%);overflow-y:auto;padding:24px 16px 48px;}
 .comp-inner{max-width:420px;margin:0 auto;display:flex;flex-direction:column;align-items:center;}
@@ -321,6 +345,7 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
     <button class="tab-btn active" onclick="switchTab('office')" id="tabBtn-office">📋 事務所</button>
     <button class="tab-btn" onclick="switchTab('scan')" id="tabBtn-scan">📱 スキャン</button>
     <button class="tab-btn" onclick="switchTab('qr')" id="tabBtn-qr">🖨️ QR印刷</button>
+    <button class="tab-btn" onclick="switchTab('results')" id="tabBtn-results">📊 結果確認</button>
   </div>
   <div class="tab-pane active" id="tab-office">
     <div class="sec-title">便設定</div>
@@ -353,6 +378,27 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
     <div class="btn-row" id="action-bar" style="display:none">
       <button class="btn-ok" id="btn-confirm-list">✅ リスト確定・QR生成</button>
       <button class="btn-danger-outline" id="btn-reset-list">リセット</button>
+    </div>
+  </div>
+  </div>
+  <!-- 結果確認タブ -->
+  <div class="tab-pane" id="tab-results">
+    <div class="results-header">
+      <div class="sec-title">📊 積込結果確認</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+        <input type="date" id="results-filter-date" style="flex:1;padding:8px;background:var(--steel-light);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px">
+        <button class="btn-secondary" id="btn-results-reload" onclick="loadResults()" style="flex:none;padding:8px 14px;font-size:13px">🔄 更新</button>
+      </div>
+    </div>
+    <div id="results-loading" style="display:none;text-align:center;padding:24px;color:var(--text-dim);font-size:13px">読込中...</div>
+    <div id="results-empty" style="display:none"><div class="empty-state">この日の結果データはありません</div></div>
+    <div id="results-list"></div>
+
+    <!-- 未送信データ表示 -->
+    <div id="unsent-section" style="margin-top:20px;display:none">
+      <div class="sec-title" style="color:var(--warn)">⚠️ 未送信データ</div>
+      <div id="unsent-list"></div>
+      <button class="btn-secondary" onclick="retryAllUnsent()" style="width:100%;margin-top:8px;padding:10px">🔁 未送信データを再送する</button>
     </div>
   </div>
   <div class="tab-pane" id="tab-scan">
@@ -546,7 +592,135 @@ function useLicenseCache(companyId){try{const c=JSON.parse(localStorage.getItem(
 function initApp(){loadAppState();document.getElementById('top-company').textContent=appState.companyName;document.getElementById('bin-date').value=todayStr();checkExpiry();renderAll();setTimeout(retrySendUnsent,3000);}
 function checkExpiry(){if(!appState.binDate)return;appState.expired=appState.binDate<todayStr();saveAppState();}
 
-function switchTab(name){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));document.getElementById('tabBtn-'+name).classList.add('active');document.getElementById('tab-'+name).classList.add('active');if(name==='scan'){renderScanTab();startCamera();}else{stopCamera();if(name==='office')renderOfficeTab();if(name==='qr')renderQRTab();}}
+function switchTab(name){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tabBtn-'+name).classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='scan'){renderScanTab();startCamera();}
+  else{stopCamera();if(name==='office')renderOfficeTab();if(name==='qr')renderQRTab();if(name==='results')initResultsTab();}
+}
+
+// ===== 結果確認タブ =====
+function initResultsTab(){
+  // 日付フィルタを今日に初期化
+  const dateEl=document.getElementById('results-filter-date');
+  if(!dateEl.value)dateEl.value=todayStr();
+  loadResults();
+  renderUnsentSection();
+}
+
+async function loadResults(){
+  const dateEl=document.getElementById('results-filter-date');
+  const filterDate=dateEl.value||todayStr();
+  const listEl=document.getElementById('results-list');
+  const loadingEl=document.getElementById('results-loading');
+  const emptyEl=document.getElementById('results-empty');
+
+  listEl.innerHTML='';
+  emptyEl.style.display='none';
+  loadingEl.style.display='block';
+
+  try{
+    const db=window._firebaseDb,fns=window._firebaseFns;
+    if(!db||!fns){loadingEl.style.display='none';listEl.innerHTML='<div class="empty-state">オフラインのため取得できません</div>';return;}
+
+    // companyIdで絞り込み、日付フィルタ
+    const {collection,query,where,getDocs,orderBy}=await importFirestoreExtra();
+    const q=query(
+      collection(db,'completions'),
+      where('companyId','==',appState.companyId),
+      where('binDate','==',filterDate),
+      orderBy('scannedAt','desc')
+    );
+    const snap=await getDocs(q);
+    loadingEl.style.display='none';
+
+    if(snap.empty){emptyEl.style.display='block';return;}
+
+    snap.forEach(doc=>{
+      listEl.appendChild(buildResultCard(doc.data()));
+    });
+  }catch(e){
+    loadingEl.style.display='none';
+    // インデックスエラーの場合はシンプル取得にフォールバック
+    await loadResultsFallback(filterDate,listEl,emptyEl);
+  }
+}
+
+async function importFirestoreExtra(){
+  const mod=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+  return mod;
+}
+
+async function loadResultsFallback(filterDate,listEl,emptyEl){
+  try{
+    const {collection,getDocs}=await importFirestoreExtra();
+    const db=window._firebaseDb;
+    const snap=await getDocs(collection(db,'completions'));
+    const docs=[];
+    snap.forEach(doc=>{
+      const d=doc.data();
+      if(d.companyId===appState.companyId&&d.binDate===filterDate)docs.push(d);
+    });
+    docs.sort((a,b)=>b.scannedAt.localeCompare(a.scannedAt));
+    if(docs.length===0){emptyEl.style.display='block';return;}
+    docs.forEach(d=>listEl.appendChild(buildResultCard(d)));
+  }catch(e){
+    listEl.innerHTML='<div class="empty-state" style="color:var(--danger)">データ取得エラー。ネット接続を確認してください。</div>';
+  }
+}
+
+function buildResultCard(d){
+  const allOk=d.missingCount===0;
+  const timeStr=d.scannedAt?new Date(d.scannedAt).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}):'--:--';
+  const card=document.createElement('div');
+  card.className='result-card '+(allOk?'all-ok':'has-missing');
+  let missingHtml='';
+  if(!allOk&&d.missingItems&&d.missingItems.length>0){
+    missingHtml=`<div class="rc-missing">⚠️ 積み残し：${d.missingItems.map(m=>m.id4+' '+m.goban).join('、')}</div>`;
+  }
+  card.innerHTML=`
+    <div class="rc-header">
+      <div>
+        <div class="rc-title">${d.binDate||''} ${d.binLabel||''}</div>
+        <div class="rc-time">完了時刻：${timeStr}</div>
+      </div>
+      <div class="rc-badge ${allOk?'ok':'ng'}">${allOk?'✅ 全件完了':'⚠️ 積み残しあり'}</div>
+    </div>
+    <div class="rc-stats">
+      <div class="rc-stat"><div class="rc-stat-val">${d.total||0}</div><div class="rc-stat-label">予定</div></div>
+      <div class="rc-stat"><div class="rc-stat-val ok">${d.scannedCount||0}</div><div class="rc-stat-label">積込済み</div></div>
+      <div class="rc-stat"><div class="rc-stat-val ${allOk?'':'danger'}">${d.missingCount||0}</div><div class="rc-stat-label">積み残し</div></div>
+    </div>
+    ${missingHtml}
+    <div class="rc-device">端末：${(d.deviceId||'').slice(0,12)}...</div>
+  `;
+  return card;
+}
+
+function renderUnsentSection(){
+  try{
+    const list=JSON.parse(localStorage.getItem(LS_UNSENT)||'[]');
+    const sec=document.getElementById('unsent-section');
+    const ul=document.getElementById('unsent-list');
+    if(list.length===0){sec.style.display='none';return;}
+    sec.style.display='block';
+    ul.innerHTML=list.map(d=>`
+      <div class="unsent-card">
+        <div class="unsent-card-title">📵 ${d.binDate} ${d.binLabel}</div>
+        <div>積込済み ${d.scannedCount}点 / 予定 ${d.total}点　積み残し ${d.missingCount}点</div>
+      </div>
+    `).join('');
+  }catch(e){}
+}
+
+async function retryAllUnsent(){
+  await retrySendUnsent();
+  renderUnsentSection();
+  await loadResults();
+  showModal('🔁','再送完了','未送信データの再送を試みました。',[{label:'OK',cls:'mbtn-single',fn:closeModal}]);
+}
 
 function renderAll(){renderTopBar();renderOfficeTab();renderScanTab();renderQRTab();}
 function renderTopBar(){const el=document.getElementById('top-bin-pill');if(!appState.binId){el.innerHTML='<span style="color:var(--text-dim);font-size:11px">便未設定</span>';return;}const s=appState.expired?'<span class="status-exp">⚠️ 期限切れ</span>':'<span class="status-ok">✓ 有効</span>';el.innerHTML=`<strong>${appState.binDate} ${appState.binLabel}</strong>${s}`;}
@@ -713,6 +887,7 @@ function buildCompletionData(){
   const missing=appState.parts.filter(p=>!scannedIds.has(p.id4));
   // extraは管理QR外の部材（今回は想定外スキャンはないので空）
   return {
+    companyId:appState.companyId,
     binId:appState.binId,
     binDate:appState.binDate,
     binLabel:appState.binLabel,
