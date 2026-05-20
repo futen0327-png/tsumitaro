@@ -124,19 +124,32 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 .upload-icon{font-size:32px;margin-bottom:8px;}
 .upload-text{font-size:13px;color:var(--text-dim);}
 .upload-text strong{color:var(--accent-bright);}
-.col-mapper{display:none;}
-.col-mapper.show{display:block;}
-.mapper-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-.mapper-label{font-size:12px;color:var(--text-dim);width:80px;flex-shrink:0;}
-.mapper-select{flex:1;padding:8px 10px;background:var(--steel-mid);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;outline:none;}
 .parts-list{margin-bottom:14px;}
 .part-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;}
 .pi-id{font-size:18px;font-weight:900;color:var(--accent-bright);width:52px;flex-shrink:0;}
 .pi-info{flex:1;}
 .pi-goban{font-size:15px;font-weight:700;color:var(--text);}
 .pi-desc{font-size:11px;color:var(--text-dim);margin-top:1px;}
-.pi-bin{font-size:11px;color:var(--text-dim);}
 .empty-state{text-align:center;padding:32px 16px;color:var(--text-dim);font-size:13px;}
+/* ===== 事務所タブ新UI ===== */
+.office-steps{display:flex;align-items:center;gap:0;margin-bottom:24px;}
+.office-step{display:flex;flex-direction:column;align-items:center;flex:1;position:relative;}
+.office-step:not(:last-child)::after{content:'';position:absolute;top:16px;left:60%;width:80%;height:2px;background:var(--border);z-index:0;}
+.step-circle{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);background:var(--steel-mid);color:var(--text-dim);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;position:relative;z-index:1;transition:all 0.3s;}
+.step-circle.active{border-color:var(--accent);background:var(--accent);color:#000;}
+.step-circle.done{border-color:var(--ok);background:var(--ok);color:#fff;}
+.step-label{font-size:10px;color:var(--text-dim);margin-top:5px;text-align:center;line-height:1.3;}
+.step-label.active{color:var(--accent-bright);}
+.template-dl-btn{display:flex;align-items:center;gap:8px;width:100%;padding:11px 14px;background:var(--steel-light);border:1px solid var(--border);border-radius:8px;color:var(--text-dim);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;text-decoration:none;margin-bottom:14px;}
+.template-dl-btn:hover{border-color:var(--accent);color:var(--accent);}
+.upload-result{background:var(--surface);border:1px solid var(--ok);border-radius:var(--radius);padding:14px;margin-bottom:14px;}
+.upload-result-title{font-size:13px;font-weight:700;color:var(--ok);margin-bottom:8px;}
+.upload-stats{display:flex;gap:12px;margin-bottom:10px;}
+.upload-stat{flex:1;text-align:center;background:var(--steel-light);border-radius:8px;padding:8px 4px;}
+.upload-stat-val{font-size:22px;font-weight:900;color:var(--accent-bright);}
+.upload-stat-label{font-size:10px;color:var(--text-dim);margin-top:2px;}
+.upload-warn{font-size:11px;color:var(--warn);margin-top:6px;padding:6px 10px;background:rgba(255,143,0,0.08);border-radius:6px;}
+.pi-bundle{font-size:11px;color:var(--text-dim);}
 .btn-row{display:flex;gap:10px;margin-bottom:14px;}
 
 /* ログイン画面 */
@@ -426,36 +439,92 @@ body.mode-admin{--admin-font-scale:1.05;}
     <button class="tab-btn" onclick="switchTab('results')" id="tabBtn-results">📊 結果確認</button>
   </div>
   <div class="tab-pane active" id="tab-office">
-    <div class="sec-title">便設定</div>
-    <div class="card">
-      <div class="form-row">
-        <div class="form-group"><label>出荷日</label><input type="date" id="bin-date"></div>
-        <div class="form-group"><label>便名</label>
-          <select id="bin-name"><option value="AM">午前便</option><option value="PM">午後便</option><option value="EX">臨時便</option></select>
-        </div>
+
+    <!-- ステップ表示 -->
+    <div class="office-steps" id="office-steps">
+      <div class="office-step">
+        <div class="step-circle active" id="step-circle-1">1</div>
+        <div class="step-label active" id="step-label-1">アップロード</div>
+      </div>
+      <div class="office-step">
+        <div class="step-circle" id="step-circle-2">2</div>
+        <div class="step-label" id="step-label-2">内容確認</div>
+      </div>
+      <div class="office-step">
+        <div class="step-circle" id="step-circle-3">3</div>
+        <div class="step-label" id="step-label-3">印刷</div>
       </div>
     </div>
-    <div class="sec-title">Excelアップロード</div>
-    <div id="locked-warn" style="display:none;margin-bottom:14px"><div class="locked-badge">🔒 リスト確定済み — 変更するにはリセットしてください</div></div>
+
+    <!-- STEP1: アップロードエリア -->
     <div id="upload-section">
+      <a class="template-dl-btn" id="btn-template-dl" href="#" onclick="downloadTemplate();return false;">
+        📥 指定テンプレートをダウンロード
+      </a>
       <div class="upload-area" id="upload-area">
         <div class="upload-icon">📂</div>
-        <div class="upload-text"><strong>Excel / CSV をドロップ</strong><br>またはタップして選択<br><span style="font-size:11px;margin-top:4px;display:block">.xlsx .xls .csv 対応</span></div>
+        <div class="upload-text"><strong>Excelファイルをここにドロップ</strong><br>またはタップして選択<br><span style="font-size:11px;margin-top:4px;display:block">.xlsx のみ対応</span></div>
       </div>
-      <input type="file" id="file-input" accept=".xlsx,.xls,.csv" style="display:none">
-      <div class="card col-mapper" id="col-mapper">
-        <div class="sec-title" style="margin-bottom:12px">列の対応付け</div>
-        <div class="mapper-row"><span class="mapper-label">合番列 <span style="color:var(--danger)">*</span></span><select class="mapper-select" id="map-goban"><option value="">-- 選択 --</option></select></div>
-        <div class="mapper-row"><span class="mapper-label">品名列</span><select class="mapper-select" id="map-desc"><option value="">(なし)</option></select></div>
-        <div class="mapper-row"><span class="mapper-label">便名列</span><select class="mapper-select" id="map-bin"><option value="">(なし)</option></select></div>
-        <div class="mapper-row"><span class="mapper-label">束番号列</span><select class="mapper-select" id="map-bundle"><option value="">(なし)</option></select></div>
-        <div style="margin-top:12px"><button class="btn-ok" id="btn-import" style="flex:none;width:100%;padding:12px">取込実行</button></div>
+      <input type="file" id="file-input" accept=".xlsx" style="display:none">
+    </div>
+
+    <!-- STEP2: 読込結果（アップロード後に表示） -->
+    <div id="upload-result-section" style="display:none">
+      <div class="upload-result">
+        <div class="upload-result-title">✅ Excelを読み込みました</div>
+        <div class="upload-stats">
+          <div class="upload-stat">
+            <div class="upload-stat-val" id="stat-count">0</div>
+            <div class="upload-stat-label">読込件数</div>
+          </div>
+          <div class="upload-stat">
+            <div class="upload-stat-val" id="stat-bundle">0</div>
+            <div class="upload-stat-label">束数</div>
+          </div>
+        </div>
+        <div class="upload-warn" id="upload-warn" style="display:none"></div>
+      </div>
+
+      <!-- プレビュー一覧 -->
+      <div class="parts-list" id="parts-list"></div>
+
+      <!-- アクションボタン -->
+      <div class="btn-row">
+        <button class="btn-ok" id="btn-confirm-list" style="flex:2">✅ リスト確定・QR生成</button>
+        <button class="btn-danger-outline" id="btn-reset-list">やり直す</button>
       </div>
     </div>
-    <div class="parts-list" id="parts-list"><div class="empty-state">Excelをアップロードすると部材が表示されます</div></div>
-    <div class="btn-row" id="action-bar" style="display:none">
-      <button class="btn-ok" id="btn-confirm-list">✅ リスト確定・QR生成</button>
-      <button class="btn-danger-outline" id="btn-reset-list">リセット</button>
+
+    <!-- 確定済み表示 -->
+    <div id="locked-section" style="display:none">
+      <div class="locked-badge">🔒 リスト確定済み</div>
+      <div class="parts-list" id="parts-list-locked"></div>
+      <div class="btn-row" style="margin-top:14px">
+        <button class="btn-ok" id="btn-go-print" style="flex:2">🖨️ 印刷タブへ</button>
+        <button class="btn-danger-outline" id="btn-reset-list-locked">リセット</button>
+      </div>
+    </div>
+
+  </div>
+  </div>
+  <!-- 結果確認タブ -->
+  <div class="tab-pane" id="tab-results">
+    <div class="results-header">
+      <div class="sec-title">📊 積込結果確認</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+        <input type="date" id="results-filter-date" style="flex:1;padding:8px;background:var(--steel-light);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px">
+        <button class="btn-secondary" id="btn-results-reload" onclick="loadResults()" style="flex:none;padding:8px 14px;font-size:13px">🔄 更新</button>
+      </div>
+    </div>
+    <div id="results-loading" style="display:none;text-align:center;padding:24px;color:var(--text-dim);font-size:13px">読込中...</div>
+    <div id="results-empty" style="display:none"><div class="empty-state">この日の結果データはありません</div></div>
+    <div id="results-list"></div>
+
+    <!-- 未送信データ表示 -->
+    <div id="unsent-section" style="margin-top:20px;display:none">
+      <div class="sec-title" style="color:var(--warn)">⚠️ 未送信データ</div>
+      <div id="unsent-list"></div>
+      <button class="btn-secondary" onclick="retryAllUnsent()" style="width:100%;margin-top:8px;padding:10px">🔁 未送信データを再送する</button>
     </div>
   </div>
   </div>
