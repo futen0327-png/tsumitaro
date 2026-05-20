@@ -1188,32 +1188,61 @@ function startCamera(){
 
 function _startCameraInner(){
   try{
-    // 毎回新しいインスタンスを生成して誤読取りを防ぐ
     if(zxingReader){try{zxingReader.reset();}catch(e){}zxingReader=null;}
-    zxingReader=new ZXing.BrowserMultiFormatReader();
+
+    // QRコードのみに絞って読取速度を上げる
+    const hints=new Map();
+    hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[ZXing.BarcodeFormat.QR_CODE]);
+    hints.set(ZXing.DecodeHintType.TRY_HARDER,true);
+    zxingReader=new ZXing.BrowserMultiFormatReader(hints);
+
     const v=document.getElementById('cam-video');
-    zxingReader.decodeFromConstraints(
-      {video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}},
-      v,
-      (result,err)=>{
-        if(result&&result.text){
-          const text=result.text.trim();
-          if(!text)return;
-          // 重複・短すぎるデータは無視
-          if(text.length<3)return;
-          if(isRecentDuplicate(text))return;
-          camStream=v.srcObject;
-          document.getElementById('cam-stopped-banner').classList.remove('show');
-          resetIdleTimer();
-          processQR(text);
-        }
+
+    // スマホカメラ向けに制約をシンプルにする
+    const constraints={
+      video:{
+        facingMode:{ideal:'environment'},
+        width:{ideal:1920},
+        height:{ideal:1080}
       }
-    ).then(()=>{
+    };
+
+    zxingReader.decodeFromConstraints(constraints,v,(result,err)=>{
+      if(result&&result.text){
+        const text=result.text.trim();
+        if(!text||text.length<3)return;
+        if(isRecentDuplicate(text))return;
+        camStream=v.srcObject;
+        document.getElementById('cam-stopped-banner').classList.remove('show');
+        resetIdleTimer();
+        processQR(text);
+      }
+    }).then(controls=>{
       camStream=v.srcObject;
       document.getElementById('cam-stopped-banner').classList.remove('show');
       resetIdleTimer();
     }).catch(e=>{
-      showScanResult('err','❌','カメラ起動失敗','カメラへのアクセスを許可してください');
+      // facingMode:environmentが失敗した場合はフロントカメラで再試行
+      zxingReader=new ZXing.BrowserMultiFormatReader(hints);
+      zxingReader.decodeFromConstraints(
+        {video:true},v,
+        (result,err)=>{
+          if(result&&result.text){
+            const text=result.text.trim();
+            if(!text||text.length<3)return;
+            if(isRecentDuplicate(text))return;
+            camStream=v.srcObject;
+            resetIdleTimer();
+            processQR(text);
+          }
+        }
+      ).then(()=>{
+        camStream=v.srcObject;
+        document.getElementById('cam-stopped-banner').classList.remove('show');
+        resetIdleTimer();
+      }).catch(e2=>{
+        showScanResult('err','❌','カメラ起動失敗','カメラへのアクセスを許可してください');
+      });
     });
   }catch(e){
     showScanResult('err','❌','カメラ起動失敗',e.message);
@@ -1227,7 +1256,7 @@ function stopCamera(){
   recentQRs=[];
 }
 function pauseCamera(){stopCamera();document.getElementById('cam-stopped-banner').classList.add('show');}
-function resetIdleTimer(){if(camIdleTimer)clearTimeout(camIdleTimer);camIdleTimer=setTimeout(()=>pauseCamera(),60000);}
+function resetIdleTimer(){if(camIdleTimer)clearTimeout(camIdleTimer);camIdleTimer=setTimeout(()=>pauseCamera(),30000);}
 function scanFrame(){}
 
 function processQR(data){
