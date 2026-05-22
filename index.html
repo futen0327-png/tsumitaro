@@ -565,7 +565,7 @@ body.mode-admin{--admin-font-scale:1.05;}
       <canvas id="cam-canvas" style="display:none"></canvas>
       <div class="cam-stopped-banner" id="cam-stopped-banner">
         <span>カメラ停止中</span>
-        <button class="btn-restart-cam" id="btn-restart-cam">カメラを再開</button>
+        <button class="btn-restart-cam" id="btn-restart-cam" onclick="resumeCamera()">カメラを再開</button>
       </div>
     </div>
     <div class="scan-result idle" id="scan-result"><div class="sr-icon">📷</div><div class="sr-msg">QRコードをカメラに向けてください</div></div>
@@ -1166,7 +1166,7 @@ if(btnGoPrint){btnGoPrint.addEventListener('click',()=>switchTab('qr'));}
 document.getElementById('btn-print-qr').addEventListener('click',()=>{const pg=document.getElementById('print-qr-grid');pg.innerHTML='';document.getElementById('print-title').textContent=`${appState.binDate} ${appState.binLabel} — 積込QR札 (便ID: ${appState.binId})`;appState.parts.forEach(p=>{const qd=`P:${appState.binId}:${p.id4}`;const card=document.createElement('div');card.className='qr-card';const qrId='print_'+p.id4;card.innerHTML=`<div class="qc-id">ID:${p.id4}</div><div class="qc-goban">${p.goban}</div><div id="${qrId}"></div><div class="qc-bottom">${appState.binDate} ${appState.binLabel}<br>${appState.companyName}</div>`;pg.appendChild(card);setTimeout(()=>{new QRCode(document.getElementById(qrId),{text:qd,width:128,height:128,correctLevel:QRCode.CorrectLevel.H});},50);});setTimeout(()=>window.print(),400);});
 
 // カメラ・スキャン
-let camStream=null,zxingReader=null,camIdleTimer=null;
+let camStream=null,camIdleTimer=null,camRafId=null,barcodeDetector=null;
 // 同一QRの連続誤読み防止：直近N件を記録
 const RECENT_QR_MAX=5;
 let recentQRs=[];
@@ -1186,44 +1186,102 @@ function startCamera(){
 }
 
 function _startCameraInner(){
-  try{
-    if(zxingReader){try{zxingReader.reset();}catch(e){}zxingReader=null;}
-    zxingReader=new ZXing.BrowserMultiFormatReader();
-    const v=document.getElementById('cam-video');
-    const constraints={
-      video:{facingMode:'environment',width:{ideal:1920},height:{ideal:1080}}
-    };
-    zxingReader.decodeFromConstraints(constraints,v,(result,err)=>{
-      if(result&&result.text){
-        const text=result.text.trim();
-        if(!text||text.length<3)return;
+  const v=document.getElementById('cam-video');
+  const banner=document.getElementById('cam-stopped-banner');
+
+  navigator.mediaDevices.getUserMedia({
+    video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}}
+  })
+  .catch(()=>navigator.mediaDevices.getUserMedia({video:true}))
+  .then(stream=>{
+    camStream=stream;
+    v.srcObject=stream;
+    v.setAttribute('playsinline','');
+    v.muted=true;
+    return v.play();
+  })
+  .then(()=>{
+    if(banner)banner.classList.remove('show');
+    resetIdleTimer();
+    // BarcodeDetector対応チェック
+    if(typeof BarcodeDetector!=='undefined'){
+      barcodeDetector=new BarcodeDetector({formats:['qr_code']});
+      _scanLoopBarcodeDetector(v);
+    }else{
+      _scanLoopZXing(v);
+    }
+  })
+  .catch(e=>{
+    showScanResult('err','❌','カメラ起動失敗',e.message||'カメラへのアクセスを許可してください');
+  });
+}
+
+function _scanLoopBarcodeDetector(v){
+  function tick(){
+    if(!camStream)return;
+    camRafId=requestAnimationFrame(tick);
+    if(v.readyState!==v.HAVE_ENOUGH_DATA)return;
+    barcodeDetector.detect(v).then(codes=>{
+      if(codes.length>0){
+        const text=codes[0].rawValue.trim();
+        if(text.length<3)return;
         if(isRecentDuplicate(text))return;
-        camStream=v.srcObject;
-        document.getElementById('cam-stopped-banner').classList.remove('show');
         resetIdleTimer();
         processQR(text);
       }
-    }).then(()=>{
-      camStream=v.srcObject;
-      document.getElementById('cam-stopped-banner').classList.remove('show');
-      resetIdleTimer();
-    }).catch(e=>{
-      showScanResult('err','❌','カメラ起動失敗','カメラへのアクセスを許可してください');
-    });
-  }catch(e){
-    showScanResult('err','❌','カメラ起動失敗',e.message);
+    }).catch(()=>{});
   }
+  camRafId=requestAnimationFrame(tick);
+}
+
+function _scanLoopZXing(v){
+  const canvas=document.createElement('canvas');
+  const ctx=canvas.getContext('2d');
+  let zxingReader=null;
+  try{
+    zxingReader=new ZXing.BrowserMultiFormatReader();
+  }catch(e){
+    showScanResult('err','❌','ZXing初期化失敗',e.message);
+    return;
+  }
+  function tick(){
+    if(!camStream)return;
+    camRafId=requestAnimationFrame(tick);
+    if(v.readyState!==v.HAVE_ENOUGH_DATA)return;
+    canvas.width=v.videoWidth;
+    canvas.height=v.videoHeight;
+    ctx.drawImage(v,0,0);
+    const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
+    try{
+      const result=zxingReader.decodeFromImageData(imageData);
+      if(result&&result.getText){
+        const text=result.getText().trim();
+        if(text.length<3)return;
+        if(isRecentDuplicate(text))return;
+        resetIdleTimer();
+        processQR(text);
+      }
+    }catch(e){}
+  }
+  camRafId=requestAnimationFrame(tick);
 }
 
 function stopCamera(){
   if(camIdleTimer){clearTimeout(camIdleTimer);camIdleTimer=null;}
-  if(zxingReader){try{zxingReader.reset();}catch(e){}zxingReader=null;}
+  if(camRafId){cancelAnimationFrame(camRafId);camRafId=null;}
   if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
+  barcodeDetector=null;
   recentQRs=[];
 }
 function pauseCamera(){stopCamera();document.getElementById('cam-stopped-banner').classList.add('show');}
 function resetIdleTimer(){if(camIdleTimer)clearTimeout(camIdleTimer);camIdleTimer=setTimeout(()=>pauseCamera(),30000);}
 function scanFrame(){}
+function resumeCamera(){
+  const banner=document.getElementById('cam-stopped-banner');
+  if(banner)banner.classList.remove('show');
+  stopCamera();
+  setTimeout(()=>_startCameraInner(),300);
+}
 
 function processQR(data){
   try{const mgmt=JSON.parse(data);if(mgmt.shipmentId&&mgmt.ids){handleMgmtQR(mgmt);return;}}catch(e){}
