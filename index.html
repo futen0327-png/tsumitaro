@@ -884,7 +884,7 @@ function buildResultCard(d){
   card.innerHTML=`
     <div class="rc-header">
       <div>
-        <div class="rc-title">${d.binDate||''} ${d.binLabel||''}</div>
+        <div class="rc-title">${d.companyName||''}</div>
         <div class="rc-time">完了時刻：${timeStr}</div>
       </div>
       <div class="rc-badge ${allOk?'ok':'ng'}">${allOk?'✅ 全件完了':'⚠️ 積み残しあり'}</div>
@@ -909,7 +909,7 @@ function renderUnsentSection(){
     sec.style.display='block';
     ul.innerHTML=list.map(d=>`
       <div class="unsent-card">
-        <div class="unsent-card-title">📵 ${d.binDate} ${d.binLabel}</div>
+        <div class="unsent-card-title">📵 ${d.companyName||''}</div>
         <div>積込済み ${d.scannedCount}点 / 予定 ${d.total}点　積み残し ${d.missingCount}点</div>
       </div>
     `).join('');
@@ -1453,8 +1453,6 @@ function buildCompletionData(){
   return {
     companyId:appState.companyId,
     binId:appState.binId,
-    binDate:'',
-    binLabel:'',
     companyName:appState.companyName,
     total:appState.parts.length,
     scannedCount:appState.scanned.length,
@@ -1469,7 +1467,7 @@ function renderCompleteSummary(data){
   const el=document.getElementById('comp-summary');
   const allOk=data.missingCount===0;
   let html=`
-    <div class="cs-row"><span class="cs-label">出荷日・便名</span><span class="cs-val">${data.binDate} ${data.binLabel}</span></div>
+    <div class="cs-row"><span class="cs-label">会社名</span><span class="cs-val">${data.companyName||''}</span></div>
     <div class="cs-row"><span class="cs-label">予定点数</span><span class="cs-val">${data.total} 点</span></div>
     <div class="cs-row"><span class="cs-label">積込済み</span><span class="cs-val ok">${data.scannedCount} 点</span></div>
     <div class="cs-row"><span class="cs-label">積み残し</span><span class="cs-val ${data.missingCount>0?'danger':'ok'}">${data.missingCount} 点</span></div>
@@ -1542,7 +1540,7 @@ async function retrySendUnsent(){
 function buildShareText(data){
   const ok=data.missingCount===0;
   let txt=`【積込完了報告】${data.companyName}\n`;
-  txt+=`${data.binDate} ${data.binLabel}\n`;
+  txt+=`${data.companyName||''}\n`;
   txt+=`━━━━━━━━━━━\n`;
   txt+=`予定点数：${data.total}点\n`;
   txt+=`積込済み：${data.scannedCount}点\n`;
@@ -1609,8 +1607,6 @@ function renderResultQR(data){
   const qrPayload={
     t:'COMP',
     bid:data.binId,
-    dt:data.binDate,
-    lb:data.binLabel,
     ok:data.scannedCount,
     ng:data.missingCount,
     miss:data.missingItems.map(m=>m.id4)
