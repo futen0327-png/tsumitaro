@@ -1182,28 +1182,35 @@ function isRecentDuplicate(text){
 
 function startCamera(){
   if(camStream)return;
+  if(camRafId)return;
   _startCameraInner();
 }
 
 function _startCameraInner(){
+  if(camStream||camRafId)return;
   const v=document.getElementById('cam-video');
+  if(!v)return;
+  v.srcObject=null;
   const banner=document.getElementById('cam-stopped-banner');
 
   navigator.mediaDevices.getUserMedia({
-    video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}}
+    video:{facingMode:{ideal:'environment'}}
   })
   .catch(()=>navigator.mediaDevices.getUserMedia({video:true}))
   .then(stream=>{
+    if(camStream){
+      stream.getTracks().forEach(t=>t.stop());
+      return Promise.reject('already started');
+    }
     camStream=stream;
     v.srcObject=stream;
-    v.setAttribute('playsinline','');
     v.muted=true;
+    v.playsInline=true;
     return v.play();
   })
   .then(()=>{
     if(banner)banner.classList.remove('show');
     resetIdleTimer();
-    // BarcodeDetector対応チェック
     if(typeof BarcodeDetector!=='undefined'){
       barcodeDetector=new BarcodeDetector({formats:['qr_code']});
       _scanLoopBarcodeDetector(v);
@@ -1212,7 +1219,9 @@ function _startCameraInner(){
     }
   })
   .catch(e=>{
-    showScanResult('err','❌','カメラ起動失敗',e.message||'カメラへのアクセスを許可してください');
+    if(e==='already started')return;
+    showScanResult('err','❌','カメラ起動失敗',
+      e.message||'カメラへのアクセスを許可してください');
   });
 }
 
