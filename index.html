@@ -696,7 +696,7 @@ window.onFirebaseReady=async function(user){
   showScreen('screen-welcome');
   loadAppState();
   const today=new Date().toISOString().split('T')[0];
-  const hasPrev=appState.locked&&appState.binDate===today&&!appState.completed;
+  const hasPrev=appState.locked&&!appState.completed;
   document.getElementById('btn-welcome-continue').style.display=hasPrev?'block':'none';
   // モード選択ボタンを前回の選択状態に
   const savedMode=getCurrentMode();
@@ -791,7 +791,7 @@ function toggleModeSwitch(){
   localStorage.setItem(LS_MODE,next);
   applyMode(next);
 }
-function checkExpiry(){if(!appState.binDate)return;appState.expired=appState.binDate<todayStr();saveAppState();}
+function checkExpiry(){return false;}
 
 function switchTab(name){
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
@@ -969,12 +969,12 @@ function renderPartsListLocked(){
   el.innerHTML=appState.parts.slice(0,10).map(p=>`<div class="part-item"><div class="pi-id">${p.id4}</div><div class="pi-info"><div class="pi-goban">${p.goban}</div><div class="pi-desc">${p.desc||''}</div></div><div class="pi-bundle">${p.bundle?'束'+p.bundle:''}</div></div>`).join('');
 }
 
-function renderScanTab(){const noBin=document.getElementById('scan-no-bin'),scanContent=document.getElementById('scan-content'),fixedBtn=document.getElementById('complete-btn-fixed'),emgWrap=document.getElementById('emergency-start-wrap'),progress=document.getElementById('scan-progress');if(!appState.locked||appState.expired){noBin.style.display='block';scanContent.style.display='none';fixedBtn.style.display='none';progress&&(progress.style.display='none');emgWrap.classList.remove('show');return;}noBin.style.display='none';if(!appState.managementQrLoaded)emgWrap.classList.add('show');else emgWrap.classList.remove('show');scanContent.style.display='block';fixedBtn.style.display='block';progress&&(progress.style.display='block');const total=appState.parts.length,done=appState.scanned.length,remaining=total-done;document.getElementById('scan-count').textContent=done;document.getElementById('scan-total').textContent=total;const badge=document.getElementById('remaining-badge');if(remaining<=0){badge.textContent='✅ 全部材スキャン済み';badge.className='remaining-badge done';document.getElementById('prompt-all-done').style.display='block';}else{badge.textContent=`残り ${remaining} 点`;badge.className='remaining-badge has';document.getElementById('prompt-all-done').style.display='none';}const btn=document.getElementById('btn-complete');btn.className='btn-complete '+(remaining<=0?'ready':'not-ready');renderUnscannedList();renderRecentList();}
+function renderScanTab(){const noBin=document.getElementById('scan-no-bin'),scanContent=document.getElementById('scan-content'),fixedBtn=document.getElementById('complete-btn-fixed'),emgWrap=document.getElementById('emergency-start-wrap'),progress=document.getElementById('scan-progress');if(!appState.locked){noBin.style.display='block';scanContent.style.display='none';fixedBtn.style.display='none';progress&&(progress.style.display='none');emgWrap.classList.remove('show');return;}noBin.style.display='none';if(!appState.managementQrLoaded)emgWrap.classList.add('show');else emgWrap.classList.remove('show');scanContent.style.display='block';fixedBtn.style.display='block';progress&&(progress.style.display='block');const total=appState.parts.length,done=appState.scanned.length,remaining=total-done;document.getElementById('scan-count').textContent=done;document.getElementById('scan-total').textContent=total;const badge=document.getElementById('remaining-badge');if(remaining<=0){badge.textContent='✅ 全部材スキャン済み';badge.className='remaining-badge done';document.getElementById('prompt-all-done').style.display='block';}else{badge.textContent=`残り ${remaining} 点`;badge.className='remaining-badge has';document.getElementById('prompt-all-done').style.display='none';}const btn=document.getElementById('btn-complete');btn.className='btn-complete '+(remaining<=0?'ready':'not-ready');renderUnscannedList();renderRecentList();}
 function renderUnscannedList(){const el=document.getElementById('unscanned-list');const scannedIds=new Set(appState.scanned.map(s=>s.id4));const unscanned=appState.parts.filter(p=>!scannedIds.has(p.id4));if(unscanned.length===0){el.innerHTML='<div style="color:var(--ok);font-size:13px;text-align:center;padding:12px">✅ 全部材積込済み</div>';return;}el.innerHTML=unscanned.map(p=>`<div class="unscanned-item" onclick="tapRegister('${p.id4}')"><div class="ui-id">${p.id4}</div><div class="ui-goban">${p.goban}</div><div class="ui-desc">${p.desc||''}</div></div>`).join('');}
 
 function renderQRTab(){const noList=document.getElementById('qr-no-list'),content=document.getElementById('qr-content');if(!appState.locked){noList.style.display='block';content.style.display='none';return;}noList.style.display='none';content.style.display='block';renderMgmtQR();renderQRGrid();}
-function renderMgmtQR(){const wrap=document.getElementById('mgmt-qr-wrap');wrap.innerHTML='';const ids=appState.parts.map(p=>[p.id4,p.goban]);const mgmtData={shipmentId:appState.binId,date:appState.binDate,label:appState.binLabel,company:appState.companyName,ids:ids};const jsonStr=JSON.stringify(mgmtData);const byteLen=new TextEncoder().encode(jsonStr).length;const div=document.createElement('div');div.className='mgmt-qr-box';div.id='mgmt-qr-inner';wrap.appendChild(div);const img=document.createElement('img');img.style.cssText='width:220px;height:220px;display:block;margin:0 auto';img.alt='管理QR';div.appendChild(img);const label=document.createElement('div');label.className='mgmt-qr-label';label.innerHTML=`管理QR（${appState.binDate} ${appState.binLabel}）<br><span style="font-size:10px;color:#999">${byteLen}バイト</span>`;div.appendChild(label);const encoded=encodeURIComponent(jsonStr);img.src=`https://api.qrserver.com/v1/create-qr-code/?size=220x220&ecc=L&data=${encoded}`;img.onerror=()=>{img.style.display='none';const err=document.createElement('div');err.style.cssText='color:red;font-size:12px;margin-top:8px;text-align:center';err.textContent='QR生成失敗。オフラインか部材数が多すぎます。';div.appendChild(err);};}
-function renderQRGrid(){const grid=document.getElementById('qr-grid');grid.innerHTML='';appState.parts.forEach(p=>{const qrData=`P:${appState.binId}:${p.id4}`;const card=document.createElement('div');card.className='qr-card';const qrId='qr_'+p.id4;card.innerHTML=`<div class="qc-id">ID:${p.id4}</div><div class="qc-goban">${p.goban}</div><div id="${qrId}"></div><div class="qc-bottom">${appState.binDate} ${appState.binLabel}<br>${appState.companyName}</div>`;grid.appendChild(card);try{new QRCode(document.getElementById(qrId),{text:qrData,width:120,height:120,correctLevel:QRCode.CorrectLevel.H});}catch(e){}});}
+function renderMgmtQR(){const wrap=document.getElementById('mgmt-qr-wrap');wrap.innerHTML='';const ids=appState.parts.map(p=>[p.id4,p.goban]);const mgmtData={shipmentId:appState.binId,date:'',label:'',company:appState.companyName,ids:ids};const jsonStr=JSON.stringify(mgmtData);const byteLen=new TextEncoder().encode(jsonStr).length;const div=document.createElement('div');div.className='mgmt-qr-box';div.id='mgmt-qr-inner';wrap.appendChild(div);const img=document.createElement('img');img.style.cssText='width:220px;height:220px;display:block;margin:0 auto';img.alt='管理QR';div.appendChild(img);const label=document.createElement('div');label.className='mgmt-qr-label';label.innerHTML=`管理QR<br><span style="font-size:10px;color:#999">${byteLen}バイト</span>`;div.appendChild(label);const encoded=encodeURIComponent(jsonStr);img.src=`https://api.qrserver.com/v1/create-qr-code/?size=220x220&ecc=L&data=${encoded}`;img.onerror=()=>{img.style.display='none';const err=document.createElement('div');err.style.cssText='color:red;font-size:12px;margin-top:8px;text-align:center';err.textContent='QR生成失敗。オフラインか部材数が多すぎます。';div.appendChild(err);};}
+function renderQRGrid(){const grid=document.getElementById('qr-grid');grid.innerHTML='';appState.parts.forEach(p=>{const qrData=`P:${appState.binId}:${p.id4}`;const card=document.createElement('div');card.className='qr-card';const qrId='qr_'+p.id4;card.innerHTML=`<div class="qc-id">ID:${p.id4}</div><div class="qc-goban">${p.goban}</div><div id="${qrId}"></div><div class="qc-bottom">${appState.companyName}</div>`;grid.appendChild(card);try{new QRCode(document.getElementById(qrId),{text:qrData,width:120,height:120,correctLevel:QRCode.CorrectLevel.H});}catch(e){}});}
 
 // ===== Excel取込（新仕様：固定列 A:合番 B:品名 C:束番号） =====
 const uploadArea=document.getElementById('upload-area');
@@ -1114,13 +1114,9 @@ document.getElementById('btn-confirm-list').addEventListener('click',()=>{
        closeModal();
        const sessionId='session_'+Date.now();
        appState.binId=sessionId;
-       appState.binDate=todayStr();
-       appState.binName='';
-       appState.binLabel='';
        appState.locked=true;
        appState.scanned=[];
        appState.completed=false;
-       appState.expired=false;
        appState.managementQrLoaded=false;
        saveAppState();
        renderAll();
@@ -1136,7 +1132,7 @@ if(btnReset){btnReset.addEventListener('click',()=>{
     [{label:'キャンセル',cls:'mbtn-cancel',fn:closeModal},
      {label:'やり直す',cls:'mbtn-ok',fn:()=>{
        closeModal();
-       Object.assign(appState,{parts:[],locked:false,scanned:[],binId:'',binDate:'',binName:'',binLabel:'',completed:false,managementQrLoaded:false,firebaseSent:false,shared:false});
+       Object.assign(appState,{parts:[],locked:false,scanned:[],binId:'',completed:false,managementQrLoaded:false,firebaseSent:false,shared:false});
        saveAppState();
        document.getElementById('upload-result-section').style.display='none';
        document.getElementById('upload-section').style.display='block';
@@ -1153,7 +1149,7 @@ if(btnResetLocked){btnResetLocked.addEventListener('click',()=>{
     [{label:'キャンセル',cls:'mbtn-cancel',fn:closeModal},
      {label:'リセット',cls:'mbtn-ok',fn:()=>{
        closeModal();
-       Object.assign(appState,{parts:[],locked:false,scanned:[],binId:'',binDate:'',binName:'',binLabel:'',completed:false,managementQrLoaded:false,firebaseSent:false,shared:false});
+       Object.assign(appState,{parts:[],locked:false,scanned:[],binId:'',completed:false,managementQrLoaded:false,firebaseSent:false,shared:false});
        saveAppState();renderAll();updateOfficeSteps(1);
      }}]);
 });}
@@ -1163,7 +1159,7 @@ const btnGoPrint=document.getElementById('btn-go-print');
 if(btnGoPrint){btnGoPrint.addEventListener('click',()=>switchTab('qr'));}
 
 // 印刷
-document.getElementById('btn-print-qr').addEventListener('click',()=>{const pg=document.getElementById('print-qr-grid');pg.innerHTML='';document.getElementById('print-title').textContent=`${appState.binDate} ${appState.binLabel} — 積込QR札 (便ID: ${appState.binId})`;appState.parts.forEach(p=>{const qd=`P:${appState.binId}:${p.id4}`;const card=document.createElement('div');card.className='qr-card';const qrId='print_'+p.id4;card.innerHTML=`<div class="qc-id">ID:${p.id4}</div><div class="qc-goban">${p.goban}</div><div id="${qrId}"></div><div class="qc-bottom">${appState.binDate} ${appState.binLabel}<br>${appState.companyName}</div>`;pg.appendChild(card);setTimeout(()=>{new QRCode(document.getElementById(qrId),{text:qd,width:128,height:128,correctLevel:QRCode.CorrectLevel.H});},50);});setTimeout(()=>window.print(),400);});
+document.getElementById('btn-print-qr').addEventListener('click',()=>{const pg=document.getElementById('print-qr-grid');pg.innerHTML='';document.getElementById('print-title').textContent=`積込QR札 (ID: ${appState.binId})`;appState.parts.forEach(p=>{const qd=`P:${appState.binId}:${p.id4}`;const card=document.createElement('div');card.className='qr-card';const qrId='print_'+p.id4;card.innerHTML=`<div class="qc-id">ID:${p.id4}</div><div class="qc-goban">${p.goban}</div><div id="${qrId}"></div><div class="qc-bottom">${appState.companyName}</div>`;pg.appendChild(card);setTimeout(()=>{new QRCode(document.getElementById(qrId),{text:qd,width:128,height:128,correctLevel:QRCode.CorrectLevel.H});},50);});setTimeout(()=>window.print(),400);});
 
 // カメラ・スキャン
 let camStream=null,camIdleTimer=null,camRafId=null,barcodeDetector=null;
@@ -1333,8 +1329,7 @@ function handleMgmtQR(mgmt){
 
   // 新しい便の管理QR → 便切替処理
   const doLoadNewBin=()=>{
-    appState.binId=mgmt.shipmentId;appState.binDate=mgmt.date;appState.binLabel=mgmt.label;
-    appState.binName=mgmt.label;appState.companyName=mgmt.company||appState.companyName;
+    appState.binId=mgmt.shipmentId;appState.companyName=mgmt.company||appState.companyName;
     appState.parts=mgmt.ids.map(([id4,goban])=>({id4,goban,desc:'',bin:'',bundle:''}));
     appState.locked=true;appState.scanned=[];appState.completed=false;
     appState.managementQrLoaded=true;appState.firebaseSent=false;appState.shared=false;
@@ -1353,7 +1348,7 @@ function handleMgmtQR(mgmt){
     }else{
       // 未共有 → 確認を求める
       showModal('⚠️','前便が未共有です',
-        `前便（${appState.binDate} ${appState.binLabel}）の結果がまだ共有されていません。<br><br>データを消去して次便を開始しますか？`,
+        `前のセッションの結果がまだ共有されていません。<br><br>データを消去して次のセッションを開始しますか？`,
         [{label:'いいえ',cls:'mbtn-cancel',fn:closeModal},
          {label:'はい・消去して開始',cls:'mbtn-ok',fn:()=>{closeModal();doLoadNewBin();}}]);
     }
@@ -1458,8 +1453,8 @@ function buildCompletionData(){
   return {
     companyId:appState.companyId,
     binId:appState.binId,
-    binDate:appState.binDate,
-    binLabel:appState.binLabel,
+    binDate:'',
+    binLabel:'',
     companyName:appState.companyName,
     total:appState.parts.length,
     scannedCount:appState.scanned.length,
