@@ -1196,7 +1196,13 @@ function _startCameraInner(){
       camStream=stream;
       v.srcObject=stream;
       v.setAttribute('playsinline','');
-      return v.play();
+      v.setAttribute('autoplay','');
+      v.muted=true;
+      v.play().catch(e=>{});
+      return new Promise(resolve=>{
+        v.onloadedmetadata=()=>resolve();
+        setTimeout(resolve,2000);
+      });
     })
     .then(()=>{
       document.getElementById('cam-stopped-banner').classList.remove('show');
