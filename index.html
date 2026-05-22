@@ -15,7 +15,7 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
@@ -1166,7 +1166,7 @@ if(btnGoPrint){btnGoPrint.addEventListener('click',()=>switchTab('qr'));}
 document.getElementById('btn-print-qr').addEventListener('click',()=>{const pg=document.getElementById('print-qr-grid');pg.innerHTML='';document.getElementById('print-title').textContent=`${appState.binDate} ${appState.binLabel} — 積込QR札 (便ID: ${appState.binId})`;appState.parts.forEach(p=>{const qd=`P:${appState.binId}:${p.id4}`;const card=document.createElement('div');card.className='qr-card';const qrId='print_'+p.id4;card.innerHTML=`<div class="qc-id">ID:${p.id4}</div><div class="qc-goban">${p.goban}</div><div id="${qrId}"></div><div class="qc-bottom">${appState.binDate} ${appState.binLabel}<br>${appState.companyName}</div>`;pg.appendChild(card);setTimeout(()=>{new QRCode(document.getElementById(qrId),{text:qd,width:128,height:128,correctLevel:QRCode.CorrectLevel.H});},50);});setTimeout(()=>window.print(),400);});
 
 // カメラ・スキャン
-let camStream=null,camIdleTimer=null,camRafId=null;
+let camStream=null,zxingReader=null,camIdleTimer=null;
 // 同一QRの連続誤読み防止：直近N件を記録
 const RECENT_QR_MAX=5;
 let recentQRs=[];
@@ -1186,60 +1186,38 @@ function startCamera(){
 }
 
 function _startCameraInner(){
-  const v=document.getElementById('cam-video');
-  const constraints={
-    video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}}
-  };
-  navigator.mediaDevices.getUserMedia(constraints)
-    .catch(()=>navigator.mediaDevices.getUserMedia({video:true}))
-    .then(stream=>{
-      camStream=stream;
-      v.srcObject=stream;
-      v.setAttribute('playsinline','');
-      v.setAttribute('autoplay','');
-      v.muted=true;
-      v.play().catch(e=>{});
-      return new Promise(resolve=>{
-        v.onloadedmetadata=()=>resolve();
-        setTimeout(resolve,2000);
-      });
-    })
-    .then(()=>{
+  try{
+    if(zxingReader){try{zxingReader.reset();}catch(e){}zxingReader=null;}
+    zxingReader=new ZXing.BrowserMultiFormatReader();
+    const v=document.getElementById('cam-video');
+    const constraints={
+      video:{facingMode:'environment',width:{ideal:1920},height:{ideal:1080}}
+    };
+    zxingReader.decodeFromConstraints(constraints,v,(result,err)=>{
+      if(result&&result.text){
+        const text=result.text.trim();
+        if(!text||text.length<3)return;
+        if(isRecentDuplicate(text))return;
+        camStream=v.srcObject;
+        document.getElementById('cam-stopped-banner').classList.remove('show');
+        resetIdleTimer();
+        processQR(text);
+      }
+    }).then(()=>{
+      camStream=v.srcObject;
       document.getElementById('cam-stopped-banner').classList.remove('show');
       resetIdleTimer();
-      _scanLoop(v);
-    })
-    .catch(()=>{
+    }).catch(e=>{
       showScanResult('err','❌','カメラ起動失敗','カメラへのアクセスを許可してください');
     });
-}
-
-function _scanLoop(v){
-  const canvas=document.createElement('canvas');
-  const ctx=canvas.getContext('2d');
-  function tick(){
-    if(!camStream){return;}
-    camRafId=requestAnimationFrame(tick);
-    if(v.readyState!==v.HAVE_ENOUGH_DATA)return;
-    canvas.width=v.videoWidth;
-    canvas.height=v.videoHeight;
-    ctx.drawImage(v,0,0);
-    const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
-    const code=jsQR(imageData.data,imageData.width,imageData.height,{inversionAttempts:'dontInvert'});
-    if(code&&code.data){
-      const text=code.data.trim();
-      if(text.length<3)return;
-      if(isRecentDuplicate(text))return;
-      resetIdleTimer();
-      processQR(text);
-    }
+  }catch(e){
+    showScanResult('err','❌','カメラ起動失敗',e.message);
   }
-  camRafId=requestAnimationFrame(tick);
 }
 
 function stopCamera(){
   if(camIdleTimer){clearTimeout(camIdleTimer);camIdleTimer=null;}
-  if(camRafId){cancelAnimationFrame(camRafId);camRafId=null;}
+  if(zxingReader){try{zxingReader.reset();}catch(e){}zxingReader=null;}
   if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
   recentQRs=[];
 }
