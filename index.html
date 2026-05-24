@@ -599,7 +599,10 @@ body.mode-admin{--admin-font-scale:1.05;}
   <div class="tab-pane" id="tab-qr">
     <div id="qr-no-list" style="display:none"><div class="no-bin-warn">⚠️ リストが確定されていません<span>事務所タブでリストを確定してください</span></div></div>
     <div id="qr-content" style="display:none">
-      <div class="sec-title">管理QR（工員スマホへ渡す）</div>
+      <div class="sec-title" style="display:flex;align-items:center;justify-content:space-between">
+  <span>管理QR（工員スマホへ渡す）</span>
+  <button class="btn-secondary" id="btn-print-kanri" onclick="printKanriTicket()" style="font-size:13px;padding:6px 12px">🖨️ 積込確認票を印刷</button>
+</div>
       <div class="card"><div style="font-size:12px;color:var(--text-dim);margin-bottom:10px">工員スマホでこのQRを読み込むと、当日リストがスマホに保存されます</div><div class="mgmt-qr-wrap" id="mgmt-qr-wrap"></div></div>
       <div class="sec-title" style="margin-top:4px">単品QR札</div>
       <div class="btn-row"><button class="btn-secondary" id="btn-print-qr">🖨️ 印刷</button></div>
@@ -641,7 +644,7 @@ body.mode-admin{--admin-font-scale:1.05;}
         <button class="share-btn" id="btn-share-copy" onclick="copyShareText()">
           <span class="share-btn-icon">📋</span>テキストコピー
         </button>
-        <button class="share-btn" id="btn-show-result-qr" onclick="toggleResultQR()">
+        <button class="share-btn" id="btn-show-result-qr" onclick="toggleResultQR()" style="display:none">
           <span class="share-btn-icon">📷</span>完了QR表示
         </button>
       </div>
@@ -1441,6 +1444,93 @@ document.getElementById('btn-complete').addEventListener('click',checkComplete);
 function checkComplete(){const scannedIds=new Set(appState.scanned.map(s=>s.id4));const missing=appState.parts.filter(p=>!scannedIds.has(p.id4));if(missing.length>0)showAlarm(missing);else{appState.completed=true;saveAppState();showCompleteScreen();}}
 function showAlarm(missing){playBeep('alarm');vibrate([500,200,500,200,500]);const list=document.getElementById('alarm-list');list.innerHTML=missing.map(p=>`<div class="alarm-item">▶ ${p.id4} — ${p.goban}${p.desc?' '+p.desc:''}</div>`).join('');document.getElementById('screen-alarm').style.display='block';}
 function backToScan(){document.getElementById('screen-alarm').style.display='none';document.getElementById('screen-complete').style.display='none';}
+function printKanriTicket(){
+  // 管理QRのSVG/canvas要素を取得
+  const qrWrap = document.getElementById('mgmt-qr-wrap');
+  const qrCanvas = qrWrap ? qrWrap.querySelector('canvas') : null;
+  const qrImgSrc = qrCanvas ? qrCanvas.toDataURL('image/png') : '';
+
+  const binName = appState.binId || '—';
+  const dateStr = appState.binId ? appState.binId.split('-').slice(0,3).join('/') : '—';
+  const parts = appState.parts || [];
+  const total = parts.length;
+
+  const rows = parts.map((p, i) => `
+    <tr>
+      <td>${String(i+1).padStart(2,'0')}</td>
+      <td>${p.goban || '—'}</td>
+      <td style="text-align:center">${p.id4 || '—'}</td>
+      <td style="text-align:center">1</td>
+      <td style="text-align:center">□</td>
+    </tr>
+  `).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="ja"><head><meta charset="UTF-8">
+<title>積込確認票</title>
+<style>
+  body{font-family:'MS Gothic',monospace;font-size:11pt;margin:0;padding:20px;color:#000}
+  h2{text-align:center;font-size:15pt;margin:0 0 8px}
+  .header-table{width:100%;border-collapse:collapse;margin-bottom:12px}
+  .header-table td{padding:4px 8px;border:1px solid #000;font-size:10pt}
+  .qr-area{text-align:center;margin:10px 0}
+  .qr-area img{width:130px;height:130px}
+  .status-box{border:1px solid #000;padding:8px 12px;margin:10px 0;font-size:10pt}
+  .status-box p{margin:4px 0}
+  table.parts{width:100%;border-collapse:collapse;font-size:10pt;margin-top:8px}
+  table.parts th,table.parts td{border:1px solid #000;padding:4px 6px}
+  table.parts th{background:#eee;text-align:center}
+  .footer-box{border:1px solid #000;padding:8px 12px;margin-top:12px;font-size:10pt}
+  .footer-box p{margin:4px 0}
+  .divider{border-top:2px solid #000;margin:10px 0}
+  @media print{body{padding:0}}
+</style></head><body>
+<h2>ツミタロウ 積込確認票</h2>
+<div class="divider"></div>
+<table class="header-table">
+  <tr>
+    <td>便ID</td><td>${binName}</td>
+    <td>出荷日</td><td>${dateStr}</td>
+  </tr>
+  <tr>
+    <td>積込担当</td><td>____________</td>
+    <td>時刻</td><td>_______</td>
+  </tr>
+</table>
+<div class="qr-area">
+  ${qrImgSrc ? `<img src="${qrImgSrc}" alt="管理QR">` : '<p>（QR未生成）</p>'}
+  <p style="font-size:9pt;margin:4px 0">管理QR ▶ 工員スマホで読み込んでから現場へ</p>
+</div>
+<div class="divider"></div>
+<div class="status-box">
+  <p><strong>積込状況</strong></p>
+  <p>□ 未開始　　□ 積込中　　□ 完了</p>
+</div>
+<table class="parts">
+  <thead>
+    <tr>
+      <th>No</th><th>合番</th><th>4桁ID</th><th>本数</th><th>状況</th>
+    </tr>
+  </thead>
+  <tbody>${rows}</tbody>
+</table>
+<div class="footer-box">
+  <p><strong>積込結果メモ</strong></p>
+  <p>________________________________</p>
+  <p>________________________________</p>
+  <p style="margin-top:8px">予定：${total}点　　積込済：___点　　残り：___点</p>
+</div>
+<div style="font-size:8pt;margin-top:8px;color:#666">
+  【QRシール注意】点線を鋼材端に合わせて貼付。合番を隠さず、水濡れ・粉じん・油分に注意。読取後は剥がしてから積込。
+</div>
+</body></html>`;
+
+  const win = window.open('','_blank','width=800,height=900');
+  win.document.write(html);
+  win.document.close();
+  win.onload = () => win.print();
+}
+
 function forceComplete(){
   document.getElementById('screen-alarm').style.display='none';
   showCompleteScreen();
