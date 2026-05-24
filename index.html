@@ -461,6 +461,9 @@ body.mode-admin{--admin-font-scale:1.05;}
       <a class="template-dl-btn" id="btn-template-dl" href="#" onclick="downloadTemplate();return false;">
         📥 指定テンプレートをダウンロード
       </a>
+      <div style="font-size:12px;color:var(--text-dim);margin-bottom:10px;line-height:1.7;padding:8px 10px;background:rgba(255,255,255,0.05);border-radius:6px;border-left:3px solid var(--danger)">
+  ※ 一度に読み込める部材数は<strong style="color:var(--danger)">50本</strong>までです。50本を超える場合は、シートを分けてアップロードしてください。
+</div>
       <div class="upload-area" id="upload-area">
         <div class="upload-icon">📂</div>
         <div class="upload-text"><strong>Excelファイルをここにドロップ</strong><br>またはタップして選択<br><span style="font-size:11px;margin-top:4px;display:block">.xlsx のみ対応</span></div>
@@ -1059,6 +1062,26 @@ function handleFile(file){
 
       if(parts.length===0){
         showModal('⚠️','データなし','合番が入力された行がありません。',[{label:'OK',cls:'mbtn-single',fn:closeModal}]);
+        return;
+      }
+
+      if(parts.length > 50){
+        showModal(
+          '⚠️',
+          '部材数が上限を超えています',
+          `ツミタロウで一度に作成できるQRコードは<strong>50本</strong>までです。<br><br>` +
+          `今回のシートには<strong style="color:var(--danger)">${parts.length}本</strong>の部材が含まれているため、QRコードは作成できません。<br><br>` +
+          `部材数を50本以下に分けたシートを作成し、再度アップロードしてください。`,
+          [{label:'アップロード画面に戻る', cls:'mbtn-single', fn:()=>{
+            closeModal();
+            // アップロード画面をリセットして戻る
+            document.getElementById('step1-area').style.display='block';
+            const step2 = document.getElementById('step2-area');
+            if(step2) step2.style.display='none';
+            const fileInput = document.getElementById('file-input');
+            if(fileInput) fileInput.value='';
+          }}]
+        );
         return;
       }
 
