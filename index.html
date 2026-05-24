@@ -387,23 +387,18 @@ body.mode-admin #tabBtn-results{display:none !important;}
 
 /* ===== QR印刷タブ PC横並びレイアウト ===== */
 @media(min-width:640px){
-  body.mode-admin #qr-content .card{
+  body.mode-admin .admin-qr-layout{
     display:grid;
     grid-template-columns:260px 1fr;
     gap:32px;
     align-items:center;
-  }
-  body.mode-admin .mgmt-qr-wrap{
-    margin-top:0;
-  }
-  body.mode-admin #qr-content .card > div:first-child{
-    display:none;
   }
 }
 body.mode-admin .admin-qr-note{
   font-size:14px;
   line-height:1.8;
   color:var(--text-dim);
+  margin-top:8px;
 }
 
 </style>
@@ -616,9 +611,12 @@ body.mode-admin .admin-qr-note{
     <div id="qr-no-list" style="display:none"><div class="no-bin-warn">⚠️ リストが確定されていません<span>事務所タブでリストを確定してください</span></div></div>
     <div id="qr-content" style="display:none">
       <div class="sec-title">① 積込確認票・管理QR</div>
-      <div class="card"><div style="font-size:12px;color:var(--text-dim);margin-bottom:10px">工員スマホでこのQRを読み込むと、当日リストがスマホに保存されます</div><div class="mgmt-qr-wrap" id="mgmt-qr-wrap"></div></div>
-      <div style="display:flex;justify-content:center;margin:12px 0 20px">
-        <button class="btn-secondary" id="btn-print-kanri" onclick="printKanriTicket()" style="width:360px;max-width:100%;min-height:56px;font-size:17px;font-weight:900;border-radius:12px;background:var(--accent);color:#000;border:none;">🖨️ 積込確認票を印刷</button>
+      <div class="card admin-qr-layout">
+        <div class="admin-qr-left"><div class="mgmt-qr-wrap" id="mgmt-qr-wrap"></div></div>
+        <div class="admin-qr-action">
+          <button class="btn-secondary" id="btn-print-kanri" onclick="printKanriTicket()" style="width:360px;max-width:100%;min-height:56px;font-size:17px;font-weight:900;border-radius:12px;background:var(--accent);color:#000;border:none;">🖨️ 積込確認票を印刷</button>
+          <div class="admin-qr-note">この確認票を印刷して、工員スマホへ渡してください。<br>工員スマホで管理QRを読み込むと、当日リストが保存されます。</div>
+        </div>
       </div>
       <div class="sec-title" style="margin-top:4px">② 部材QRラベル</div>
       <div class="btn-row" style="gap:8px">
