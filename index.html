@@ -385,6 +385,27 @@ body.mode-admin{--admin-font-scale:1.05;}
 body.mode-admin #tabBtn-results{display:none !important;}
 #screen-app{min-height:0 !important;}
 
+/* ===== QR印刷タブ PC横並びレイアウト ===== */
+@media(min-width:640px){
+  body.mode-admin #qr-content .card{
+    display:grid;
+    grid-template-columns:260px 1fr;
+    gap:32px;
+    align-items:center;
+  }
+  body.mode-admin .mgmt-qr-wrap{
+    margin-top:0;
+  }
+  body.mode-admin #qr-content .card > div:first-child{
+    display:none;
+  }
+}
+body.mode-admin .admin-qr-note{
+  font-size:14px;
+  line-height:1.8;
+  color:var(--text-dim);
+}
+
 </style>
 </head>
 <body>
@@ -976,7 +997,8 @@ function renderScanTab(){const noBin=document.getElementById('scan-no-bin'),scan
 function renderUnscannedList(){const el=document.getElementById('unscanned-list');const scannedIds=new Set(appState.scanned.map(s=>s.id4));const unscanned=appState.parts.filter(p=>!scannedIds.has(p.id4));if(unscanned.length===0){el.innerHTML='<div style="color:var(--ok);font-size:13px;text-align:center;padding:12px">✅ 全部材積込済み</div>';return;}el.innerHTML=unscanned.map(p=>`<div class="unscanned-item" onclick="tapRegister('${p.id4}')"><div class="ui-id">${p.id4}</div><div class="ui-goban">${p.goban}</div><div class="ui-desc">${p.desc||''}</div></div>`).join('');}
 
 function renderQRTab(){const noList=document.getElementById('qr-no-list'),content=document.getElementById('qr-content');if(!appState.locked){noList.style.display='block';content.style.display='none';return;}noList.style.display='none';content.style.display='block';renderMgmtQR();renderQRGrid();}
-function renderMgmtQR(){const wrap=document.getElementById('mgmt-qr-wrap');wrap.innerHTML='';const ids=appState.parts.map(p=>[p.id4,p.goban]);const mgmtData={shipmentId:appState.binId,date:'',label:'',company:appState.companyName,ids:ids};const jsonStr=JSON.stringify(mgmtData);const byteLen=new TextEncoder().encode(jsonStr).length;const div=document.createElement('div');div.className='mgmt-qr-box';div.id='mgmt-qr-inner';wrap.appendChild(div);const img=document.createElement('img');img.style.cssText='width:220px;height:220px;display:block;margin:0 auto';img.alt='管理QR';div.appendChild(img);const label=document.createElement('div');label.className='mgmt-qr-label';label.innerHTML=`管理QR<br><span style="font-size:10px;color:#999">${byteLen}バイト</span>`;div.appendChild(label);const encoded=encodeURIComponent(jsonStr);img.src=`https://api.qrserver.com/v1/create-qr-code/?size=220x220&ecc=L&data=${encoded}`;img.onerror=()=>{img.style.display='none';const err=document.createElement('div');err.style.cssText='color:red;font-size:12px;margin-top:8px;text-align:center';err.textContent='QR生成失敗。オフラインか部材数が多すぎます。';div.appendChild(err);};}
+function renderMgmtQR(){const wrap=document.getElementById('mgmt-qr-wrap');wrap.innerHTML='';const ids=appState.parts.map(p=>[p.id4,p.goban]);const mgmtData={shipmentId:appState.binId,date:'',label:'',company:appState.companyName,ids:ids};const jsonStr=JSON.stringify(mgmtData);const byteLen=new TextEncoder().encode(jsonStr).length;const div=document.createElement('div');div.className='mgmt-qr-box';div.id='mgmt-qr-inner';wrap.appendChild(div);const img=document.createElement('img');img.style.cssText='width:220px;height:220px;display:block;margin:0 auto';img.alt='管理QR';div.appendChild(img);const label=document.createElement('div');label.className='mgmt-qr-label';label.innerHTML=`管理QR<br><span style="font-size:10px;color:#999">${byteLen}バイト</span>`;div.appendChild(label);const encoded=encodeURIComponent(jsonStr);img.src=`https://api.qrserver.com/v1/create-qr-code/?size=220x220&ecc=L&data=${encoded}`;img.onerror=()=>{img.style.display='none';const err=document.createElement('div');err.style.cssText='color:red;font-size:12px;margin-top:8px;text-align:center';err.textContent='QR生成失敗。オフラインか部材数が多すぎます。';div.appendChild(err);};
+const note=document.createElement('div');note.className='admin-qr-note';note.innerHTML='この確認票を印刷して、工員スマホへ渡してください。<br>工員スマホで管理QRを読み込むと、当日リストが保存されます。';wrap.appendChild(note);}
 function renderQRGrid(){const grid=document.getElementById('qr-grid');grid.innerHTML='';appState.parts.forEach(p=>{const qrData=`P:${appState.binId}:${p.id4}`;const card=document.createElement('div');card.className='qr-card';const qrId='qr_'+p.id4;card.innerHTML=`<div class="qc-id">ID:${p.id4}</div><div class="qc-goban">${p.goban}</div><div id="${qrId}"></div><div class="qc-bottom">${appState.companyName}</div>`;grid.appendChild(card);try{new QRCode(document.getElementById(qrId),{text:qrData,width:120,height:120,correctLevel:QRCode.CorrectLevel.H});}catch(e){}});}
 
 // ===== Excel取込（新仕様：固定列 A:合番 B:品名 C:束番号） =====
