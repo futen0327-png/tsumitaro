@@ -1603,7 +1603,8 @@ function printLabelSheet(){
     return;
   }
 
-  const labels = parts.map(p => {
+  // 10枚ごとにページ分割
+  const allLabels = parts.map(p => {
     const id4 = p.id4 ? String(p.id4).padStart(4,'0') : '0000';
     const qrData = `P:${appState.binId}:${p.id4}`;
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&ecc=H&data=${encodeURIComponent(qrData)}`;
@@ -1626,7 +1627,12 @@ function printLabelSheet(){
         </div>
       </div>
     `;
-  }).join('');
+  });
+  const pages = [];
+  for(let i = 0; i < allLabels.length; i += 10){
+    pages.push(`<div class="sheet">${allLabels.slice(i, i+10).join('')}</div>`);
+  }
+  const sheetsHtml = pages.join('');
 
   const html = `<!DOCTYPE html>
 <html lang="ja"><head><meta charset="UTF-8">
@@ -1725,18 +1731,26 @@ function printLabelSheet(){
   }
   @page{
     size:A4 portrait;
-    margin:10.5mm 17mm;
+    margin:0;
   }
   @media print{
     body{margin:0;padding:0}
     .sheet{
-      padding:0;
-      width:176mm;
+      margin:0;
+      padding:10.5mm 17mm;
+      page-break-inside:avoid;
     }
-    .label{border:none}
+    .label{
+      border:none;
+      page-break-inside:avoid;
+    }
+    .sheet-page{
+      page-break-after:always;
+      padding:10.5mm 17mm;
+    }
   }
 </style></head><body>
-<div class="sheet">${labels}</div>
+${sheetsHtml}
 <script>
   window.onload = function(){
     document.querySelectorAll('[data-goban]').forEach(function(el){
