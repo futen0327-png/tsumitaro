@@ -768,9 +768,10 @@ function applyMode(mode){
     officeBtn.style.display='';
     scanBtn.style.display='none';
     qrBtn.style.display='';
-    resultsBtn.style.display='';
-    // スキャンタブが選択中なら事務所に切替
-    if(document.getElementById('tab-scan').classList.contains('active')){switchTab('office');}
+    resultsBtn.style.display='none';
+    // スキャンタブまたは結果タブが選択中なら事務所に切替
+    if(document.getElementById('tab-scan').classList.contains('active')||
+       document.getElementById('tab-results').classList.contains('active')){switchTab('office');}
   }else{
     // 現場：スキャン・結果確認のみ（事務所・QR非表示）
     officeBtn.style.display='none';
