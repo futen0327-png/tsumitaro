@@ -1609,13 +1609,15 @@ function printLabelSheet(){
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&ecc=H&data=${encodeURIComponent(qrData)}`;
     return `
       <div class="label">
-        <div class="label-top">
-          <div class="label-qr-area">
+        <div class="label-body">
+          <div class="label-qr-wrap">
             <img class="label-qr" src="${qrUrl}" alt="QR">
           </div>
           <div class="label-info">
-            <div class="label-goban" data-goban="1">${p.goban || '—'}</div>
-            <div class="label-id">ID: ${id4}</div>
+            <div class="label-info-top">
+              <div class="label-goban" data-goban="1">${p.goban || '—'}</div>
+              <div class="label-id">ID: ${id4}</div>
+            </div>
             <div class="label-peel">読取後は剥がす</div>
           </div>
         </div>
@@ -1650,74 +1652,74 @@ function printLabelSheet(){
     border:0.3px solid #ccc;
     overflow:hidden;
   }
-  /* 上部エリア：44mm（52mm - つまみ8mm） */
-  .label-top{
-    width:84mm;
-    height:44mm;
+  .label-body{
     display:flex;
     flex-direction:row;
     align-items:center;
+    flex:1;
+    min-height:0;
   }
-  /* QRエリア：左6mm余白 + QR30mm + 右4mm = 40mm */
-  .label-qr-area{
-    width:40mm;
-    height:44mm;
+  .label-qr-wrap{
+    width:39mm;
     flex-shrink:0;
     display:flex;
     align-items:center;
     justify-content:center;
-    padding-left:6mm;
-    padding-right:4mm;
+    padding-left:7mm;
+    padding-right:2mm;
+    align-self:center;
   }
   .label-qr{
     width:30mm;
     height:30mm;
     display:block;
   }
-  /* 情報エリア：残り44mm幅、右10mm余白 */
   .label-info{
-    width:44mm;
-    height:44mm;
+    flex:1;
     display:flex;
     flex-direction:column;
-    padding-top:7mm;
-    padding-right:3mm;
+    justify-content:space-between;
+    align-self:stretch;
+    padding:4mm 5mm 3mm 1mm;
+    min-width:0;
+  }
+  .label-info-top{
+    display:flex;
+    flex-direction:column;
     gap:1mm;
+    margin-top:4mm;
   }
   .label-goban{
-    font-size:7mm;
+    font-size:11.5mm;
     font-weight:900;
     color:#000;
     font-family:'MS Gothic',monospace;
     white-space:nowrap;
     text-align:center;
     display:block;
-    line-height:1.1;
+    line-height:1.15;
   }
   .label-id{
-    font-size:3mm;
+    font-size:5.5mm;
     font-weight:700;
     color:#444;
     font-family:'MS Gothic',monospace;
   }
   .label-peel{
-    font-size:2.2mm;
+    font-size:3.5mm;
     color:#555;
     font-family:'MS Gothic',monospace;
-    margin-top:4mm;
   }
-  /* つまみエリア：8mm */
   .label-bottom{
-    width:84mm;
     height:8mm;
+    flex-shrink:0;
     border-top:0.3mm dashed #aaa;
     display:flex;
     align-items:center;
     padding-left:3mm;
-    flex-shrink:0;
   }
   .label-dottext{
-    font-size:2mm;
+    font-size:3.5mm;
     color:#999;
     font-family:'MS Gothic',monospace;
   }
@@ -1731,10 +1733,10 @@ function printLabelSheet(){
 <script>
   window.onload = function(){
     document.querySelectorAll('[data-goban]').forEach(function(el){
-      var fs = 7;
+      var fs = 11.5;
       el.style.fontSize = fs + 'mm';
       var maxW = el.parentElement.offsetWidth;
-      while(el.scrollWidth > maxW && fs > 3){
+      while(el.scrollWidth > maxW && fs > 4){
         fs -= 0.5;
         el.style.fontSize = fs + 'mm';
       }
