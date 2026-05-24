@@ -465,6 +465,108 @@ body.mode-admin .admin-qr-note{
   body.mode-admin .tabs{top:44px;}
 }
 
+/* ===== ログイン・ウェルカム画面 白系配色 ===== */
+#screen-login,
+#screen-welcome,
+#screen-loading{
+  background:#e9eef5 !important;
+  color:#1f2937;
+}
+.login-card{
+  background:#ffffff !important;
+  border-color:#d8dee6 !important;
+  box-shadow:0 8px 28px rgba(15,23,42,0.10);
+}
+.login-tagline,
+.welcome-tagline,
+.welcome-version,
+.loading-text{
+  color:#64748b !important;
+}
+.btn-welcome-sub,
+.mode-btn{
+  background:#ffffff !important;
+  color:#1f2937 !important;
+  border-color:#cbd5e1 !important;
+}
+.mode-btn span{
+  color:#64748b !important;
+}
+.mode-btn.selected{
+  background:#fff7ed !important;
+  color:#d97706 !important;
+  border-color:var(--accent-bright) !important;
+}
+.mode-btn.selected span{
+  color:#d97706 !important;
+}
+
+/* ===== 管理画面 追加修正 ===== */
+@media(min-width:640px){
+  body.mode-admin .mode-switch-btn{
+    background:#ffffff !important;
+    color:#1f2937 !important;
+    border:1px solid #cbd5e1 !important;
+    font-size:14px !important;
+    font-weight:800 !important;
+    min-height:38px;
+    padding:8px 14px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(15,23,42,0.08);
+  }
+  body.mode-admin .mode-switch-btn:hover{
+    background:#fff7ed !important;
+    border-color:var(--accent-bright) !important;
+    color:#d97706 !important;
+  }
+  body.mode-admin .upload-result-title{
+    color:#1f2937 !important;
+    font-size:16px !important;
+    font-weight:900 !important;
+    margin-bottom:12px;
+  }
+  body.mode-admin .part-item{
+    padding:14px 16px !important;
+    gap:14px;
+  }
+  body.mode-admin .pi-id{
+    width:76px !important;
+    min-width:76px !important;
+    flex:0 0 76px !important;
+    font-size:23px !important;
+    text-align:left;
+  }
+  body.mode-admin .pi-info{
+    padding-left:8px;
+    min-width:0;
+  }
+  body.mode-admin .pi-goban{
+    font-size:19px !important;
+    line-height:1.25;
+  }
+  body.mode-admin .pi-desc{
+    font-size:14px !important;
+  }
+  body.mode-admin .pi-bundle{
+    font-size:13px !important;
+    min-width:40px;
+    text-align:right;
+  }
+  body.mode-admin .admin-qr-card{
+    margin-bottom:42px !important;
+  }
+  body.mode-admin #tab-qr .sec-title{
+    margin-top:30px !important;
+    padding-top:4px;
+    padding-bottom:12px;
+    border-bottom:2px solid #d8dee6;
+  }
+  body.mode-admin #tab-qr .sec-title + .btn-row{
+    margin-top:18px;
+    margin-bottom:24px;
+  }
+}
+
 /* ===== ヘッダー調整 ===== */
 @media(min-width:640px){
   body.mode-admin .top-logo{display:none !important;}
