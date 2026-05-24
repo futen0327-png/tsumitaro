@@ -1724,12 +1724,15 @@ function printLabelSheet(){
     font-family:'MS Gothic',monospace;
   }
   @page{
-    margin:0;
     size:A4 portrait;
+    margin:10.5mm 17mm;
   }
   @media print{
-    body{margin:0}
-    .sheet{margin:0;padding:10.5mm 17mm}
+    body{margin:0;padding:0}
+    .sheet{
+      padding:0;
+      width:176mm;
+    }
     .label{border:none}
   }
 </style></head><body>
