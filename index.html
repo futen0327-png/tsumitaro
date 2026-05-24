@@ -1445,44 +1445,80 @@ function checkComplete(){const scannedIds=new Set(appState.scanned.map(s=>s.id4)
 function showAlarm(missing){playBeep('alarm');vibrate([500,200,500,200,500]);const list=document.getElementById('alarm-list');list.innerHTML=missing.map(p=>`<div class="alarm-item">▶ ${p.id4} — ${p.goban}${p.desc?' '+p.desc:''}</div>`).join('');document.getElementById('screen-alarm').style.display='block';}
 function backToScan(){document.getElementById('screen-alarm').style.display='none';document.getElementById('screen-complete').style.display='none';}
 function printKanriTicket(){
-  // 管理QRのSVG/canvas要素を取得
+  // 管理QRのimgタグを取得
   const qrWrap = document.getElementById('mgmt-qr-wrap');
-  const qrCanvas = qrWrap ? qrWrap.querySelector('canvas') : null;
-  const qrImgSrc = qrCanvas ? qrCanvas.toDataURL('image/png') : '';
+  let qrImg = qrWrap ? qrWrap.querySelector('img') : null;
 
+  // 管理QRが未生成の場合は自動生成してから印刷
+  if(!qrImg || !qrImg.src || qrImg.src === window.location.href){
+    if(!appState.locked || !appState.parts || appState.parts.length === 0){
+      alert('部材リストが確定されていません。\n事務所タブでリストを確定してから印刷してください。');
+      return;
+    }
+    // QRタブに切り替えてQRを生成
+    switchTab('qr');
+    renderQRTab();
+    // 生成完了を待って印刷
+    setTimeout(()=>{
+      qrImg = document.getElementById('mgmt-qr-wrap').querySelector('img');
+      if(!qrImg || !qrImg.src){
+        alert('管理QRの生成に失敗しました。\nQRタブを開いてQRが表示されてから印刷してください。');
+        return;
+      }
+      _execPrintKanri(qrImg.src);
+    }, 2000);
+    return;
+  }
+
+  // QR画像の読み込み完了を確認してから印刷
+  if(!qrImg.complete || qrImg.naturalWidth === 0){
+    qrImg.onload = () => _execPrintKanri(qrImg.src);
+    qrImg.onerror = () => {
+      alert('管理QRの読み込みに失敗しました。\nオンライン環境で再試行してください。');
+    };
+    return;
+  }
+
+  _execPrintKanri(qrImg.src);
+}
+
+function _execPrintKanri(qrImgSrc){
   const binName = appState.binId || '—';
-  const dateStr = appState.binId ? appState.binId.split('-').slice(0,3).join('/') : '—';
   const parts = appState.parts || [];
   const total = parts.length;
 
-  const rows = parts.map((p, i) => `
-    <tr>
-      <td>${String(i+1).padStart(2,'0')}</td>
+  // 4桁ゼロ埋め表示
+  const rows = parts.map((p, i) => {
+    const id4 = p.id4 ? String(p.id4).padStart(4,'0') : '—';
+    return `<tr>
+      <td style="text-align:center">${String(i+1).padStart(2,'0')}</td>
       <td>${p.goban || '—'}</td>
-      <td style="text-align:center">${p.id4 || '—'}</td>
+      <td style="text-align:center">${id4}</td>
       <td style="text-align:center">1</td>
       <td style="text-align:center">□</td>
-    </tr>
-  `).join('');
+    </tr>`;
+  }).join('');
 
   const html = `<!DOCTYPE html>
 <html lang="ja"><head><meta charset="UTF-8">
 <title>積込確認票</title>
 <style>
-  body{font-family:'MS Gothic',monospace;font-size:11pt;margin:0;padding:20px;color:#000}
-  h2{text-align:center;font-size:15pt;margin:0 0 8px}
-  .header-table{width:100%;border-collapse:collapse;margin-bottom:12px}
+  body{font-family:'MS Gothic',monospace;font-size:11pt;margin:0;padding:16px;color:#000}
+  h2{text-align:center;font-size:14pt;margin:0 0 6px}
+  .header-table{width:100%;border-collapse:collapse;margin-bottom:8px}
   .header-table td{padding:4px 8px;border:1px solid #000;font-size:10pt}
-  .qr-area{text-align:center;margin:10px 0}
+  .qr-area{text-align:center;margin:8px 0 4px}
   .qr-area img{width:130px;height:130px}
-  .status-box{border:1px solid #000;padding:8px 12px;margin:10px 0;font-size:10pt}
-  .status-box p{margin:4px 0}
-  table.parts{width:100%;border-collapse:collapse;font-size:10pt;margin-top:8px}
-  table.parts th,table.parts td{border:1px solid #000;padding:4px 6px}
+  .qr-note{text-align:center;font-size:9pt;margin:2px 0 8px;color:#333}
+  .status-box{border:1px solid #000;padding:6px 12px;margin:8px 0;font-size:10pt}
+  .status-box p{margin:3px 0}
+  table.parts{width:100%;border-collapse:collapse;font-size:10pt;margin-top:6px}
+  table.parts th,table.parts td{border:1px solid #000;padding:3px 6px}
   table.parts th{background:#eee;text-align:center}
-  .footer-box{border:1px solid #000;padding:8px 12px;margin-top:12px;font-size:10pt}
-  .footer-box p{margin:4px 0}
-  .divider{border-top:2px solid #000;margin:10px 0}
+  .footer-box{border:1px solid #000;padding:6px 12px;margin-top:10px;font-size:10pt}
+  .footer-box p{margin:3px 0}
+  .divider{border-top:2px solid #000;margin:8px 0}
+  .qr-warn{font-size:8pt;margin-top:8px;color:#333;border-top:1px solid #ccc;padding-top:6px}
   @media print{body{padding:0}}
 </style></head><body>
 <h2>ツミタロウ 積込確認票</h2>
@@ -1490,26 +1526,29 @@ function printKanriTicket(){
 <table class="header-table">
   <tr>
     <td>便ID</td><td>${binName}</td>
-    <td>出荷日</td><td>${dateStr}</td>
+    <td>積込担当</td><td>____________</td>
   </tr>
   <tr>
-    <td>積込担当</td><td>____________</td>
+    <td>出荷日</td><td>${new Date().toLocaleDateString('ja-JP')}</td>
     <td>時刻</td><td>_______</td>
   </tr>
 </table>
 <div class="qr-area">
-  ${qrImgSrc ? `<img src="${qrImgSrc}" alt="管理QR">` : '<p>（QR未生成）</p>'}
-  <p style="font-size:9pt;margin:4px 0">管理QR ▶ 工員スマホで読み込んでから現場へ</p>
+  <img src="${qrImgSrc}" alt="管理QR">
 </div>
+<div class="qr-note">▶ 管理QRを工員スマホで読み込んでから積込開始</div>
 <div class="divider"></div>
 <div class="status-box">
-  <p><strong>積込状況</strong></p>
-  <p>□ 未開始　　□ 積込中　　□ 完了</p>
+  <p><strong>積込状況</strong>　□ 未開始　　□ 積込中　　□ 完了</p>
 </div>
 <table class="parts">
   <thead>
     <tr>
-      <th>No</th><th>合番</th><th>4桁ID</th><th>本数</th><th>状況</th>
+      <th style="width:8%">No</th>
+      <th style="width:36%">合番</th>
+      <th style="width:16%">4桁ID</th>
+      <th style="width:12%">本数</th>
+      <th style="width:28%">状況</th>
     </tr>
   </thead>
   <tbody>${rows}</tbody>
@@ -1518,17 +1557,17 @@ function printKanriTicket(){
   <p><strong>積込結果メモ</strong></p>
   <p>________________________________</p>
   <p>________________________________</p>
-  <p style="margin-top:8px">予定：${total}点　　積込済：___点　　残り：___点</p>
+  <p style="margin-top:6px">予定：${total}点　　積込済：___点　　残り：___点</p>
 </div>
-<div style="font-size:8pt;margin-top:8px;color:#666">
-  【QRシール注意】点線を鋼材端に合わせて貼付。合番を隠さず、水濡れ・粉じん・油分に注意。読取後は剥がしてから積込。
+<div class="qr-warn">
+  【QRシール注意】点線を鋼材端に合わせる／合番を隠さない／読取後は剥がす
 </div>
 </body></html>`;
 
   const win = window.open('','_blank','width=800,height=900');
   win.document.write(html);
   win.document.close();
-  win.onload = () => win.print();
+  setTimeout(() => win.print(), 1500);
 }
 
 function forceComplete(){
