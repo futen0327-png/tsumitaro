@@ -531,26 +531,6 @@ body.mode-admin{--admin-font-scale:1.05;}
     </div>
   </div>
   </div>
-  <!-- 結果確認タブ -->
-  <div class="tab-pane" id="tab-results">
-    <div class="results-header">
-      <div class="sec-title">📊 積込結果確認</div>
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
-        <input type="date" id="results-filter-date" style="flex:1;padding:8px;background:var(--steel-light);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px">
-        <button class="btn-secondary" id="btn-results-reload" onclick="loadResults()" style="flex:none;padding:8px 14px;font-size:13px">🔄 更新</button>
-      </div>
-    </div>
-    <div id="results-loading" style="display:none;text-align:center;padding:24px;color:var(--text-dim);font-size:13px">読込中...</div>
-    <div id="results-empty" style="display:none"><div class="empty-state">この日の結果データはありません</div></div>
-    <div id="results-list"></div>
-
-    <!-- 未送信データ表示 -->
-    <div id="unsent-section" style="margin-top:20px;display:none">
-      <div class="sec-title" style="color:var(--warn)">⚠️ 未送信データ</div>
-      <div id="unsent-list"></div>
-      <button class="btn-secondary" onclick="retryAllUnsent()" style="width:100%;margin-top:8px;padding:10px">🔁 未送信データを再送する</button>
-    </div>
-  </div>
   <div class="tab-pane" id="tab-scan">
     <div id="scan-no-bin" style="display:none;margin-bottom:8px">
       <div class="no-bin-warn">⚠️ 管理QRが未読込です<span>下のカメラで管理QRを読み込んでください</span></div>
