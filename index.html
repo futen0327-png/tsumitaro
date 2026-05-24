@@ -777,7 +777,7 @@ function applyMode(mode){
     officeBtn.style.display='none';
     scanBtn.style.display='';
     qrBtn.style.display='none';
-    resultsBtn.style.display='';
+    resultsBtn.style.display='none';
     // 事務所やQRタブが選択中ならスキャンに切替
     const activeTab=document.querySelector('.tab-pane.active');
     if(activeTab&&(activeTab.id==='tab-office'||activeTab.id==='tab-qr')){switchTab('scan');}
