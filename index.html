@@ -428,6 +428,43 @@ body.mode-admin .admin-qr-note{
   .admin-qr-action{align-items:center;text-align:center;}
 }
 
+/* ===== PC管理画面 白系配色 ===== */
+@media(min-width:640px){
+  body.mode-admin{background:#e9eef5;}
+  body.mode-admin #screen-app{background:#f3f5f7;color:#1f2937;border-left:1px solid #d8dee6;border-right:1px solid #d8dee6;}
+  body.mode-admin .top-bar{background:#ffffff;border-bottom:2px solid var(--accent);}
+  body.mode-admin .tabs{background:#ffffff;border-bottom:1px solid #d8dee6;}
+  body.mode-admin .tab-btn{color:#334155;background:#ffffff;}
+  body.mode-admin .tab-btn.active{color:#111827;background:#fff7ed;border-bottom-color:var(--accent-bright);}
+  body.mode-admin .admin-status-bar{background:#ffffff;color:#1f2937;border-bottom:1px solid #d8dee6;box-shadow:0 1px 4px rgba(15,23,42,0.06);}
+  body.mode-admin .tab-pane{background:#f3f5f7;color:#1f2937;}
+  body.mode-admin .sec-title{color:#d97706;border-bottom-color:#d8dee6;}
+  body.mode-admin .admin-qr-card,
+  body.mode-admin .card,
+  body.mode-admin .part-item,
+  body.mode-admin .upload-result,
+  body.mode-admin .template-dl-btn,
+  body.mode-admin .upload-area{background:#ffffff;color:#1f2937;border-color:#d8dee6;box-shadow:0 4px 14px rgba(15,23,42,0.06);}
+  body.mode-admin .admin-qr-note,
+  body.mode-admin .upload-text,
+  body.mode-admin .step-label,
+  body.mode-admin .pi-desc,
+  body.mode-admin .pi-bundle,
+  body.mode-admin .upload-stat-label{color:#64748b;}
+  body.mode-admin .upload-area{background:#fffdf5;border-color:#f59e0b;}
+  body.mode-admin .upload-warn{background:#fff7ed;color:#9a3412;border-left:4px solid var(--warn);}
+  body.mode-admin .parts-list{background:transparent;}
+  body.mode-admin .pi-goban{color:#111827;}
+  body.mode-admin .pi-id{color:#d97706;}
+  body.mode-admin .step-circle{background:#ffffff;color:#334155;border-color:#cbd5e1;}
+  body.mode-admin .step-circle.done{background:#16a34a;color:#ffffff;border-color:#16a34a;}
+  body.mode-admin .step-circle.active{background:#f59e0b;color:#111827;border-color:#f59e0b;}
+  body.mode-admin .mgmt-qr-box{background:#ffffff;border:1px solid #cbd5e1;box-shadow:0 8px 24px rgba(15,23,42,0.12);}
+  body.mode-admin .mgmt-qr-label{color:#475569;}
+  body.mode-admin .top-bar{height:44px;}
+  body.mode-admin .tabs{top:44px;}
+}
+
 /* ===== ヘッダー調整 ===== */
 @media(min-width:640px){
   body.mode-admin .top-logo{display:none !important;}
