@@ -66,6 +66,9 @@ body{font-family:'Hiragino Kaku Gothic ProN','Meiryo',sans-serif;background:var(
 .bin-pill{font-size:12px;text-align:right;line-height:1.5;}
 .bin-pill strong{display:block;font-size:14px;color:var(--text);}
 .status-ok{color:var(--ok);} .status-exp{color:var(--danger);font-weight:700;}
+.admin-status-bar{max-width:900px;margin:0 auto;padding:10px 16px;background:rgba(28,43,58,0.9);border-bottom:1px solid var(--border);text-align:center;font-size:17px;font-weight:900;color:var(--text);}
+.admin-status-bar .status-ok{color:var(--ok);margin-left:10px;}
+.admin-status-bar .status-warn{color:var(--warn);margin-left:10px;}
 
 /* タブ */
 .tabs{display:flex;background:var(--steel-mid);border-bottom:1px solid var(--border);position:sticky;top:52px;z-index:99;}
@@ -496,6 +499,9 @@ body.mode-admin .admin-qr-note{
     <button class="tab-btn" onclick="switchTab('scan')" id="tabBtn-scan">📱 スキャン</button>
     <button class="tab-btn" onclick="switchTab('qr')" id="tabBtn-qr">🖨️ QR印刷</button>
     <button class="tab-btn" onclick="switchTab('results')" id="tabBtn-results">📊 結果確認</button>
+  </div>
+  <div class="admin-status-bar" id="admin-status-bar">
+    <span id="admin-status-count" style="color:var(--text-dim)">読込件数：未設定</span><span id="admin-status-lock" class="status-warn">　リスト未確定</span>
   </div>
   <div class="tab-pane active" id="tab-office">
 
@@ -980,11 +986,25 @@ async function retryAllUnsent(){
 
 function renderAll(){renderTopBar();renderOfficeTab();renderScanTab();renderQRTab();}
 function renderTopBar(){
-  const el=document.getElementById('top-bin-pill');
-  if(!el)return;
-  if(!appState.binId){el.innerHTML='<span style="color:var(--text-dim);font-size:11px">未設定</span>';return;}
-  const s=appState.locked?'<span class="status-ok">✓ 確定済</span>':'';
-  el.innerHTML=`<strong>${appState.parts.length}件</strong>${s}`;
+  const pill=document.getElementById('top-bin-pill');
+  if(pill) pill.innerHTML='';
+  const countEl=document.getElementById('admin-status-count');
+  const lockEl=document.getElementById('admin-status-lock');
+  if(!countEl||!lockEl)return;
+  if(!appState.binId||appState.parts.length===0){
+    countEl.innerHTML='<span style="color:var(--text-dim)">読込件数：未設定</span>';
+    lockEl.className='status-warn';
+    lockEl.textContent='　リスト未確定';
+    return;
+  }
+  countEl.innerHTML=`読込件数：<strong>${appState.parts.length}件</strong>`;
+  if(appState.locked){
+    lockEl.className='status-ok';
+    lockEl.textContent='　✓ リスト確定済';
+  }else{
+    lockEl.className='status-warn';
+    lockEl.textContent='　リスト未確定';
+  }
 }
 function renderOfficeTab(){
   const locked=appState.locked;
