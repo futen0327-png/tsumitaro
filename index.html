@@ -1603,27 +1603,34 @@ function printLabelSheet(){
     return;
   }
 
-  // A-ONE 31286 仕様
-  // A4・18面・ラベルサイズ 70mm × 42.3mm
-  // 3列 × 6行
-  // 上下余白 13.5mm、左右余白 8mm、列間隔 0mm、行間隔 0mm
+  // A-ONE 31251 仕様
+  // A4・10面・角丸タイプ
+  // ラベルサイズ：84mm × 52mm
+  // 2列 × 5行
+  // 上下余白：10.5mm、左右余白：17mm
+  // 列間：8mm、行間：4mm
+  // つまみしろ（点線）：8mm
 
   const labels = parts.map(p => {
     const id4 = p.id4 ? String(p.id4).padStart(4,'0') : '0000';
     const qrData = `P:${appState.binId}:${p.id4}`;
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&ecc=H&data=${encodeURIComponent(qrData)}`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&ecc=H&data=${encodeURIComponent(qrData)}`;
     return `
       <div class="label">
-        <div class="label-main">
-          <img class="label-qr" src="${qrUrl}" alt="QR">
+        <div class="label-body">
+          <div class="label-qr-wrap">
+            <img class="label-qr" src="${qrUrl}" alt="QR">
+          </div>
           <div class="label-info">
-            <div class="label-id">ID:${id4}</div>
-            <div class="label-goban">${p.goban || '—'}</div>
+            <div class="label-info-top">
+              <div class="label-goban" data-goban="1">${p.goban || '—'}</div>
+              <div class="label-id">ID: ${id4}</div>
+            </div>
             <div class="label-peel">読取後は剥がす</div>
           </div>
         </div>
-        <div class="label-dotline">
-          <span class="label-dottext">点線を鋼材端に合わせる</span>
+        <div class="label-bottom">
+          <span class="label-dottext">▲ 点線を鋼材端に合わせる</span>
         </div>
       </div>
     `;
@@ -1634,76 +1641,100 @@ function printLabelSheet(){
 <title>QRラベルシート</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  body{
-    font-family:'MS Gothic',monospace;
-    background:white;
-  }
+  body{font-family:'MS Gothic',monospace;background:white}
   .sheet{
     width:210mm;
-    padding-top:13.5mm;
-    padding-bottom:13.5mm;
-    padding-left:8mm;
-    padding-right:8mm;
+    padding-top:10.5mm;
+    padding-bottom:10.5mm;
+    padding-left:17mm;
+    padding-right:17mm;
     display:grid;
-    grid-template-columns:repeat(3, 70mm);
-    grid-template-rows:repeat(6, 42.3mm);
-    gap:0;
+    grid-template-columns:repeat(2,84mm);
+    grid-template-rows:repeat(5,52mm);
+    column-gap:8mm;
+    row-gap:4mm;
   }
   .label{
-    width:70mm;
-    height:42.3mm;
+    width:84mm;
+    height:52mm;
     display:flex;
     flex-direction:column;
-    justify-content:space-between;
     overflow:hidden;
-    border:0.3px solid #ccc; /* 確認用・実際は消してもよい */
+    border-radius:4mm;
+    border:0.3px solid #ccc;
   }
-  .label-main{
+  .label-body{
     display:flex;
     flex-direction:row;
     align-items:center;
     flex:1;
-    padding:2mm 2mm 0 2mm;
-    gap:2mm;
+    min-height:0;
+    padding:0 5px 0 5px;
+  }
+  .label-qr-wrap{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:78px;
+    flex-shrink:0;
+    padding:0 4px 0 14px;
+    align-self:center;
   }
   .label-qr{
-    width:25mm;
-    height:25mm;
+    width:30mm;
+    height:30mm;
     flex-shrink:0;
     display:block;
   }
   .label-info{
     display:flex;
     flex-direction:column;
-    justify-content:center;
+    justify-content:space-between;
     flex:1;
-    gap:1mm;
+    padding:8px 10px 6px 2px;
+    min-width:0;
+    align-self:stretch;
   }
-  .label-id{
-    font-size:14pt;
-    font-weight:900;
-    letter-spacing:0.05em;
-    color:#000;
+  .label-info-top{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    margin-top:8px;
   }
   .label-goban{
-    font-size:10pt;
-    font-weight:700;
+    font-size:23px;
+    font-weight:900;
     color:#000;
+    font-family:'MS Gothic',monospace;
+    letter-spacing:0.02em;
+    line-height:1.15;
+    text-align:center;
+    white-space:nowrap;
+    display:block;
+  }
+  .label-id{
+    font-size:11px;
+    font-weight:700;
+    color:#444;
+    font-family:'MS Gothic',monospace;
   }
   .label-peel{
     font-size:7pt;
     color:#555;
-    margin-top:1mm;
+    font-family:'MS Gothic',monospace;
   }
-  .label-dotline{
-    border-top:1px dashed #999;
-    padding:1mm 2mm;
+  .label-bottom{
+    flex-shrink:0;
+    border-top:1px dashed #aaa;
+    height:8mm;
     display:flex;
     align-items:center;
+    padding:0 6px;
   }
   .label-dottext{
-    font-size:6pt;
-    color:#777;
+    font-size:7pt;
+    color:#999;
+    font-family:'MS Gothic',monospace;
   }
   @media print{
     body{margin:0}
@@ -1711,16 +1742,27 @@ function printLabelSheet(){
     .label{border:none}
   }
 </style></head><body>
-<div class="sheet">
-  ${labels}
-</div>
+<div class="sheet">${labels}</div>
+<script>
+  // 描画後に各合番の幅を計測してフォントを自動縮小
+  window.onload = function(){
+    document.querySelectorAll('[data-goban]').forEach(function(el){
+      var fs = 23;
+      el.style.fontSize = fs + 'px';
+      var maxW = el.parentElement.offsetWidth;
+      while(el.scrollWidth > maxW && fs > 10){
+        fs--;
+        el.style.fontSize = fs + 'px';
+      }
+    });
+    setTimeout(function(){ window.print(); }, 500);
+  };
+<\/script>
 </body></html>`;
 
-  const win = window.open('','_blank','width=900,height:1000');
+  const win = window.open('','_blank','width=900,height=1000');
   win.document.write(html);
   win.document.close();
-  // QR画像の読み込みを待ってから印刷
-  setTimeout(() => win.print(), 3000);
 }
 
 function forceComplete(){
