@@ -571,6 +571,50 @@ body.mode-admin .admin-qr-note{
   }
 }
 
+/* ===== 管理画面 読込結果・ボタン改善 ===== */
+@media(min-width:640px){
+  body.mode-admin .upload-result{
+    background:#ffffff !important;
+    border:1px solid #d8dee6 !important;
+    box-shadow:0 4px 14px rgba(15,23,42,0.06);
+  }
+  body.mode-admin .upload-stats{
+    gap:14px;
+  }
+  body.mode-admin .upload-stat{
+    background:#fff7ed !important;
+    border:1px solid #fed7aa !important;
+    padding:14px 10px !important;
+    border-radius:10px;
+  }
+  body.mode-admin .upload-stat-val{
+    font-size:30px !important;
+    font-weight:900 !important;
+    color:#d97706 !important;
+  }
+  body.mode-admin .upload-stat-label{
+    font-size:15px !important;
+    font-weight:800 !important;
+    color:#334155 !important;
+    margin-top:6px;
+  }
+  body.mode-admin #btn-confirm-list{
+    min-height:58px !important;
+    font-size:18px !important;
+    font-weight:900 !important;
+    border-radius:10px;
+  }
+  body.mode-admin #btn-reset-list,
+  body.mode-admin #btn-reset-list-locked,
+  body.mode-admin .btn-danger-outline{
+    min-height:46px;
+    font-size:15px !important;
+    font-weight:800 !important;
+    padding:0 18px;
+    border-radius:8px;
+  }
+}
+
 /* ===== ヘッダー調整 ===== */
 @media(min-width:640px){
   body.mode-admin .top-logo{display:none !important;}
