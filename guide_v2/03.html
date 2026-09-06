@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>【比較用試作】03 合番・部材QRの読み取り方｜ツミタロウ 使い方</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="guide.css">
+<link rel="stylesheet" href="03.css?rev=13c">
+</head>
+<body class="v2-page-03">
+
+<div class="v2-topbar">
+  <div class="v2-topbar-brand"><span class="dot"></span>ツミタロウ<span class="v2-topbar-sub">&nbsp;使い方</span></div>
+  <span class="v2-topbar-tag">比較用試作（No.86V2-07B）</span>
+</div>
+
+<main class="v2-main">
+  <header class="v2-header">
+    <span class="v2-badge">03</span>
+    <div class="v2-header-text">
+      <h1 class="v2-title">合番・部材QRの読み取り方</h1>
+      <p class="v2-lead">カメラで合番や部材QRを読み取り、出荷リストの部材と照合します。</p>
+      <p class="v2-lead">うまく読めないときは、別の方法に切り替えられます。</p>
+    </div>
+  </header>
+
+  <div class="read-dual-panels">
+    <section class="v2-panel read-panel read-panel--ocr" aria-labelledby="ocr-title">
+      <h2 id="ocr-title" class="read-panel-title">A. 合番を読む（OCR）</h2>
+
+      <div class="read-process-grid read-process-grid--five">
+        <article class="read-process-step">
+          <div class="read-process-head"><span class="read-process-number">1</span><h3>カメラを向ける</h3></div>
+          <figure class="read-phone-frame">
+            <img src="assets/03_ocr_step1.png" width="121" height="262" alt="部材の合番G2-B1をカメラ枠に収めた画面">
+          </figure>
+          <p>合番が書かれた部材にカメラを向けます。</p>
+        </article>
+        <div class="read-flow-arrow" aria-hidden="true"></div>
+
+        <article class="read-process-step">
+          <div class="read-process-head"><span class="read-process-number">2</span><h3>読み取り中</h3></div>
+          <figure class="read-phone-frame">
+            <img src="assets/03_ocr_step2.png" width="119" height="262" alt="合番G2-B1を読み取っている画面">
+          </figure>
+          <p>文字を読み取ります。少し動かすと読みやすくなります。</p>
+        </article>
+        <div class="read-flow-arrow" aria-hidden="true"></div>
+
+        <article class="read-process-step">
+          <div class="read-process-head"><span class="read-process-number">3</span><h3>照合・候補表示</h3></div>
+          <figure class="read-phone-frame read-phone-frame--ui" aria-label="候補を選んでください。G2-B1、G2-B7、G2-GIの3件を表示する画面">
+            <div class="read-candidate-screen">
+              <p class="read-candidate-prompt"><span>候補を</span><span>選んでください。</span></p>
+              <div class="read-candidate-list">
+                <div><span>1．</span><strong>G2-B1</strong></div>
+                <div><span>2．</span><strong>G2-B7</strong></div>
+                <div><span>3．</span><strong>G2-GI</strong></div>
+              </div>
+              <span class="read-candidate-cancel">キャンセル</span>
+            </div>
+          </figure>
+          <p>出荷リストと照合し、一致度の高い順に候補を表示します。</p>
+        </article>
+        <div class="read-flow-arrow" aria-hidden="true"></div>
+
+        <article class="read-process-step">
+          <div class="read-process-head"><span class="read-process-number">4</span><h3>内容を確認</h3></div>
+          <figure class="read-phone-frame read-phone-frame--ui" aria-label="G2-B1を数量2/5で積込済にするか確認する画面">
+            <div class="read-confirm-screen read-confirm-screen--ocr">
+              <span class="read-confirm-question">この合番を<br>積込済にしますか？</span>
+              <strong class="read-confirm-part">G2-B1</strong>
+              <span class="read-confirm-quantity">数量 2 / 5</span>
+              <span class="read-confirm-button read-confirm-button--primary">積込済にする</span>
+              <span class="read-confirm-button read-confirm-button--cancel">いいえ</span>
+            </div>
+          </figure>
+          <p>内容を確認し『確認して積込済にする』をタップします。</p>
+        </article>
+        <div class="read-flow-arrow" aria-hidden="true"></div>
+
+        <article class="read-process-step">
+          <div class="read-process-head"><span class="read-process-number">5</span><h3>積込完了</h3></div>
+          <figure class="read-phone-frame read-phone-frame--ui">
+            <div class="read-status-screen">
+              <div class="read-status-summary">
+                <span class="read-status-label">積込状況</span>
+                <div class="read-status-counts">
+                  <strong>0 / 3</strong>
+                  <span>完了</span>
+                  <b>残り3件</b>
+                </div>
+              </div>
+              <div class="read-status-item">
+                <strong>G2-B1</strong>
+                <span>△ 一部完了</span>
+                <small>2/5</small>
+              </div>
+            </div>
+          </figure>
+          <p>積込状況は『一覧から選ぶ』で確認できます。</p>
+        </article>
+      </div>
+
+      <aside class="read-help-box" aria-labelledby="ocr-help-title">
+        <div class="read-help-heading">
+          <svg viewBox="0 0 28 28" aria-hidden="true" focusable="false"><rect x="4" y="7" width="20" height="16" rx="2"/><path d="M8 7l2-3h8l2 3M9 15a5 5 0 1 0 10 0 5 5 0 0 0-10 0Z"/></svg>
+          <div><h3 id="ocr-help-title">読み取れない・照合できないとき</h3><p>以下の方法に切り替えてください。</p></div>
+        </div>
+        <div class="read-help-options">
+          <div class="read-help-option">
+            <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><rect x="5" y="8" width="22" height="18" rx="2"/><path d="m10 8 2-3h8l2 3M11 17a5 5 0 1 0 10 0 5 5 0 0 0-10 0Z"/></svg>
+            <div><strong>もう一度読む</strong><span>カメラを調整して再度試します。</span></div>
+          </div>
+          <div class="read-help-option">
+            <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M8 24h16a6 6 0 0 0 .6-12A9 9 0 0 0 7.2 10.2 7 7 0 0 0 8 24Z"/><path d="M11 17h10M16 12v10"/></svg>
+            <div><strong>AIで読む</strong><span>AI（プロ機能）で再度読み取ります。</span></div>
+          </div>
+          <p class="read-help-alternative">それでも難しい場合は、<strong>部材QR</strong>または<strong>一覧から選ぶ</strong>を利用できます。</p>
+        </div>
+      </aside>
+    </section>
+
+    <section class="v2-panel read-panel read-panel--qr" aria-labelledby="qr-title">
+      <h2 id="qr-title" class="read-panel-title">B. 部材QRを読む</h2>
+
+      <div class="read-process-grid read-process-grid--four">
+        <article class="read-process-step">
+          <div class="read-process-head"><span class="read-process-number">1</span><h3>QRに向ける</h3></div>
+          <figure class="read-phone-frame">
+            <img src="assets/03_qr_step1.png" width="121" height="262" alt="部材に貼られたG2-B1のQRコードへカメラを向けた画面">
+          </figure>
+          <p>部材に貼られたQRコードにカメラを向けます。</p>
+        </article>
+        <div class="read-flow-arrow" aria-hidden="true"></div>
+
+        <article class="read-process-step">
+          <div class="read-process-head"><span class="read-process-number">2</span><h3>読み取り中</h3></div>
+          <figure class="read-phone-frame">
+            <img src="assets/03_qr_step2.png" width="121" height="262" alt="QRコードを読み取っている画面">
+          </figure>
+          <p>QRコードを読み取ります。</p>
+        </article>
+        <div class="read-flow-arrow" aria-hidden="true"></div>
+
+        <article class="read-process-step">
+          <div class="read-process-head"><span class="read-process-number">3</span><h3>内容を確認</h3></div>
+          <figure class="read-phone-frame read-phone-frame--ui" aria-label="G2-B1を数量2/5で積込済にするか確認する画面">
+            <div class="read-confirm-screen read-confirm-screen--qr">
+              <span class="read-confirm-question">この合番を<br>積込済にしますか？</span>
+              <strong class="read-confirm-part">G2-B1</strong>
+              <span class="read-confirm-quantity">数量 2 / 5</span>
+              <span class="read-confirm-button read-confirm-button--primary">積込済にする</span>
+              <span class="read-confirm-button read-confirm-button--cancel">いいえ</span>
+            </div>
+          </figure>
+          <p>内容を確認し『確認して積込済にする』をタップします。</p>
+        </article>
+        <div class="read-flow-arrow" aria-hidden="true"></div>
+
+        <article class="read-process-step">
+          <div class="read-process-head"><span class="read-process-number">4</span><h3>積込完了</h3></div>
+          <figure class="read-phone-frame read-phone-frame--ui">
+            <div class="read-status-screen">
+              <div class="read-status-summary">
+                <span class="read-status-label">積込状況</span>
+                <div class="read-status-counts">
+                  <strong>0 / 3</strong>
+                  <span>完了</span>
+                  <b>残り3件</b>
+                </div>
+              </div>
+              <div class="read-status-item">
+                <strong>G2-B1</strong>
+                <span>△ 一部完了</span>
+                <small>2/5</small>
+              </div>
+            </div>
+          </figure>
+          <p>積込状況は『一覧から選ぶ』で確認できます。</p>
+        </article>
+      </div>
+
+      <aside class="read-tip-box" aria-labelledby="qr-tip-title">
+        <div class="read-tip-copy">
+          <h3 id="qr-tip-title">
+            <svg viewBox="0 0 28 28" aria-hidden="true" focusable="false"><path d="M9 19c-2-1.7-3-4-3-6.5a8 8 0 1 1 16 0c0 2.5-1 4.8-3 6.5-.8.7-1.2 1.6-1.2 2.5h-7.6c0-.9-.4-1.8-1.2-2.5Z"/><path d="M11 24h6M12 27h4"/></svg>
+            QR 読み取りのコツ
+          </h3>
+          <ul>
+            <li>部材に対してまっすぐ、15〜30cmの距離で読み取ります。</li>
+            <li>暗い場所はライトを使うと読みやすくなります。</li>
+            <li>反射や影があるときは、角度を変えてみてください。</li>
+          </ul>
+        </div>
+        <div class="read-distance-diagram">
+          <img src="assets/03_qr_tip_diagram.png" width="340" height="199" alt="スマホ、15〜30cmの両向き点線矢印、部材QRの距離説明図">
+        </div>
+      </aside>
+    </section>
+  </div>
+
+  <section class="v2-panel read-list-panel" aria-labelledby="list-method-title">
+    <div class="read-list-intro">
+      <p>どの方法でも<br>うまくいかないとき</p>
+      <h2 id="list-method-title">一覧から選ぶ</h2>
+      <p>を活用してください。</p>
+    </div>
+
+    <div class="read-parts-figure">
+      <div class="read-parts-screen">
+        <img src="assets/03_parts_list.png" width="269" height="131" alt="部材一覧（未積込）。G2-B1 数量5 2/5、G2-B7 数量1 0/1、TAB-001 数量3 1/3。">
+        <img class="read-tap-icon" src="assets/03_tap_icon.png" width="81" height="83" alt="" aria-hidden="true">
+      </div>
+      <p>部材一覧から対象の合番をタップして、積込できます。</p>
+    </div>
+
+    <aside class="read-warning" aria-labelledby="warning-title">
+      <svg viewBox="0 0 52 46" aria-hidden="true" focusable="false"><path d="M22 5a5 5 0 0 1 8 0l20 34a5 5 0 0 1-4 7H6a5 5 0 0 1-4-7Z"/><path d="M26 15v14M26 37v1"/></svg>
+      <div><h2 id="warning-title">重要</h2><p>読み取った結果を自動で確定しません。<br>必ず内容を確認してから積込登録してください。</p></div>
+    </aside>
+  </section>
+
+  <nav class="read-pager" aria-label="前後ページ案内">
+    <a class="read-pager-item read-pager-item--prev" href="02.html"><span aria-hidden="true">←</span><strong>前へ（02 出荷リストを選ぶ）</strong></a>
+    <a class="read-pager-item read-pager-item--next" href="04.html"><strong>次へ（04 積込確認から完了へ）</strong><span aria-hidden="true">→</span></a>
+  </nav>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>【比較用試作】01 出荷リストを準備する｜ツミタロウ 使い方</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="guide.css">
+<link rel="stylesheet" href="01.css?rev=13e">
+</head>
+<body class="v2-page-01">
+
+<div class="v2-topbar">
+  <div class="v2-topbar-brand"><span class="dot"></span>ツミタロウ<span class="v2-topbar-sub">&nbsp;使い方</span></div>
+  <span class="v2-topbar-tag">比較用試作（No.86V2-05B）</span>
+</div>
+
+<main class="v2-main">
+  <div class="v2-header">
+    <span class="v2-badge">01</span>
+    <div class="v2-header-text">
+      <h1 class="v2-title">出荷リストを準備する</h1>
+      <p class="v2-lead">積込を始める前に、部材の「出荷リスト」を作ります。</p>
+      <p class="v2-lead">スマホだけでも、PCのExcelからでも作成できます。</p>
+    </div>
+  </div>
+
+  <div class="prep-methods">
+    <section class="prep-panel prep-panel--phone" aria-labelledby="phone-method-title">
+      <div class="prep-panel-heading">
+        <span class="prep-method-icon prep-method-icon--phone" aria-hidden="true">
+          <svg viewBox="0 0 64 64" focusable="false"><rect x="20" y="9" width="25" height="46" rx="4" fill="currentColor"/><rect x="23" y="14" width="19" height="33" rx="1.5" fill="#fff"/><path d="m32.5 23 7 8-7 8-7-8Z" fill="var(--gold)"/><path d="M29 12h7M31 51h3" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </span>
+        <div class="prep-heading-copy">
+          <h2 id="phone-method-title" class="prep-method-title"><span>スマホで作る</span><span>かんたんリスト</span></h2>
+          <span class="prep-recommended">おすすめ</span>
+        </div>
+      </div>
+
+      <div class="prep-phone-demo">
+        <ol class="prep-step-list">
+          <li class="prep-step prep-step--1">
+            <span class="prep-step-number" aria-hidden="true">1</span>
+            <span class="prep-step-copy">出荷日を<wbr>決める</span>
+            <svg class="prep-step-arrow" viewBox="0 0 48 20" aria-hidden="true" focusable="false"><path d="M1 10h30"/><path class="prep-arrow-tip" d="m30 1 18 9-18 9Z"/></svg>
+          </li>
+          <li class="prep-step prep-step--2">
+            <span class="prep-step-number" aria-hidden="true">2</span>
+            <span class="prep-step-copy">合番・数量を<wbr>追加する</span>
+            <svg class="prep-step-arrow prep-step-arrow--up" viewBox="0 0 48 46" aria-hidden="true" focusable="false"><path d="M2 44V24Q2 10 16 10h16"/><path class="prep-arrow-tip" d="m30 1 18 9-18 9Z"/></svg>
+          </li>
+          <li class="prep-step prep-step--3">
+            <span class="prep-step-number" aria-hidden="true">3</span>
+            <span class="prep-step-copy">出荷リストを<wbr>作成</span>
+            <svg class="prep-step-arrow prep-step-arrow--down" viewBox="0 0 48 46" aria-hidden="true" focusable="false"><path d="M2 2v20q0 14 14 14h16"/><path class="prep-arrow-tip" d="m30 27 18 9-18 9Z"/></svg>
+          </li>
+        </ol>
+
+        <figure class="prep-phone-shell">
+          <div class="prep-phone-screen">
+            <!-- 正本の内画面のみ。切り出し範囲は左上(250,294)、右下(547,835)、右下を含まない。
+                 元の端末枠・ノッチは透明化。原寸297×541pxで保存し、補間・拡大は行わない。 -->
+            <img src="assets/01_phone_screen.png" width="297" height="541" alt="かんたんリスト。出荷日2026/07/01。1F-01・図面番号D-01・数量10本、1F-02・図面番号D-02・数量6本、2F-01・図面番号D-03・数量4本。合番を追加、出荷リストを作成。下部タブはリスト、下書き、履歴、設定。">
+          </div>
+        </figure>
+      </div>
+
+      <div class="prep-phone-note">
+        <span class="prep-input-icons" aria-hidden="true">
+          <span class="prep-input-icon"><svg viewBox="0 0 40 40" focusable="false"><rect x="15" y="5" width="10" height="20" rx="5" fill="currentColor"/><path d="M10 18v2a10 10 0 0 0 20 0v-2M20 30v5M14 35h12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></span>
+          <span class="prep-input-icon"><svg viewBox="0 0 40 40" focusable="false"><path d="M5 12h8l3-5h9l3 5h7v22H5Z" fill="currentColor"/><circle cx="20" cy="23" r="7" fill="none" stroke="#fff" stroke-width="2.5"/><circle cx="31" cy="16" r="1.5" fill="#fff"/></svg></span>
+        </span>
+        <p>合番は文字入力のほか、音声入力や図面撮影からも追加できます。</p>
+      </div>
+    </section>
+
+    <section class="prep-panel prep-panel--pc" aria-labelledby="pc-method-title">
+      <div class="prep-panel-heading">
+        <span class="prep-method-icon prep-method-icon--pc" aria-hidden="true">
+          <svg viewBox="0 0 64 64" focusable="false"><rect x="13" y="13" width="39" height="29" rx="2" fill="currentColor"/><rect x="16" y="16" width="33" height="23" fill="#fff"/><path d="m13 42-7 9q0 3 4 3h45q3 0 3-3l-6-9Z" fill="currentColor"/><path d="M28 48h10l2 3H26Z" fill="#fff"/></svg>
+        </span>
+        <h2 id="pc-method-title" class="prep-method-title"><span>PCで作る</span><span>Excel</span></h2>
+      </div>
+
+      <!-- 画面内もHTMLで再現し、狭い幅でも操作名・ファイル名・表の全3行を折り返して保持する。
+           これは説明図。操作ボタンに見える要素は静的なspanであり、送信・選択処理は持たない。 -->
+      <figure class="prep-pc-screen" aria-labelledby="pc-screen-caption">
+        <figcaption id="pc-screen-caption" class="prep-sr-only">PCのツミタロウ管理画面で出荷リストを作成する例</figcaption>
+        <div class="prep-pc-topbar">
+          <span class="prep-pc-brand"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m12 2 9 5v10l-9 5-9-5V7Zm0 0v10m9-5-9 5-9-5m9 5v10M7.5 4.5l9 5v5l-4.5 2.5-4.5-2.5v-5l9-5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg><span>ツミタロウ 管理画面</span></span>
+          <span class="prep-pc-logout">ログアウト</span>
+        </div>
+        <div class="prep-pc-body">
+          <h3 class="prep-pc-title">出荷リストの作成</h3>
+          <ol class="prep-pc-actions">
+            <li><span class="prep-pc-step-number" aria-hidden="true">1</span><span class="prep-ui-action prep-ui-action--select"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 7V5h7l2 3h9v12H3Zm0 4h18M6 11V8h3" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>出荷リストExcelを選択</span></span></li>
+            <li><span class="prep-pc-step-number" aria-hidden="true">2</span><span class="prep-ui-action prep-ui-action--create"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m7 12 3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>出荷データを作成</span></span></li>
+          </ol>
+          <div class="prep-selected-file">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 2h8l5 5v15H6Zm8 0v6h5M9 12h7M9 16h7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+            <span class="prep-file-name"><span>選択中のファイル：</span> <span>shipment_list_20260701.xlsx</span></span>
+            <span class="prep-file-clear">クリア</span>
+          </div>
+          <h3 class="prep-table-title">Excel内容の確認</h3>
+          <div class="prep-table-frame">
+            <table class="prep-data-table">
+              <caption class="prep-sr-only">選択した出荷リストExcelの内容</caption>
+              <colgroup><col class="prep-col-mark"><col class="prep-col-drawing"><col class="prep-col-count"><col class="prep-col-date"></colgroup>
+              <thead><tr><th scope="col">合番</th><th scope="col">図面番号</th><th scope="col">数量</th><th scope="col">出荷日</th></tr></thead>
+              <tbody>
+                <tr><td>1F-01</td><td>D-01</td><td>10</td><td>2026/07/01</td></tr>
+                <tr><td>1F-02</td><td>D-02</td><td>6</td><td>2026/07/01</td></tr>
+                <tr><td>2F-01</td><td>D-03</td><td>4</td><td>2026/07/01</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </figure>
+
+      <div class="prep-excel-note">
+        <svg class="prep-excel-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect x="23" y="9" width="34" height="46" rx="3" fill="#21a366"/><path d="M32 16h19v5H32Zm0 10h19v5H32Zm0 10h19v5H32Zm0 10h19v4H32Z" fill="#d8f2df"/><path d="m6 15 29-6v46L6 49Z" fill="#107c41"/><path d="m14 24 12 17m0-17L14 41" fill="none" stroke="#fff" stroke-width="4"/></svg>
+        <p>Excelには「合番」「数量」「出荷日」を入力します。</p>
+      </div>
+    </section>
+  </div>
+
+  <div class="prep-merge" aria-hidden="true">
+    <svg class="prep-merge-desktop" viewBox="0 0 1040 42" preserveAspectRatio="none" focusable="false"><path d="M236 0v10q0 16 16 16h514q16 0 16-16V0M520 26v8"/><path class="prep-arrow-tip" d="m510 31 10 11 10-11Z"/></svg>
+    <svg class="prep-merge-mobile" viewBox="0 0 300 44" preserveAspectRatio="none" focusable="false"><path d="M1 0v14q0 14 14 14h141V0M150 28v8"/><path class="prep-arrow-tip" d="m142 34 8 10 8-10Z"/></svg>
+  </div>
+
+  <div class="prep-complete"><svg viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="m4 17 8 8L29 7" fill="none" stroke="currentColor" stroke-width="5" stroke-linejoin="round"/></svg><span>出荷リストの準備完了</span></div>
+  <svg class="prep-next-arrow" viewBox="0 0 20 24" aria-hidden="true" focusable="false"><path d="M10 0v19m-6-6 6 8 6-8"/></svg>
+  <a class="prep-next" href="02.html"><span>次は、出荷リストを選びます</span><svg viewBox="0 0 32 24" aria-hidden="true" focusable="false"><path d="M2 12h27m-9-8 9 8-9 8"/></svg></a>
+</main>
+
+</body>
+</html>

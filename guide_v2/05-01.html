@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>【比較用試作】05-01 音声で操作する（その1）｜ツミタロウ 使い方</title>
+<link rel="stylesheet" href="guide.css">
+<link rel="stylesheet" href="05-01.css?rev=13c">
+<link rel="icon" href="data:,">
+</head>
+<body class="v2-page-05-01">
+
+<div class="v2-topbar">
+  <div class="v2-topbar-brand"><span class="dot"></span>ツミタロウ<span class="v2-topbar-sub">&nbsp;使い方</span></div>
+  <span class="v2-topbar-tag">比較用試作（No.86V2-08A）</span>
+</div>
+
+<main class="v2-main">
+  <div class="voice-hero">
+    <header class="v2-header">
+      <span class="v2-badge">05-01</span>
+      <div class="v2-header-text">
+        <h1 class="v2-title">音声で操作する<span>（その1）</span></h1>
+        <p class="v2-lead">ツミタロウの音声機能は、積込作業を「声だけ」で素早くサポートします。</p>
+      </div>
+    </header>
+
+    <aside class="voice-experimental" aria-label="実験機能の注意">
+      <svg viewBox="0 0 44 50" aria-hidden="true" focusable="false">
+        <path d="M17 4h10M22 4v12L9 39a5 5 0 0 0 4 7h18a5 5 0 0 0 4-7L22 16"/>
+        <path d="M13 34h18M19 28h6"/>
+      </svg>
+      <div><strong>実験機能</strong><p>周囲の騒音や話し方により、正しく認識できない場合があります。</p></div>
+    </aside>
+  </div>
+
+  <section class="v2-panel voice-assistant" aria-labelledby="assistant-title">
+    <h2 id="assistant-title" class="voice-section-title">積込作業中の音声アシスタント（声で操作）</h2>
+    <p class="voice-section-lead">スマホと会話するように、積込・取消・確認ができます。</p>
+
+    <div class="voice-methods">
+      <article class="voice-method voice-method--together">
+        <header class="voice-method-head">
+          <span class="voice-method-number">1</span>
+          <h3>まとめて話す <small>（1回の発話で完結）</small></h3>
+        </header>
+        <p class="voice-method-desc">合番と作業内容をまとめて話します。</p>
+
+        <div class="voice-conversation voice-conversation--together">
+          <div class="voice-turn voice-turn--user">
+            <svg class="voice-person" viewBox="0 0 54 54" aria-hidden="true" focusable="false">
+              <circle cx="21" cy="15" r="9"/><path d="M8 45c1-12 6-19 13-19s12 7 13 19Z"/><path d="M38 18l7-4M39 24h9M38 30l7 4"/>
+            </svg>
+            <div class="voice-bubble">「G2-B1を<br>2本積込」</div>
+          </div>
+          <span class="voice-arrow voice-arrow--right" aria-hidden="true"></span>
+          <div class="voice-reply voice-reply--success"><b>♪ 積込成功音</b><span>G2-B1を2本<br>積込完了しました。<br>積込済：2本　残り：3本</span><span class="voice-check" aria-hidden="true">✓</span></div>
+        </div>
+      </article>
+
+      <article class="voice-method voice-method--split">
+        <header class="voice-method-head">
+          <span class="voice-method-number">2</span>
+          <h3>分けて話す <small>（短い言葉で素早く操作）</small></h3>
+        </header>
+        <p class="voice-method-desc">合番と作業内容を分けて話すことで、短い言葉でテンポよく操作できます。</p>
+
+        <div class="voice-split-step">
+          <h4><span>1</span>合番を話す</h4>
+          <div class="voice-split-flow">
+            <div class="voice-turn voice-turn--user">
+              <svg class="voice-person" viewBox="0 0 54 54" aria-hidden="true" focusable="false">
+                <circle cx="21" cy="15" r="9"/><path d="M8 45c1-12 6-19 13-19s12 7 13 19Z"/><path d="M38 18l7-4M39 24h9M38 30l7 4"/>
+              </svg>
+              <div class="voice-bubble">「ジーツー、<br>ハイフン、<br>ビーワン」</div>
+            </div>
+            <span class="voice-arrow voice-arrow--right" aria-hidden="true"></span>
+            <div class="voice-sound">G2-B1ですね。<br>何をしますか？</div>
+          </div>
+        </div>
+
+        <div class="voice-split-step">
+          <h4><span>2</span>作業内容を話す</h4>
+          <div class="voice-split-flow">
+            <div class="voice-turn voice-turn--user">
+              <svg class="voice-person" viewBox="0 0 54 54" aria-hidden="true" focusable="false">
+                <circle cx="21" cy="15" r="9"/><path d="M8 45c1-12 6-19 13-19s12 7 13 19Z"/><path d="M38 18l7-4M39 24h9M38 30l7 4"/>
+              </svg>
+              <div class="voice-bubble">「2本積込」</div>
+            </div>
+            <span class="voice-arrow voice-arrow--right" aria-hidden="true"></span>
+            <div class="voice-reply voice-reply--success"><b>♪ 積込成功音</b><span>G2-B1を2本<br>積込完了しました。<br>積込済：2本　残り：3本</span><span class="voice-check" aria-hidden="true">✓</span></div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="v2-panel voice-commands" aria-labelledby="commands-title">
+    <h2 id="commands-title" class="voice-subtitle"><span aria-hidden="true"></span>よく使う命令 <small>（いつでも使えます）</small></h2>
+    <div class="voice-command-grid">
+      <article class="voice-command voice-command--load">
+        <div class="voice-command-head">
+          <svg viewBox="0 0 44 44" aria-hidden="true" focusable="false"><path d="M7 8h30v28H7Z"/><path d="m7 8 15 14L37 8M7 36l12-12M37 36 25 24"/></svg>
+          <h3>積込</h3>
+        </div>
+        <p class="voice-command-example">「G2-B1を2本積込」</p>
+        <p>指定した合番と数量を積込します。</p>
+      </article>
+
+      <article class="voice-command voice-command--cancel">
+        <div class="voice-command-head">
+          <svg viewBox="0 0 44 44" aria-hidden="true" focusable="false"><path d="M13 12H5v-8"/><path d="M6 12a17 17 0 1 1 1 22"/></svg>
+          <h3>取消</h3>
+        </div>
+        <p class="voice-command-example">「G2-B1を1本取消」</p>
+        <p>直前の積込を取消します。<br>（全部取消も可能です）</p>
+      </article>
+
+      <article class="voice-command voice-command--check">
+        <div class="voice-command-head">
+          <svg viewBox="0 0 44 44" aria-hidden="true" focusable="false"><path d="M12 8h20v30H12Z"/><path d="M17 8V4h10v4M17 16h10M17 23h10M17 30h7"/></svg>
+          <h3>確認</h3>
+        </div>
+        <p class="voice-command-example">「確認して」</p>
+        <p>現在の積込状況を音声でお知らせします。</p>
+      </article>
+
+      <article class="voice-command voice-command--repeat">
+        <div class="voice-command-head">
+          <svg viewBox="0 0 44 44" aria-hidden="true" focusable="false"><path d="M8 31c-3-3-5-7-5-11C3 11 11 4 21 4s18 7 18 16-8 16-18 16c-3 0-5 0-8-1l-7 5 2-9Z"/><path d="M17 16c1-4 8-4 9 0 1 3-4 4-4 7M22 29h.01"/></svg>
+          <h3>聞き直し</h3>
+        </div>
+        <p class="voice-command-example">「もう一度言って」</p>
+        <p>うまく認識できなかったときに使います。</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="v2-panel voice-tips" aria-labelledby="tips-title">
+    <h2 id="tips-title">
+      <svg viewBox="0 0 36 46" aria-hidden="true" focusable="false"><path d="M9 28C5 25 3 20 3 16a15 15 0 1 1 30 0c0 5-2 9-6 12-2 2-3 4-3 7H12c0-3-1-5-3-7Z"/><path d="M12 36h12M13 41h10"/></svg>
+      認識しやすくするコツ
+    </h2>
+    <ul>
+      <li>合番は、アルファベットを一文字ずつはっきり発音すると認識しやすくなります。<br><span>（例）G2-B1 →「ジーツー、ハイフン、ビーワン」</span></li>
+      <li>ゆっくり、はっきり話す</li>
+      <li>周囲の騒音をなるべく避ける</li>
+      <li>合番と数字を区切って話す
+        <span class="voice-tip-example"><span>（例）「G2-B1を、</span><span>にほん、つみこみ」</span></span>
+      </li>
+    </ul>
+  </section>
+
+  <nav class="voice-pager" aria-label="前後ページ案内">
+    <a class="voice-pager-item voice-pager-item--prev" href="04.html"><span aria-hidden="true">←</span><strong>前へ（04 積込確認から完了まで）</strong></a>
+    <a class="voice-pager-item voice-pager-item--next" href="05-02.html"><strong>次へ（05-02 音声で操作する その2）</strong><span aria-hidden="true">→</span></a>
+  </nav>
+</main>
+
+</body>
+</html>

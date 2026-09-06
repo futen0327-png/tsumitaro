@@ -1,0 +1,744 @@
+/* ============================================================
+   ツミタロウ 使い方 07ページ 比較用試作（No.86V2-11A）
+   正本「07_FAQ・用語集.png」を基準に、FAQ・用語集を
+   HTML/CSSとインラインSVGで再構築する。
+   ============================================================ */
+
+.v2-page-07 {
+  --guide7-blue: #0d3f88;
+  --guide7-blue-soft: #eef5ff;
+  --guide7-green: #07834c;
+  --guide7-green-soft: #effaf5;
+  --guide7-yellow: #ffc824;
+  --guide7-line: #bed3ee;
+  --guide7-ink: #102750;
+  overflow-x: visible;
+}
+
+.v2-page-07 .guide7-symbols {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.v2-page-07 .v2-main {
+  max-width: 1180px;
+  padding-top: 30px;
+}
+
+.v2-page-07 .guide7-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 318px;
+  gap: 28px;
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.v2-page-07 .v2-header {
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.v2-page-07 .v2-badge {
+  width: 76px;
+  height: 66px;
+  border-radius: 12px;
+  background: var(--navy);
+  color: #fff;
+  box-shadow: 0 3px 0 var(--navy-dark), 0 6px 14px rgba(16, 48, 94, 0.12);
+}
+
+.v2-page-07 .v2-header-text {
+  min-width: 0;
+}
+
+.v2-page-07 .v2-title {
+  font-size: clamp(34px, 3.5vw, 48px);
+}
+
+.v2-page-07 .guide7-hero-note {
+  min-height: 92px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 82px;
+  align-items: end;
+  gap: 8px;
+  padding: 0;
+  color: var(--guide7-ink);
+}
+
+.v2-page-07 .guide7-note-card {
+  min-height: 88px;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border: 2px solid var(--guide7-ink);
+  border-radius: 12px;
+  background: #fff;
+  font-size: 16px;
+  line-height: 1.6;
+  box-shadow: 0 4px 10px rgba(18, 42, 82, 0.08);
+}
+
+.v2-page-07 .guide7-note-line {
+  display: block;
+}
+
+.v2-page-07 .guide7-note-line--keep {
+  white-space: nowrap;
+}
+
+.v2-page-07 .guide7-hero-note svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.v2-page-07 .guide7-hero-bulb {
+  width: 30px;
+  height: 30px;
+  color: #e1ad00;
+}
+
+.v2-page-07 .guide7-hero-person {
+  width: 82px;
+  height: auto;
+  align-self: end;
+  object-fit: contain;
+}
+
+.v2-page-07 .guide7-section {
+  position: relative;
+  padding: 58px 18px 18px;
+  margin-bottom: 22px;
+}
+
+.v2-page-07 .guide7-section-title {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 265px;
+  padding: 7px 22px;
+  border-radius: 12px 0 12px 0;
+  color: #fff;
+}
+
+.v2-page-07 .guide7-section-title h2 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.35;
+  font-weight: 900;
+}
+
+.v2-page-07 .guide7-section-title--faq {
+  background: var(--guide7-blue);
+}
+
+.v2-page-07 .guide7-section-title--glossary {
+  background: var(--guide7-green);
+}
+
+.v2-page-07 .guide7-faq {
+  border-color: #9dbde7;
+}
+
+.v2-page-07 .guide7-faq-list {
+  display: grid;
+  gap: 10px;
+}
+
+.v2-page-07 .guide7-faq-card {
+  display: grid;
+  grid-template-columns: minmax(280px, 34%) minmax(0, 1fr);
+  min-width: 0;
+  border: 1px solid var(--guide7-line);
+  border-radius: 12px;
+  background: linear-gradient(90deg, #fff 0%, #fbfdff 100%);
+  overflow: hidden;
+}
+
+.v2-page-07 .guide7-question,
+.v2-page-07 .guide7-answer {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px;
+}
+
+.v2-page-07 .guide7-question {
+  align-items: center;
+  color: var(--guide7-blue);
+  background: var(--guide7-blue-soft);
+}
+
+.v2-page-07 .guide7-question h3 {
+  min-width: 0;
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.55;
+  font-weight: 900;
+}
+
+.v2-page-07 .guide7-answer {
+  border-left: 1px dashed #b6c9de;
+}
+
+.v2-page-07 .guide7-answer > div {
+  min-width: 0;
+}
+
+.v2-page-07 .guide7-answer p {
+  margin: 0;
+  color: #1b2739;
+  font-size: 14.5px;
+  line-height: 1.75;
+  font-weight: 650;
+}
+
+.v2-page-07 .guide7-answer a {
+  display: inline-block;
+  margin-top: 5px;
+  color: var(--guide7-blue);
+  font-size: 13px;
+  line-height: 1.6;
+  font-weight: 800;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.v2-page-07 .guide7-mark {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font: 900 17px/1 system-ui, sans-serif;
+}
+
+.v2-page-07 .guide7-mark--q {
+  background: var(--guide7-blue);
+}
+
+.v2-page-07 .guide7-mark--a {
+  background: var(--guide7-green);
+}
+
+.v2-page-07 .guide7-caution {
+  margin-top: 7px !important;
+  color: #9b3f25 !important;
+  font-size: 12.5px !important;
+}
+
+.v2-page-07 .guide7-glossary {
+  border-color: #9ed4ba;
+}
+
+.v2-page-07 .guide7-glossary-head {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 18px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+}
+
+.v2-page-07 .guide7-glossary-head .guide7-section-title {
+  position: static;
+  min-width: 150px;
+}
+
+.v2-page-07 .guide7-glossary-head > p {
+  margin: 0 0 0 18px;
+  color: var(--guide7-ink);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.v2-page-07 .guide7-glossary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.v2-page-07 .guide7-glossary-column {
+  min-width: 0;
+  padding: 0 12px;
+  border: 1px solid #b9dccc;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #fff 0%, #fbfffd 100%);
+}
+
+.v2-page-07 .guide7-term {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  padding: 15px 6px;
+  border-bottom: 1px dotted #9fc9b5;
+}
+
+.v2-page-07 .guide7-term:last-child {
+  border-bottom: 0;
+}
+
+.v2-page-07 .guide7-term > svg {
+  width: 48px;
+  height: 48px;
+  fill: none;
+  stroke: var(--guide7-green);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.v2-page-07 .guide7-glossary-column:first-child .guide7-term:nth-child(odd) > svg,
+.v2-page-07 .guide7-glossary-column:last-child .guide7-term:nth-child(even) > svg {
+  stroke: var(--guide7-blue);
+}
+
+.v2-page-07 .guide7-term > div {
+  min-width: 0;
+}
+
+.v2-page-07 .guide7-term h3 {
+  margin: 0 0 3px;
+  color: var(--guide7-green);
+  font-size: 17px;
+  line-height: 1.45;
+  font-weight: 900;
+}
+
+.v2-page-07 .guide7-term p {
+  margin: 0;
+  color: #1d2b3f;
+  font-size: 13.5px;
+  line-height: 1.7;
+  font-weight: 650;
+}
+
+.v2-page-07 .guide7-term .guide7-example {
+  margin-top: 4px;
+  color: var(--guide7-blue);
+  font-weight: 850;
+}
+
+.v2-page-07 .guide7-assurance {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 22px;
+  padding: 16px 22px;
+  border: 1.5px solid #b8d8cc;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--guide7-ink);
+}
+
+.v2-page-07 .guide7-assurance-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.v2-page-07 .guide7-assurance-title svg {
+  width: 28px;
+  height: 28px;
+  fill: none;
+  stroke: #d9a800;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.v2-page-07 .guide7-assurance-title h2 {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.4;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.v2-page-07 .guide7-assurance ul {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.v2-page-07 .guide7-assurance li {
+  position: relative;
+  padding: 8px 9px 8px 31px;
+  border-radius: 8px;
+  background: var(--guide7-green-soft);
+  font-size: 12.5px;
+  line-height: 1.5;
+  font-weight: 800;
+}
+
+.v2-page-07 .guide7-assurance li::before {
+  content: "✓";
+  position: absolute;
+  top: 8px;
+  left: 9px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--guide7-green);
+  color: #fff;
+  font: 900 11px/1 system-ui, sans-serif;
+}
+
+.v2-page-07 .guide7-pager {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.v2-page-07 .guide7-pager-link {
+  min-width: 0;
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  border: 1.5px solid #9db9e3;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--guide7-blue);
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.v2-page-07 .guide7-pager-link--next {
+  justify-content: center;
+  border-color: var(--navy);
+  background: var(--navy);
+  color: #fff;
+  text-align: center;
+}
+
+.v2-page-07 .guide7-pager-link--next:hover,
+.v2-page-07 .guide7-pager-link--next:focus-visible,
+.v2-page-07 .guide7-pager-link--next:active {
+  color: #fff;
+}
+
+.v2-page-07 .guide7-pager-link small {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  opacity: .9;
+}
+
+.v2-page-07 .guide7-pager-arrow {
+  flex: 0 0 auto;
+  font-size: 29px;
+  line-height: 1;
+}
+
+@media (min-width: 901px) {
+  .v2-page-07 .guide7-hero {
+    grid-template-columns: minmax(0, 1fr) 340px;
+  }
+
+  .v2-page-07 .guide7-note-card {
+    height: 105px;
+  }
+}
+
+@media (max-width: 900px) {
+  .v2-page-07 .guide7-hero {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .v2-page-07 .guide7-hero-note {
+    max-width: 420px;
+    justify-self: end;
+  }
+
+  .v2-page-07 .guide7-faq-card {
+    grid-template-columns: minmax(220px, 35%) minmax(0, 1fr);
+  }
+
+  .v2-page-07 .guide7-question,
+  .v2-page-07 .guide7-answer {
+    padding: 15px;
+  }
+
+  .v2-page-07 .guide7-glossary-grid {
+    gap: 12px;
+  }
+
+  .v2-page-07 .guide7-term {
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .v2-page-07 .guide7-term > svg {
+    width: 40px;
+    height: 40px;
+  }
+
+  .v2-page-07 .guide7-assurance {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 640px) {
+  .v2-page-07 .v2-main {
+    padding: 18px 12px 40px;
+  }
+
+  .v2-page-07 .guide7-hero {
+    gap: 13px;
+    margin-bottom: 16px;
+  }
+
+  .v2-page-07 .v2-header {
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .v2-page-07 .v2-badge {
+    width: 54px;
+    height: 50px;
+    border-radius: 9px;
+    font-size: 21px;
+  }
+
+  .v2-page-07 .v2-title {
+    margin-top: 1px;
+    font-size: 25px;
+  }
+
+  .v2-page-07 .v2-lead {
+    font-size: 13px;
+    line-height: 1.65;
+  }
+
+  .v2-page-07 .guide7-hero-note {
+    width: 100%;
+    max-width: none;
+    min-height: 76px;
+    grid-template-columns: minmax(0, 1fr) 68px;
+    gap: 8px;
+    padding: 0;
+  }
+
+  .v2-page-07 .guide7-note-card {
+    min-height: 72px;
+    grid-template-columns: 29px minmax(0, 1fr);
+    gap: 8px;
+    padding: 8px 10px 8px 14px;
+    font-size: 13px;
+  }
+
+  .v2-page-07 .guide7-hero-bulb {
+    width: 26px;
+    height: 26px;
+  }
+
+  .v2-page-07 .guide7-hero-person {
+    width: 68px;
+    height: auto;
+  }
+
+  .v2-page-07 .guide7-section {
+    padding: 48px 9px 10px;
+    margin-bottom: 16px;
+    border-radius: 12px;
+  }
+
+  .v2-page-07 .guide7-section-title {
+    min-width: 220px;
+    padding: 6px 15px;
+  }
+
+  .v2-page-07 .guide7-section-title h2 {
+    font-size: 19px;
+  }
+
+  .v2-page-07 .guide7-faq-list {
+    gap: 9px;
+  }
+
+  .v2-page-07 .guide7-faq-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .v2-page-07 .guide7-question,
+  .v2-page-07 .guide7-answer {
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .v2-page-07 .guide7-question {
+    min-height: 56px;
+  }
+
+  .v2-page-07 .guide7-question h3 {
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  .v2-page-07 .guide7-answer {
+    border-top: 1px dashed #b6c9de;
+    border-left: 0;
+  }
+
+  .v2-page-07 .guide7-answer p {
+    font-size: 13px;
+    line-height: 1.75;
+  }
+
+  .v2-page-07 .guide7-answer a {
+    font-size: 12px;
+  }
+
+  .v2-page-07 .guide7-mark {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .v2-page-07 .guide7-caution {
+    font-size: 11.5px !important;
+  }
+
+  .v2-page-07 .guide7-glossary-head {
+    right: 9px;
+    height: 40px;
+  }
+
+  .v2-page-07 .guide7-glossary-head .guide7-section-title {
+    min-width: 102px;
+  }
+
+  .v2-page-07 .guide7-glossary-head > p {
+    margin-left: 10px;
+    font-size: 11.5px;
+    line-height: 1.4;
+  }
+
+  .v2-page-07 .guide7-glossary-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .v2-page-07 .guide7-glossary-column {
+    padding: 0 8px;
+  }
+
+  .v2-page-07 .guide7-term {
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 10px;
+    padding: 13px 4px;
+  }
+
+  .v2-page-07 .guide7-term > svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .v2-page-07 .guide7-term h3 {
+    font-size: 15px;
+  }
+
+  .v2-page-07 .guide7-term p {
+    font-size: 12.5px;
+    line-height: 1.7;
+  }
+
+  .v2-page-07 .guide7-assurance {
+    padding: 14px 12px;
+  }
+
+  .v2-page-07 .guide7-assurance-title h2 {
+    font-size: 16px;
+    white-space: normal;
+  }
+
+  .v2-page-07 .guide7-assurance ul {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 7px;
+  }
+
+  .v2-page-07 .guide7-assurance li {
+    font-size: 12px;
+  }
+
+  .v2-page-07 .guide7-pager {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 9px;
+    margin-top: 14px;
+  }
+
+  .v2-page-07 .guide7-pager-link {
+    min-height: 62px;
+    padding: 11px 13px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 340px) {
+  .v2-page-07 .v2-main {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .v2-page-07 .v2-header {
+    gap: 9px;
+  }
+
+  .v2-page-07 .v2-badge {
+    width: 48px;
+    height: 46px;
+    font-size: 19px;
+  }
+
+  .v2-page-07 .v2-title {
+    font-size: 23px;
+  }
+
+  .v2-page-07 .v2-lead {
+    font-size: 12.5px;
+  }
+
+  .v2-page-07 .guide7-question,
+  .v2-page-07 .guide7-answer {
+    padding: 10px;
+  }
+
+  .v2-page-07 .guide7-glossary-head > p {
+    font-size: 10.5px;
+  }
+
+  .v2-page-07 .guide7-term {
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .v2-page-07 .guide7-term > svg {
+    width: 32px;
+    height: 32px;
+  }
+}

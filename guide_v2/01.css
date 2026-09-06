@@ -1,0 +1,580 @@
+/* No.86V2-05B — 01専用。共通のguide.cssと04ページは変更しない。
+   正本: 01_出荷リストを準備する.png (1402×1122px)。
+   スマホ画面だけ原寸で切り出し、端末枠・説明・PC画面・接続線はHTML/CSS/SVGで描く。 */
+
+.v2-page-01 {
+  overflow-x: visible;
+}
+
+.v2-page-01 .v2-badge {
+  border-radius: 14px;
+  background: var(--navy);
+  color: #fff;
+  box-shadow: 0 3px 0 var(--navy-dark), 0 6px 14px rgba(16, 30, 60, 0.1);
+}
+
+.v2-page-01 .v2-header-text,
+.v2-page-01 .prep-methods > *,
+.v2-page-01 .prep-panel-heading > *,
+.v2-page-01 .prep-phone-demo > * {
+  min-width: 0;
+}
+
+.v2-page-01 .prep-methods {
+  display: grid;
+  grid-template-columns: minmax(0, 612fr) minmax(0, 702fr);
+  align-items: stretch;
+  gap: 28px;
+}
+
+.v2-page-01 .prep-panel {
+  position: relative;
+  padding: 14px 17px 16px;
+  border: 1.5px solid;
+  border-radius: 14px;
+  color: var(--navy-dark);
+}
+
+.v2-page-01 .prep-panel--phone {
+  background: linear-gradient(135deg, #fffaf0, #fffdf5);
+  border-color: #efe4c6;
+}
+
+.v2-page-01 .prep-panel--pc {
+  background: linear-gradient(135deg, #f2f7ff, #f6f9ff);
+  border-color: #d3e1f7;
+}
+
+.v2-page-01 .prep-panel-heading {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-height: 65px;
+  margin-bottom: 8px;
+  padding: 0 8px;
+}
+
+.v2-page-01 .prep-method-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 64px;
+  width: 64px;
+  height: 64px;
+  border: 1px solid;
+  border-radius: 50%;
+}
+
+.v2-page-01 .prep-method-icon svg { width: 58px; height: 58px; }
+.v2-page-01 .prep-method-icon--phone { background: #fff0b3; border-color: var(--gold); }
+.v2-page-01 .prep-method-icon--pc { background: #d9edff; border-color: #51a4ff; }
+
+.v2-page-01 .prep-heading-copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 4px 12px;
+}
+
+.v2-page-01 .prep-method-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1.3;
+}
+
+.v2-page-01 .prep-method-title > span { display: block; }
+
+.v2-page-01 .prep-recommended {
+  padding: 3px 11px;
+  border-radius: 999px;
+  background: var(--gold);
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 900;
+}
+
+.v2-page-01 .prep-phone-demo {
+  display: grid;
+  grid-template-columns: minmax(0, 190fr) minmax(0, 324fr) minmax(0, 50fr);
+  align-items: stretch;
+}
+
+.v2-page-01 .prep-step-list {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.v2-page-01 .prep-step {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: start;
+  gap: 6px;
+  padding-right: 10px;
+  font-size: 15px;
+  font-weight: 850;
+  line-height: 1.5;
+}
+
+.v2-page-01 .prep-step--1 { top: 14%; }
+.v2-page-01 .prep-step--2 { top: 39.5%; }
+.v2-page-01 .prep-step--3 { top: 73%; }
+.v2-page-01 .prep-step-copy { padding-top: 7px; }
+
+.v2-page-01 .prep-step-number {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--gold);
+  font-size: 25px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.v2-page-01 .prep-step-arrow {
+  position: absolute;
+  top: 10px;
+  right: -12px;
+  z-index: 3;
+  width: 35px;
+  height: 16px;
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.v2-page-01 .prep-step-arrow--up { top: -11px; height: 34px; }
+.v2-page-01 .prep-step-arrow--down { top: 17px; height: 34px; }
+.v2-page-01 .prep-arrow-tip { fill: var(--gold); stroke: none; }
+
+/* No.86V2-05C（修正版）: PCの案内矢印を上下だけ個別調整。 */
+@media (min-width: 901px) {
+  .v2-page-01 .prep-step--1 .prep-step-arrow { top: 16px; }
+  .v2-page-01 .prep-step--2 .prep-step-arrow { top: -17px; }
+  .v2-page-01 .prep-step--3 .prep-step-arrow { top: 23px; }
+}
+
+.v2-page-01 .prep-phone-shell {
+  position: relative;
+  isolation: isolate;
+  grid-column: 2;
+  width: 100%;
+  max-width: 317px;
+  margin: 0;
+  padding: 10px;
+  border-radius: 34px;
+  background: #171717;
+  box-shadow: 0 2px 0 #373737, 0 7px 12px rgba(16, 30, 60, .12);
+}
+
+.v2-page-01 .prep-phone-screen {
+  overflow: hidden;
+  border-radius: 24px;
+  background: #faf9f5;
+  line-height: 0;
+}
+
+.v2-page-01 .prep-phone-screen img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}
+
+.v2-page-01 .prep-phone-shell::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 34%;
+  height: 22px;
+  border-radius: 0 0 10px 10px;
+  background: #171717;
+  pointer-events: none;
+}
+
+.v2-page-01 .prep-phone-note {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 12px 8px 0;
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.v2-page-01 .prep-phone-note p,
+.v2-page-01 .prep-excel-note p { min-width: 0; margin: 0; }
+.v2-page-01 .prep-input-icons { display: flex; flex: 0 0 auto; gap: 3px; }
+
+.v2-page-01 .prep-input-icon {
+  display: grid;
+  place-items: center;
+  width: 43px;
+  height: 43px;
+  color: #123a35;
+  border: 1px solid #22b86a;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.v2-page-01 .prep-input-icon svg { width: 31px; height: 31px; }
+
+.v2-page-01 .prep-pc-screen {
+  min-width: 0;
+  margin: 10px 0 0;
+  border: 1px solid #cbd6e3;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 5px rgba(16, 30, 60, .04);
+  color: #171b22;
+}
+
+.v2-page-01 .prep-pc-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 5px 10px;
+  padding: 10px 14px;
+  border-radius: 11px 11px 0 0;
+  background: var(--navy-dark);
+  color: #fff;
+  font-size: 11px;
+  line-height: 1.45;
+  font-weight: 700;
+}
+
+.v2-page-01 .prep-pc-brand { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.v2-page-01 .prep-pc-brand svg { flex: 0 0 20px; width: 20px; height: 20px; }
+.v2-page-01 .prep-pc-logout { font-size: 10px; }
+.v2-page-01 .prep-pc-body { padding: 16px 15px 14px; }
+.v2-page-01 .prep-pc-title { margin: 0; font-size: 16px; line-height: 1.5; font-weight: 800; }
+
+.v2-page-01 .prep-pc-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.v2-page-01 .prep-pc-actions li { display: flex; flex-direction: column; min-width: 0; }
+
+.v2-page-01 .prep-pc-step-number {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin: 2px auto 7px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: var(--navy-dark);
+  font-size: 21px;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.v2-page-01 .prep-ui-action {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 0;
+  min-height: 36px;
+  padding: 8px 6px;
+  border-radius: 5px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+.v2-page-01 .prep-ui-action span { min-width: 0; }
+.v2-page-01 .prep-ui-action svg { flex: 0 0 16px; width: 16px; height: 16px; }
+.v2-page-01 .prep-ui-action--select { background: linear-gradient(120deg, #075dea, #1855cb); }
+.v2-page-01 .prep-ui-action--create { background: linear-gradient(120deg, #08ab58, #129747); }
+
+.v2-page-01 .prep-selected-file {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 7px 8px;
+  border: 1px solid #dce0e5;
+  border-radius: 6px;
+  background: #fafbfc;
+  color: #5b6069;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.v2-page-01 .prep-selected-file > svg { flex: 0 0 13px; width: 13px; height: 16px; color: #468ee4; }
+.v2-page-01 .prep-file-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.v2-page-01 .prep-file-clear { flex: 0 0 auto; padding: 3px 7px; border: 1px solid #d0d6df; border-radius: 4px; background: #fff; color: #394554; }
+.v2-page-01 .prep-table-title { margin: 16px 0 8px; font-size: 13px; line-height: 1.5; font-weight: 750; }
+.v2-page-01 .prep-table-frame { border: 1px solid #dce0e5; border-radius: 6px; }
+
+.v2-page-01 .prep-data-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.v2-page-01 .prep-col-mark { width: 23%; }
+.v2-page-01 .prep-col-drawing { width: 25%; }
+.v2-page-01 .prep-col-count { width: 15%; }
+.v2-page-01 .prep-col-date { width: 37%; }
+.v2-page-01 .prep-data-table th,
+.v2-page-01 .prep-data-table td { padding: 7px 10px; text-align: left; overflow-wrap: anywhere; }
+.v2-page-01 .prep-data-table th { padding-top: 6px; padding-bottom: 6px; background: #f6f7f9; font-weight: 750; }
+.v2-page-01 .prep-data-table th:first-child { border-top-left-radius: 5px; }
+.v2-page-01 .prep-data-table th:last-child { border-top-right-radius: 5px; }
+.v2-page-01 .prep-data-table td { border-top: 1px solid #e1e4e8; }
+
+.v2-page-01 .prep-excel-note {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin: 15px 8px 0;
+  padding: 10px;
+  border: 1.5px solid #b8c9e0;
+  border-radius: 12px;
+  background: #f8f9fb;
+  font-size: 17px;
+  line-height: 1.55;
+  font-weight: 700;
+}
+
+.v2-page-01 .prep-excel-icon { flex: 0 0 59px; width: 59px; height: 59px; padding: 3px; border-radius: 9px; background: #fff; }
+.v2-page-01 .prep-merge { height: 40px; }
+.v2-page-01 .prep-merge svg { display: block; width: 100%; height: 100%; fill: none; stroke: var(--gold); stroke-width: 2.5; }
+.v2-page-01 .prep-merge path { vector-effect: non-scaling-stroke; }
+.v2-page-01 .prep-merge .prep-merge-mobile { display: none; }
+
+.v2-page-01 .prep-complete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 8px 20px;
+  border-radius: 999px;
+  background: linear-gradient(120deg, #08ab58, #159d50);
+  color: #fff;
+  font-size: 21px;
+  font-weight: 900;
+  line-height: 1.4;
+}
+
+.v2-page-01 .prep-complete span { min-width: 0; }
+.v2-page-01 .prep-complete svg { flex: 0 0 30px; width: 30px; height: 30px; }
+.v2-page-01 .prep-next-arrow { display: block; width: 16px; height: 20px; margin: 0 auto; fill: none; stroke: #465437; stroke-width: 2; }
+
+.v2-page-01 .prep-next {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 7px 30px;
+  border: 2px solid var(--navy);
+  border-radius: 8px;
+  background: var(--navy);
+  color: #fff;
+  font-size: 23px;
+  font-weight: 900;
+  line-height: 1.5;
+  text-align: center;
+  text-decoration: none;
+}
+
+.v2-page-01 .prep-next:hover,
+.v2-page-01 .prep-next:focus-visible,
+.v2-page-01 .prep-next:active {
+  color: #fff;
+}
+
+.v2-page-01 .prep-next span { min-width: 0; }
+.v2-page-01 .prep-next svg { flex: 0 0 25px; width: 25px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2.5; }
+
+.v2-page-01 .prep-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+/* 01は画面を2方式で見せるため、カードが狭くなる前に縦並びへ切り替える。
+   共通ヘッダーの640px・340pxルールはguide.cssをそのまま使用する。 */
+@media (max-width: 900px) {
+  .v2-page-01 .prep-methods { grid-template-columns: minmax(0, 1fr); gap: 24px; padding-left: 12px; }
+  .v2-page-01 .prep-panel { padding: 16px; }
+  .v2-page-01 .prep-phone-demo { max-width: 564px; margin: 0 auto; }
+  .v2-page-01 .prep-panel-heading { justify-content: center; }
+  .v2-page-01 .prep-phone-note { max-width: 480px; margin-left: auto; margin-right: auto; }
+  .v2-page-01 .prep-pc-screen { max-width: 654px; margin-left: auto; margin-right: auto; }
+  .v2-page-01 .prep-excel-note { max-width: 600px; margin-left: auto; margin-right: auto; }
+
+  .v2-page-01 .prep-panel--phone::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: -13px;
+    right: 50%;
+    height: 12px;
+    border-right: 2px solid var(--gold);
+    border-bottom: 2px solid var(--gold);
+    border-radius: 0 0 10px 0;
+    pointer-events: none;
+  }
+
+  .v2-page-01 .prep-panel--pc::before {
+    content: "";
+    position: absolute;
+    top: -13px;
+    bottom: 0;
+    left: -13px;
+    border-left: 2px solid var(--gold);
+    pointer-events: none;
+  }
+
+  .v2-page-01 .prep-merge .prep-merge-desktop { display: none; }
+  .v2-page-01 .prep-merge .prep-merge-mobile { display: block; }
+}
+
+@media (max-width: 640px) {
+  .v2-page-01 .v2-badge { border-radius: 9px; }
+  .v2-page-01 .prep-panel { padding: 14px 12px; }
+  .v2-page-01 .prep-panel-heading { justify-content: flex-start; gap: 12px; padding: 0; margin-bottom: 14px; }
+  .v2-page-01 .prep-method-icon { flex-basis: 48px; width: 48px; height: 48px; }
+  .v2-page-01 .prep-method-icon svg { width: 44px; height: 44px; }
+  .v2-page-01 .prep-method-title { font-size: 21px; }
+  .v2-page-01 .prep-heading-copy { gap: 5px 8px; }
+  .v2-page-01 .prep-recommended { padding: 2px 10px; font-size: 13px; }
+
+  .v2-page-01 .prep-phone-demo { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .v2-page-01 .prep-step-list { display: grid; gap: 12px; align-self: stretch; }
+  .v2-page-01 .prep-step { position: relative; top: auto; display: grid; grid-template-columns: 28px minmax(0, 1fr); align-items: center; gap: 9px; padding-right: 28px; font-size: 15px; }
+  .v2-page-01 .prep-step-number { width: 28px; height: 28px; font-size: 20px; }
+  .v2-page-01 .prep-step-copy { padding-top: 0; }
+  .v2-page-01 .prep-step-arrow { top: 11px; right: 0; width: 24px; height: 13px; transform: rotate(90deg); }
+  .v2-page-01 .prep-step-arrow--up,
+  .v2-page-01 .prep-step-arrow--down { top: 5px; width: 24px; height: 23px; }
+  .v2-page-01 .prep-phone-shell { max-width: 280px; }
+  .v2-page-01 .prep-phone-note { gap: 7px; margin-top: 14px; font-size: 14px; }
+  .v2-page-01 .prep-input-icons { flex-direction: column; }
+  .v2-page-01 .prep-input-icon { width: 33px; height: 33px; }
+  .v2-page-01 .prep-input-icon svg { width: 25px; height: 25px; }
+
+  .v2-page-01 .prep-pc-topbar { padding: 9px; gap: 6px; font-size: 11px; }
+  .v2-page-01 .prep-pc-body { padding: 12px 8px; }
+  .v2-page-01 .prep-pc-actions { grid-template-columns: minmax(0, 1fr); gap: 8px; margin-top: 10px; }
+  .v2-page-01 .prep-pc-actions li { display: grid; grid-template-columns: 26px minmax(0, 1fr); align-items: center; gap: 7px; }
+  .v2-page-01 .prep-pc-step-number { width: 26px; height: 26px; margin: 0; font-size: 19px; }
+  .v2-page-01 .prep-ui-action { min-height: 38px; font-size: 12px; padding: 8px; }
+  .v2-page-01 .prep-selected-file { flex-wrap: wrap; padding: 7px; font-size: 11px; }
+  .v2-page-01 .prep-file-name { flex-basis: calc(100% - 24px); }
+  .v2-page-01 .prep-file-clear { margin-left: auto; }
+  .v2-page-01 .prep-table-title { font-size: 13px; }
+  .v2-page-01 .prep-data-table { font-size: 12px; }
+  .v2-page-01 .prep-data-table th,
+  .v2-page-01 .prep-data-table td { padding: 7px 3px; }
+  .v2-page-01 .prep-col-mark { width: 22%; }
+  .v2-page-01 .prep-col-drawing { width: 23%; }
+  .v2-page-01 .prep-col-count { width: 14%; }
+  .v2-page-01 .prep-col-date { width: 41%; }
+  .v2-page-01 .prep-excel-note { gap: 9px; padding: 9px; font-size: 14px; }
+  .v2-page-01 .prep-excel-icon { flex-basis: 42px; width: 42px; height: 42px; }
+  .v2-page-01 .prep-complete { gap: 8px; padding: 10px 15px; font-size: 18px; text-align: center; }
+  .v2-page-01 .prep-complete svg { flex-basis: 25px; width: 25px; height: 25px; }
+  .v2-page-01 .prep-next { gap: 12px; padding: 10px 12px; font-size: 17px; }
+  .v2-page-01 .prep-next svg { flex-basis: 22px; width: 22px; }
+}
+
+@media (max-width: 340px) {
+  .v2-page-01 .prep-method-title { font-size: 19px; }
+  .v2-page-01 .prep-panel-heading { gap: 9px; }
+  .v2-page-01 .prep-step { font-size: 14px; }
+  .v2-page-01 .prep-complete { padding-right: 12px; padding-left: 12px; font-size: 16px; }
+}
+
+/* No.86V2-05D: 900px以下は共通の直線下向き矢印。PC用SVGは変更しない。 */
+@media (max-width: 900px) {
+  .v2-page-01 .prep-step-arrow { display: none; }
+
+  .v2-page-01 .prep-step::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: 10px;
+    height: 22px;
+    transform: translateY(-50%);
+    background: var(--gold);
+    /* 軸3×15px、先端10×7px。既存の行右端の余白内に収める。 */
+    clip-path: polygon(3.5px 0, 6.5px 0, 6.5px 15px, 10px 15px, 5px 22px, 0 15px, 3.5px 15px);
+    pointer-events: none;
+  }
+}
+
+/* No.86V2-05E: 縦並びでは分岐・合流線を消し、完了表示の直前だけ下向き矢印にする。 */
+@media (max-width: 900px) {
+  .v2-page-01 .prep-panel--phone::after,
+  .v2-page-01 .prep-panel--pc::before {
+    content: none;
+    display: none;
+  }
+
+  .v2-page-01 .prep-merge .prep-merge-desktop,
+  .v2-page-01 .prep-merge .prep-merge-mobile { display: none; }
+
+  .v2-page-01 .prep-merge { position: relative; }
+
+  .v2-page-01 .prep-merge::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 22px;
+    transform: translate(-50%, -50%);
+    background: var(--gold);
+    /* 05Dの工程矢印と同じ軸3×15px・先端10×7px。既存の40pxの間隔は維持。 */
+    clip-path: polygon(3.5px 0, 6.5px 0, 6.5px 15px, 10px 15px, 5px 22px, 0 15px, 3.5px 15px);
+    pointer-events: none;
+  }
+}
+
+/* No.86V2-05F: 340px以下の「図面番号」だけ、左右の余白を文字幅へ充てる。 */
+@media (max-width: 340px) {
+  .v2-page-01 .prep-data-table th:nth-child(2) {
+    padding-left: 0;
+    padding-right: 0;
+    white-space: nowrap;
+    /* 320pxで従来の2行分（18px×2＋上下padding 14px）の高さを保持する。 */
+    height: 50px;
+  }
+}

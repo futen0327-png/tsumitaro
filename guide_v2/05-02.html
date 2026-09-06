@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>【比較用試作】05-02 音声で操作する（その2）｜ツミタロウ 使い方</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="guide.css">
+<link rel="stylesheet" href="05-02.css?rev=13c">
+</head>
+<body class="v2-page-05-02">
+
+<div class="v2-topbar">
+  <div class="v2-topbar-brand"><span class="dot"></span>ツミタロウ<span class="v2-topbar-sub">&nbsp;使い方</span></div>
+  <span class="v2-topbar-tag">比較用試作（No.86V2-09A）</span>
+</div>
+
+<main class="v2-main">
+  <div class="voice2-hero">
+    <header class="v2-header">
+      <span class="v2-badge">05-02</span>
+      <div class="v2-header-text">
+        <h1 class="v2-title">音声で操作する<span>（その2）</span></h1>
+        <p class="v2-lead">画面のボタンまたは対応するNFCタグから、音声作業を開始できます。<br>音声作業中は処理後も次の発話を待ち、画面のボタンで終了できます。</p>
+      </div>
+    </header>
+
+    <aside class="voice2-experimental" aria-label="実験機能と利用条件">
+      <svg viewBox="0 0 44 50" aria-hidden="true" focusable="false">
+        <path d="M17 4h10M22 4v12L9 39a5 5 0 0 0 4 7h18a5 5 0 0 0 4-7L22 16"/>
+        <path d="M13 34h18M19 28h6"/>
+      </svg>
+      <div><strong>実験機能</strong><p>AI音声アシスタントはPROプランで利用できます。NFCによる開始機能は現在試験中です。</p></div>
+    </aside>
+  </div>
+
+  <section class="v2-panel voice2-screen" aria-labelledby="screen-title">
+    <div class="voice2-section-head voice2-section-head--blue">
+      <span class="voice2-section-number">3</span>
+      <div><h2 id="screen-title">画面のボタンで音声作業を開始・終了</h2><p>積込確認画面から音声作業を始め、必要な操作を続けて話せます。</p></div>
+    </div>
+
+    <div class="voice2-screen-flow">
+      <article class="voice2-screen-step">
+        <span class="voice2-screen-step-number">1</span>
+        <div class="voice2-app-phone" aria-label="音声作業を開始ボタンの画面例">
+          <div class="voice2-app-screen">
+            <strong>積込確認</strong>
+            <span>ボタンを押して話してください</span>
+            <b class="voice2-app-button">音声作業を開始</b>
+          </div>
+        </div>
+        <h3>「音声作業を開始」をタップ</h3>
+        <p>開始案内のあと、音声の聞き取りが始まります。</p>
+      </article>
+      <span class="voice2-flow-arrow voice2-flow-arrow--blue" aria-hidden="true"></span>
+      <article class="voice2-screen-step">
+        <span class="voice2-screen-step-number">2</span>
+        <div class="voice2-app-phone" aria-label="音声作業中の画面例">
+          <div class="voice2-app-screen">
+            <strong>積込確認</strong>
+            <span>次の音声をお待ちください</span>
+            <b class="voice2-app-button voice2-app-button--stop">音声作業を終了</b>
+          </div>
+        </div>
+        <h3>続けて音声で操作</h3>
+        <p>処理後は次の発話待受へ進みます。05-01の話し方で操作してください。</p>
+      </article>
+      <span class="voice2-flow-arrow voice2-flow-arrow--blue" aria-hidden="true"></span>
+      <article class="voice2-screen-step">
+        <span class="voice2-screen-step-number">3</span>
+        <div class="voice2-app-phone" aria-label="音声作業を終了ボタンの画面例">
+          <div class="voice2-app-screen">
+            <strong>積込確認</strong>
+            <span>音声作業中</span>
+            <b class="voice2-app-button voice2-app-button--stop">音声作業を終了</b>
+          </div>
+        </div>
+        <h3>終わるときは終了をタップ</h3>
+        <p>「音声作業を終了」をタップすると、音声作業を終了します。</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="v2-panel voice2-nfc" aria-labelledby="nfc-title">
+    <div class="voice2-section-head voice2-section-head--green">
+      <span class="voice2-section-number">4</span>
+      <div><h2 id="nfc-title">NFCで音声操作を開始</h2><p>対応するNFCタグをスマホにタッチすると、マイクがONになり、音声作業が始まります。</p></div>
+    </div>
+
+    <div class="voice2-nfc-flow">
+      <article class="voice2-nfc-step">
+        <div class="voice2-icon voice2-icon--tag">
+          <svg viewBox="0 0 100 100" aria-hidden="true"><path d="M26 20h46a8 8 0 0 1 8 8v54a8 8 0 0 1-8 8H26a8 8 0 0 1-8-8V28a8 8 0 0 1 8-8Z"/><circle cx="49" cy="55" r="15"/><path d="M42 55a7 7 0 0 1 14 0M36 55a13 13 0 0 1 26 0"/></svg>
+        </div>
+        <h3>対応するNFCタグ</h3>
+        <p>作業場所で使うタグを用意します。</p>
+      </article>
+      <span class="voice2-flow-arrow" aria-hidden="true"></span>
+      <article class="voice2-nfc-step">
+        <div class="voice2-icon voice2-icon--touch">
+          <svg viewBox="0 0 100 100" aria-hidden="true"><rect x="23" y="9" width="53" height="82" rx="9"/><path d="M33 20h33M33 78h33"/><path d="M84 37c7 7 7 19 0 26M91 30c11 11 11 29 0 40"/></svg>
+        </div>
+        <h3>スマホにタッチ</h3>
+        <p>スマホのNFC読取位置へ近づけます。</p>
+      </article>
+      <span class="voice2-flow-arrow" aria-hidden="true"></span>
+      <article class="voice2-nfc-step">
+        <div class="voice2-icon voice2-icon--mic">
+          <svg viewBox="0 0 100 100" aria-hidden="true"><rect x="39" y="15" width="22" height="42" rx="11"/><path d="M29 46a21 21 0 0 0 42 0M50 67v15M38 82h24"/><path d="M21 22l-7-7M79 22l7-7"/></svg>
+        </div>
+        <h3>タグ検知音・マイクON</h3>
+        <p>音が鳴り、音声の聞き取りを始めます。</p>
+      </article>
+      <span class="voice2-flow-arrow" aria-hidden="true"></span>
+      <article class="voice2-nfc-step">
+        <div class="voice2-icon voice2-icon--voice">
+          <svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="31" cy="27" r="13"/><path d="M10 75c2-22 10-34 21-34s19 12 21 34Z"/><path d="M62 31c8 3 13 10 13 19s-5 16-13 19M72 22c12 6 19 16 19 28s-7 22-19 28"/></svg>
+        </div>
+        <h3>音声作業を開始</h3>
+        <p>05-01の発話方法で続けて操作します。</p>
+      </article>
+    </div>
+    <p class="voice2-note">※NFCによる開始機能は現在試験中です。対応タグと利用方法は、提供時の案内をご確認ください。</p>
+  </section>
+
+  <section class="v2-panel voice2-safety" aria-labelledby="safety-title">
+    <div class="voice2-section-head voice2-section-head--red">
+      <span class="voice2-section-number">5</span>
+      <div><h2 id="safety-title">NFC音声操作の安全確認</h2><p>実行前に「はい／いいえ」で確認</p></div>
+    </div>
+    <p class="voice2-safety-lead">NFCから始めた音声作業では、積込・取消の実行前に内容を確認します。誤認識による操作を防ぐための仕組みです。</p>
+
+    <div class="voice2-confirm-flow">
+      <article class="voice2-confirm-card voice2-confirm-card--worker">
+        <span class="voice2-role">作業員</span>
+        <svg viewBox="0 0 62 62" aria-hidden="true"><circle cx="23" cy="17" r="10"/><path d="M8 53c1-16 6-25 15-25s14 9 15 25Z"/><path d="M44 20l8-4M45 28h10M44 36l8 4"/></svg>
+        <p>「G2-B1を<br>2本積込」</p>
+      </article>
+      <span class="voice2-flow-arrow voice2-flow-arrow--red" aria-hidden="true"></span>
+      <article class="voice2-confirm-card voice2-confirm-card--phone">
+        <span class="voice2-role">スマホ</span>
+        <svg viewBox="0 0 60 76" aria-hidden="true"><rect x="7" y="3" width="46" height="70" rx="8"/><path d="M19 13h22M23 63h14"/></svg>
+        <p>「G2-B1を2本、<br>積込しますか？」</p>
+      </article>
+      <span class="voice2-flow-arrow voice2-flow-arrow--red" aria-hidden="true"></span>
+      <article class="voice2-confirm-card voice2-confirm-card--worker">
+        <span class="voice2-role">作業員</span>
+        <svg viewBox="0 0 62 62" aria-hidden="true"><circle cx="23" cy="17" r="10"/><path d="M8 53c1-16 6-25 15-25s14 9 15 25Z"/><path d="M44 20l8-4M45 28h10M44 36l8 4"/></svg>
+        <p>「はい」</p>
+      </article>
+      <span class="voice2-flow-arrow voice2-flow-arrow--red" aria-hidden="true"></span>
+      <article class="voice2-confirm-card voice2-confirm-card--result">
+        <span class="voice2-role">スマホ</span>
+        <strong>♪ 積込成功音</strong>
+        <p>G2-B1を2本<br>積込完了しました。<br><b>積込済：2本　残り：3本</b></p>
+        <span class="voice2-check" aria-hidden="true">✓</span>
+      </article>
+    </div>
+
+    <div class="voice2-safety-bottom">
+      <aside class="voice2-recommend">
+        <h3>こんなときに安心</h3>
+        <ul><li>誤認識が心配なとき</li><li>音声操作に慣れていない人が使うとき</li><li>重要な出荷作業をするとき</li></ul>
+      </aside>
+      <p class="voice2-answer"><strong>答え方</strong> 確認内容が正しければ「はい」、中止する場合は「いいえ」と答えます。<span>「いいえ」の場合は「中止しました。」と応答します。処理後は次の発話を待ちます。</span></p>
+    </div>
+  </section>
+
+  <section class="v2-panel voice2-trouble" aria-labelledby="trouble-title">
+    <div class="voice2-section-head voice2-section-head--gold">
+      <span class="voice2-section-number">6</span>
+      <div><h2 id="trouble-title">うまく認識されないときは…</h2><p>次の方法を順番に試してください。</p></div>
+    </div>
+    <div class="voice2-help-grid">
+      <article><span>1</span><svg viewBox="0 0 70 70" aria-hidden="true"><circle cx="25" cy="19" r="11"/><path d="M9 61c1-19 7-30 16-30s15 11 16 30Z"/><path d="M47 25h15M48 35h12M47 45h15"/></svg><h3>ゆっくり、はっきり話す</h3><p>言葉を区切り、落ち着いて話します。</p></article>
+      <article><span>2</span><svg viewBox="0 0 70 70" aria-hidden="true"><path d="M12 27h11l14-12v40L23 43H12Z"/><path d="m49 24 14 22M63 24 49 46"/></svg><h3>周囲の騒音を避ける</h3><p>できるだけ静かな場所で試します。</p></article>
+      <article><span>3</span><svg viewBox="0 0 70 70" aria-hidden="true"><path d="M8 20h54v32H8Z"/><path d="M18 30h13M18 40h20M47 30h5M47 40h5"/></svg><h3>合番と数字を区切る</h3><p>「G2-B1を、2本、積込」のように話します。</p></article>
+      <article><span>4</span><svg viewBox="0 0 70 70" aria-hidden="true"><path d="M8 43c-3-4-5-8-5-13C3 18 13 9 25 9s22 9 22 21-10 21-22 21c-4 0-7-1-10-2L6 56l2-13Z"/><path d="M53 18c9 4 14 11 14 20 0 5-2 10-6 14"/></svg><h3>「もう一度言って」</h3><p>直前の案内を聞き直せます。</p></article>
+      <article><span>5</span><svg viewBox="0 0 70 70" aria-hidden="true"><rect x="12" y="7" width="46" height="56" rx="7"/><path d="M21 20h28M21 31h28M21 42h18"/><path d="m43 51 6 6 11-14"/></svg><h3>一覧から選ぶ</h3><p>音声を使わず、画面の部材一覧から操作できます。</p></article>
+    </div>
+  </section>
+
+  <aside class="voice2-warning">
+    <svg viewBox="0 0 54 48" aria-hidden="true"><path d="M27 4 51 44H3Z"/><path d="M27 17v13M27 37h.01"/></svg>
+    <p><strong>最後に必ず確認してください</strong>音声操作だけで出荷判断をせず、積込内容を画面で確認してください。<a href="04.html">04ページ「積込確認から完了まで」へ</a></p>
+  </aside>
+
+  <nav class="voice2-pager" aria-label="前後ページ案内">
+    <a class="voice2-pager-item voice2-pager-item--prev" href="05-01.html"><span aria-hidden="true">←</span><strong>前へ（05-01 音声で操作する その1）</strong></a>
+    <a class="voice2-pager-item voice2-pager-item--next" href="06.html"><strong>次へ（06 未積込・取消・オフライン）</strong><span aria-hidden="true">→</span></a>
+  </nav>
+</main>
+
+</body>
+</html>
