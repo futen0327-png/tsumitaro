@@ -3,16 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>【比較用試作】01 出荷リストを準備する｜ツミタロウ 使い方</title>
+<title>01 出荷リストを準備する｜ツミタロウ 使い方</title>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="guide.css">
-<link rel="stylesheet" href="01.css?rev=13e">
+<link rel="stylesheet" href="01.css?rev=14a">
 </head>
 <body class="v2-page-01">
 
 <div class="v2-topbar">
-  <div class="v2-topbar-brand"><span class="dot"></span>ツミタロウ<span class="v2-topbar-sub">&nbsp;使い方</span></div>
-  <span class="v2-topbar-tag">比較用試作（No.86V2-05B）</span>
+  <div class="v2-topbar-brand"><span class="dot"></span>ツミタロウ<span class="v2-topbar-sub">&nbsp;使い方ガイド</span></div>
 </div>
 
 <main class="v2-main">
@@ -58,9 +57,8 @@
 
         <figure class="prep-phone-shell">
           <div class="prep-phone-screen">
-            <!-- 正本の内画面のみ。切り出し範囲は左上(250,294)、右下(547,835)、右下を含まない。
-                 元の端末枠・ノッチは透明化。原寸297×541pxで保存し、補間・拡大は行わない。 -->
-            <img src="assets/01_phone_screen.png" width="297" height="541" alt="かんたんリスト。出荷日2026/07/01。1F-01・図面番号D-01・数量10本、1F-02・図面番号D-02・数量6本、2F-01・図面番号D-03・数量4本。合番を追加、出荷リストを作成。下部タブはリスト、下書き、履歴、設定。">
+            <!-- 実際のスマホ画面を使用。下端のOSナビゲーション領域だけをCSSで見切る。 -->
+            <img src="assets/01_phone_screen.png" width="293" height="611" alt="かんたんリスト作成画面。出荷日2026/09/07。G2-B1・数量4本、BR-001・数量1本、G2-B4・数量2本。合番と数量の追加、紙から読み取る、最終確認へ進む操作を表示。">
           </div>
         </figure>
       </div>
@@ -105,12 +103,12 @@
           <div class="prep-table-frame">
             <table class="prep-data-table">
               <caption class="prep-sr-only">選択した出荷リストExcelの内容</caption>
-              <colgroup><col class="prep-col-mark"><col class="prep-col-drawing"><col class="prep-col-count"><col class="prep-col-date"></colgroup>
-              <thead><tr><th scope="col">合番</th><th scope="col">図面番号</th><th scope="col">数量</th><th scope="col">出荷日</th></tr></thead>
+              <colgroup><col class="prep-col-mark"><col class="prep-col-count"><col class="prep-col-date"></colgroup>
+              <thead><tr><th scope="col">合番</th><th scope="col">数量</th><th scope="col">出荷日</th></tr></thead>
               <tbody>
-                <tr><td>1F-01</td><td>D-01</td><td>10</td><td>2026/07/01</td></tr>
-                <tr><td>1F-02</td><td>D-02</td><td>6</td><td>2026/07/01</td></tr>
-                <tr><td>2F-01</td><td>D-03</td><td>4</td><td>2026/07/01</td></tr>
+                <tr><td>G2-B1</td><td>4</td><td>9/1</td></tr>
+                <tr><td>BR-001</td><td>1</td><td>9/1</td></tr>
+                <tr><td>G2-B4</td><td>2</td><td>9/1</td></tr>
               </tbody>
             </table>
           </div>
