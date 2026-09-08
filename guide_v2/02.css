@@ -321,6 +321,13 @@
   border-radius: 10px;
   background: #fff7f8;
   color: var(--navy-dark);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.v2-page-02 .load-voice:focus-visible {
+  outline: 3px solid #e55370;
+  outline-offset: 3px;
 }
 
 .v2-page-02 .load-voice svg {
